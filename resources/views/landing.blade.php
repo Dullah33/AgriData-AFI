@@ -44,15 +44,15 @@
                 <li><a href="#" class="nav-link">Contact</a></li>
                 <!-- Mobile Only Actions -->
                 <li class="mobile-actions">
-                    <a href="#" class="btn btn-ghost">Log In</a>
-                    <a href="#" class="btn btn-primary">Sign Up</a>
+                    <a href="{{ route('login') }}" class="btn btn-ghost">Log In</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary">Sign Up</a>
                 </li>
             </ul>
             
             <!-- Desktop Only Actions -->
             <div class="nav-actions desktop-only">
-                <a href="#" class="btn btn-ghost">Log In</a>
-                <a href="#" class="btn btn-primary">Sign Up</a>
+                <a href="{{ route('login') }}" class="btn btn-ghost">Log In</a>
+                <a href="{{ route('register') }}" class="btn btn-primary">Sign Up</a>
             </div>
         </nav>
     </header>
