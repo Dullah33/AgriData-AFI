@@ -248,8 +248,38 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
         return;
     }
     
-    // If all validation passes, show success modal
-    showSuccessModal();
+    // If all validation passes, submit form via AJAX
+    const formData = new FormData(this);
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Registering...';
+
+    fetch('{{ route("register") }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: formData
+    })
+    .then(response => response.json().then(data => ({ status: response.status, body: data })))
+    .then(res => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+
+        if (res.status === 200 || res.status === 201) {
+            showSuccessModal();
+        } else {
+            const errorMsg = res.body.message || 'Registration failed. Please check your inputs.';
+            showError(errorMsg);
+        }
+    })
+    .catch(err => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+        showError('Something went wrong. Please try again.');
+    });
 });
 
 // Show Success Modal

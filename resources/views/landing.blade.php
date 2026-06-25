@@ -43,16 +43,34 @@
                 <li><a href="#" class="nav-link">About Us</a></li>
                 <li><a href="#" class="nav-link">Contact</a></li>
                 <!-- Mobile Only Actions -->
-                <li class="mobile-actions">
-                    <a href="{{ route('login') }}" class="btn btn-ghost">Log In</a>
-                    <a href="{{ route('register') }}" class="btn btn-primary">Sign Up</a>
-                </li>
+                @auth
+                    <li class="mobile-actions">
+                        <span class="nav-user-name" style="font-size: 1.05rem; font-weight: 600; color: var(--text-main); text-align: center; width: 100%; display: block; margin-bottom: 4px;">Halo, {{ auth()->user()->name }}</span>
+                        <form action="{{ route('logout') }}" method="POST" style="width: 100%;">
+                            @csrf
+                            <button type="submit" class="btn btn-ghost" style="width: 100%;">Log Out</button>
+                        </form>
+                    </li>
+                @else
+                    <li class="mobile-actions">
+                        <a href="{{ route('login') }}" class="btn btn-ghost">Log In</a>
+                        <a href="{{ route('register') }}" class="btn btn-primary">Sign Up</a>
+                    </li>
+                @endauth
             </ul>
             
             <!-- Desktop Only Actions -->
             <div class="nav-actions desktop-only">
-                <a href="{{ route('login') }}" class="btn btn-ghost">Log In</a>
-                <a href="{{ route('register') }}" class="btn btn-primary">Sign Up</a>
+                @auth
+                    <span class="nav-user-name" style="font-size: 0.95rem; font-weight: 600; color: var(--text-main); margin-right: 8px;">Halo, {{ auth()->user()->name }}</span>
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn btn-ghost">Log Out</button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="btn btn-ghost">Log In</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary">Sign Up</a>
+                @endauth
             </div>
         </nav>
     </header>

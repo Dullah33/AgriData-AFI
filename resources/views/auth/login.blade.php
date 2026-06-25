@@ -21,8 +21,15 @@
         <p class="text-gray-600 text-sm">Sign in to access your farming dashboard</p>
     </div>
     
+    @if ($errors->any())
+        <div style="background-color: #fee2e2; border: 1px solid #fecaca; color: #dc2626; padding: 12px 16px; border-radius: 12px; font-size: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="alert-circle" style="width: 20px; height: 20px; flex-shrink: 0;"></i>
+            <span>{{ $errors->first() }}</span>
+        </div>
+    @endif
+
     <!-- Login Form -->
-    <form action="#" method="POST" class="space-y-5">
+    <form action="{{ route('login') }}" method="POST" class="space-y-5">
         @csrf
         
         <!-- Email/Username Input -->
@@ -40,6 +47,7 @@
                     name="email" 
                     class="input-glow w-full pl-12 pr-4 py-3.5 bg-white/80 border border-gray-300 rounded-xl focus:outline-none transition-all duration-300"
                     placeholder="farmer@example.com"
+                    value="{{ old('email') }}"
                     required
                 >
             </div>
