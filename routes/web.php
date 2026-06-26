@@ -1,21 +1,56 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 
+/*
+|--------------------------------------------------------------------------
+| 1. PUBLIC ROUTES (Landing Page & Auth)
+|--------------------------------------------------------------------------
+*/
+
+// Landing page (untuk semua orang)
 Route::get('/', function () {
     return view('landing');
 })->name('landing');
 
-Route::get('/test', function () {
-    return 'Route bekerja!';
-});
-
+// Routes untuk GUEST (belum login)
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
-
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    
+    // Login Routes
+    Route::get('/login', function () {
+        return view('auth.login');
+    })->name('login');
+    
+    Route::post('/login', [LoginController::class, 'authenticate']);
+    
+    // Register Routes
+    Route::get('/register', function () {
+        return view('auth.register');
+    })->name('register');
+    
+    Route::post('/register', [RegisterController::class, 'store']);
 });
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+/*
+|--------------------------------------------------------------------------
+| 2. PROTECTED ROUTES (Harus Login)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+    
+    // Logout
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    
+    /* 
+     * PENAMBAHAN ROUTE FITUR LAINNYA SESUAI KEBUTUHAN SISTEM:
+     * Route::get('/cuaca', ...);        // Sistem kamu
+     * Route::get('/penyakit', ...);     // Sistem teman 1
+     * Route::get('/lahan', ...);        // Sistem teman 2
+     */
+});

@@ -103,7 +103,7 @@
         
         /* Background Image */
         .auth-bg {
-            background-image: url('/assets/images/farmer-bg.jpg');
+            background-image: url('/assets/images/farmer-bg.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;

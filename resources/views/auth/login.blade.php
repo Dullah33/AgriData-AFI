@@ -42,14 +42,19 @@
                     <i data-lucide="mail" class="w-5 h-5 text-gray-400"></i>
                 </div>
                 <input 
-                    type="text" 
+                    type="email" 
                     id="email" 
                     name="email" 
-                    class="input-glow w-full pl-12 pr-4 py-3.5 bg-white/80 border border-gray-300 rounded-xl focus:outline-none transition-all duration-300"
+                    value="{{ old('email') }}"
+                    class="input-glow w-full pl-12 pr-4 py-3.5 bg-white/80 border border-gray-300 rounded-xl focus:outline-none transition-all duration-300 @error('email') border-red-500 @enderror"
                     placeholder="farmer@example.com"
                     value="{{ old('email') }}"
                     required
+                    autofocus
                 >
+                @error('email')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
         </div>
         
@@ -122,7 +127,7 @@
     <div class="mt-4 text-center">
         <a href="/" class="text-sm text-gray-500 hover:text-gray-700 transition flex items-center justify-center">
             <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i>
-            Back to home
+            Back to Landing Page
         </a>
     </div>
 </div>

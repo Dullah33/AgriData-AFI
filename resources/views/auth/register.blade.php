@@ -22,7 +22,7 @@
     </div>
     
     <!-- Register Form -->
-    <form id="registerForm" class="space-y-4">
+    <form action="{{ route('register') }}" method="POST" class="space-y-4">
         @csrf
         
         <!-- Name Input -->
@@ -38,10 +38,13 @@
                     type="text" 
                     id="name" 
                     name="name" 
-                    class="input-glow w-full pl-12 pr-4 py-3 bg-white/80 border border-gray-300 rounded-xl focus:outline-none transition-all duration-300"
-                    placeholder="John Doe"
-                    required
+                    value="{{ old('name') }}"
+                    class="input-glow w-full pl-12 pr-4 py-3 bg-white/80 border border-gray-300 rounded-xl focus:outline-none transition-all duration-300 @error('name') border-red-500 @enderror"
+                    placeholder="Your Name"
                 >
+                @error('name')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
         </div>
         
@@ -55,13 +58,17 @@
                     <i data-lucide="mail" class="w-5 h-5 text-gray-400"></i>
                 </div>
                 <input 
-                    type="email" 
+                    type="text" 
                     id="email" 
                     name="email" 
-                    class="input-glow w-full pl-12 pr-4 py-3 bg-white/80 border border-gray-300 rounded-xl focus:outline-none transition-all duration-300"
+                    value="{{ old('email') }}"
+                    class="input-glow w-full pl-12 pr-4 py-3 bg-white/80 border border-gray-300 rounded-xl focus:outline-none transition-all duration-300 @error('email') border-red-500 @enderror"
                     placeholder="farmer@example.com"
                     required
                 >
+                @error('email')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
         </div>
         
@@ -77,11 +84,15 @@
                 <input 
                     type="password" 
                     id="password" 
-                    name="password" 
-                    class="input-glow w-full pl-12 pr-4 py-3 bg-white/80 border border-gray-300 rounded-xl focus:outline-none transition-all duration-300"
+                    name="password"
+                    value="{{ old('password') }}"
+                    class="input-glow w-full pl-12 pr-4 py-3 bg-white/80 border border-gray-300 rounded-xl focus:outline-none transition-all duration-300 @error('password') border-red-500 @enderror"
                     placeholder="••••••••"
                     required
                 >
+                @error('password')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
                 <button 
                     type="button" 
                     class="absolute inset-y-0 right-0 pr-4 flex items-center"
@@ -105,10 +116,13 @@
                     type="password" 
                     id="password_confirmation" 
                     name="password_confirmation" 
-                    class="input-glow w-full pl-12 pr-4 py-3 bg-white/80 border border-gray-300 rounded-xl focus:outline-none transition-all duration-300"
+                    value="{{ old('password_confirmation') }}"
+                    class="input-glow w-full pl-12 pr-4 py-3 bg-white/80 border border-gray-300 rounded-xl focus:outline-none transition-all duration-300 @error('password_confirmation') border-red-500 @enderror"
                     placeholder="••••••••"
-                    required
                 >
+                @error('password_confirmation')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
                 <button 
                     type="button" 
                     class="absolute inset-y-0 right-0 pr-4 flex items-center"
@@ -118,24 +132,7 @@
                 </button>
             </div>
         </div>
-        
-        <!-- Terms & Conditions -->
-        <div class="flex items-start">
-            <input 
-                type="checkbox" 
-                id="terms" 
-                name="terms"
-                class="w-4 h-4 mt-1 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                required
-            >
-            <label for="terms" class="ml-2 text-sm text-gray-700">
-                I agree to the 
-                <a href="#" class="text-primary-600 hover:text-primary-800 font-medium">Terms of Service</a>
-                and 
-                <a href="#" class="text-primary-600 hover:text-primary-800 font-medium">Privacy Policy</a>
-            </label>
-        </div>
-        
+    
         <!-- Submit Button -->
         <button 
             type="submit" 
@@ -159,7 +156,7 @@
     <div class="mt-3 text-center">
         <a href="/" class="text-sm text-gray-500 hover:text-gray-700 transition flex items-center justify-center">
             <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i>
-            Back to home
+            Back to Landing Page
         </a>
     </div>
 </div>
@@ -298,13 +295,6 @@ function showError(message) {
 // Close Error Modal
 function closeErrorModal() {
     document.getElementById('errorModal').classList.add('hidden');
-}
-
-// Close modal when clicking outside
-document.getElementById('errorModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeErrorModal();
-    }
-});
+}   
 </script>
 @endsection
