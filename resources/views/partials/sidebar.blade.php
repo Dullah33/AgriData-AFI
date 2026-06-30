@@ -5,7 +5,7 @@
     $sidebarConfig = [
         'admin' => [
             'label' => 'ADMIN',
-            'color' => '#1A3C8A',
+            'color' => '#1A3C8A', // Warna seragam untuk semua role
             'menu' => [
                 ['label' => 'Dashboard', 'route' => 'dashboard'],
                 ['label' => 'Manajemen Petani', 'route' => null],
@@ -20,7 +20,7 @@
         ],
         'petani' => [
             'label' => 'PETANI',
-            'color' => '#16A34A',
+            'color' => '#1A3C8A', // Disamakan dengan warna Admin
             'menu' => [
                 ['label' => 'Dashboard', 'route' => 'dashboard'],
                 ['label' => 'Profil & Lahan Saya', 'route' => null],
@@ -35,7 +35,7 @@
         ],
         'user' => [
             'label' => 'USER',
-            'color' => '#9CA3AF',
+            'color' => '#1A3C8A', // Disamakan dengan warna Admin
             'menu' => [
                 ['label' => 'Dashboard', 'route' => 'dashboard'],
                 ['label' => 'Marketplace Hasil Panen', 'route' => null],
@@ -50,7 +50,7 @@
         ],
         'penyuluh' => [
             'label' => 'PETUGAS PENYULUH',
-            'color' => '#0D9488',
+            'color' => '#1A3C8A', // Disamakan dengan warna Admin
             'menu' => [
                 ['label' => 'Dashboard', 'route' => 'dashboard'],
                 ['label' => 'Wilayah Binaan', 'route' => null],
