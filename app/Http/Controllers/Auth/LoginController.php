@@ -29,7 +29,7 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             // Redirect ke landing page dengan pesan sukses
-            return redirect()->intended('/')->with('success', 'Selamat datang, ' . Auth::user()->username . '!');
+            return redirect()->intended(route('dashboard'))->with('success', 'Selamat datang, ' . Auth::user()->username . '!');
         }
 
         // Jika login gagal
