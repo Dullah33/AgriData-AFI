@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,9 +41,9 @@ Route::middleware('guest')->group(function () {
 */
 Route::middleware('auth')->group(function () {
     
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // Satu route /dashboard untuk semua role, view-nya beda-beda
+    // tergantung role user (lihat DashboardController)
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
     // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
