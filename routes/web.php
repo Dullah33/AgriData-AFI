@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\WeatherController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +47,25 @@ Route::middleware('auth')->group(function () {
     
     // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+    // Halaman utama fitur cuaca
+    Route::get('/cuaca', [WeatherController::class, 'index'])->name('cuaca.index');
+    
+    // ============================ Prediksi cuaca ===========================
+    // API: Cascading Location (EMSIFA)
+    Route::get('/api/provinces', [WeatherController::class, 'getProvinces'])->name('api.provinces');
+    Route::get('/api/regencies/{provCode}', [WeatherController::class, 'getRegencies'])->name('api.regencies');
+    Route::get('/api/districts/{regCode}', [WeatherController::class, 'getDistricts'])->name('api.districts');
+    
+    // API: Analisis Cuaca
+    Route::get('/api/cuaca/recommendations/{provinsi}/{kabupaten}/{kecamatan}', 
+        [WeatherController::class, 'getRecommendations'])->name('api.cuaca.recommendations');
+    
+    Route::post('/api/cuaca/analyze', [WeatherController::class, 'analyze'])->name('api.cuaca.analyze');
+    
+    // API: Data Tanaman
+    Route::get('/api/tanaman', [WeatherController::class, 'getPlants'])->name('api.tanaman');
+    Route::get('/api/tanaman/{id}/detail', [WeatherController::class, 'getPlantDetail'])->name('api.tanaman.detail');
     
     /* 
      * PENAMBAHAN ROUTE FITUR LAINNYA SESUAI KEBUTUHAN SISTEM:
