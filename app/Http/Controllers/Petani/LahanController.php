@@ -51,12 +51,13 @@ class LahanController extends Controller
         abort_if(! $petaniProfile, 403, 'Profil petani belum terdaftar. Hubungi Admin.');
 
         $data = $request->validate([
-            'nama_lahan'       => 'required|string|max:100',
-            'luas_ha'          => 'required|numeric|min:0.01',
-            'jenis_tanah'      => 'nullable|string|max:50',
-            'tanaman_aktif'    => 'nullable|string|max:100',
-            'tanggal_tanam'    => 'nullable|date',
-            'perkiraan_panen'  => 'nullable|date|after_or_equal:tanggal_tanam',
+            'nama_lahan'          => 'required|string|max:100',
+            'luas_ha'             => 'required|numeric|min:0.01',
+            'jenis_tanah'         => 'nullable|string|max:50',
+            'tanaman_aktif'       => 'nullable|string|max:100',
+            'tanggal_tanam'       => 'nullable|date',
+            'perkiraan_panen'     => 'nullable|date|after_or_equal:tanggal_tanam',
+            'koordinat_poligon'   => 'nullable|string',
         ], [
             'nama_lahan.required' => 'Nama/kode lahan harus diisi.',
             'luas_ha.required'    => 'Luas lahan harus diisi.',
@@ -65,6 +66,7 @@ class LahanController extends Controller
 
         $data['petani_profile_id'] = $petaniProfile->id;
         $data['status'] = $data['tanaman_aktif'] ?? null ? 'aktif' : 'bera';
+        $data['koordinat_poligon'] = $this->decodePoligon($request->input('koordinat_poligon'));
 
         Lahan::create($data);
 
@@ -89,14 +91,23 @@ class LahanController extends Controller
         $this->pastikanPemilik($lahan);
 
         $data = $request->validate([
-            'nama_lahan'       => 'required|string|max:100',
-            'luas_ha'          => 'required|numeric|min:0.01',
-            'jenis_tanah'      => 'nullable|string|max:50',
-            'tanaman_aktif'    => 'nullable|string|max:100',
-            'tanggal_tanam'    => 'nullable|date',
-            'perkiraan_panen'  => 'nullable|date|after_or_equal:tanggal_tanam',
-            'status'           => 'required|in:aktif,bera,panen',
+            'nama_lahan'          => 'required|string|max:100',
+            'luas_ha'             => 'required|numeric|min:0.01',
+            'jenis_tanah'         => 'nullable|string|max:50',
+            'tanaman_aktif'       => 'nullable|string|max:100',
+            'tanggal_tanam'       => 'nullable|date',
+            'perkiraan_panen'     => 'nullable|date|after_or_equal:tanggal_tanam',
+            'status'              => 'required|in:aktif,bera,panen',
+            'koordinat_poligon'   => 'nullable|string',
         ]);
+
+        // Kalau field poligon tidak dikirim sama sekali (mis. peta belum
+        // digambar ulang saat edit), pertahankan poligon lama alih-alih menimpanya jadi null.
+        if ($request->filled('koordinat_poligon')) {
+            $data['koordinat_poligon'] = $this->decodePoligon($request->input('koordinat_poligon'));
+        } else {
+            unset($data['koordinat_poligon']);
+        }
 
         $lahan->update($data);
 
@@ -119,5 +130,26 @@ class LahanController extends Controller
     {
         $petaniProfile = Auth::user()->petaniProfile;
         abort_if(! $petaniProfile || $lahan->petani_profile_id !== $petaniProfile->id, 403);
+    }
+
+    // Widget peta (Leaflet + Leaflet.draw) mengirim koordinat poligon sebagai
+    // string JSON lewat hidden input, berbentuk array pasangan [lat, lng].
+    // Di-decode di sini (bukan pakai cast otomatis) supaya kita bisa validasi
+    // isinya benar-benar array yang valid sebelum disimpan ke kolom JSON.
+    private function decodePoligon(?string $json): ?array
+    {
+        if (! $json) {
+            return null;
+        }
+
+        $decoded = json_decode($json, true);
+
+        if (! is_array($decoded) || count($decoded) < 3) {
+            // Poligon butuh minimal 3 titik. Kalau tidak valid, abaikan saja
+            // (jangan gagalkan penyimpanan hanya karena peta belum digambar).
+            return null;
+        }
+
+        return $decoded;
     }
 }
