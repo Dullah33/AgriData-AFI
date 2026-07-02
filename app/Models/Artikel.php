@@ -10,8 +10,14 @@ class Artikel extends Model
     protected $table = 'artikel';
 
     protected $fillable = [
-        'user_id', 'judul', 'slug', 'kategori',
-        'konten', 'foto_sampul', 'status', 'published_at',
+        'author_id', 
+        'title', 
+        'slug', 
+        'category', 
+        'content', 
+        'thumbnail', 
+        'status', 
+        'published_at'
     ];
 
     protected $casts = [

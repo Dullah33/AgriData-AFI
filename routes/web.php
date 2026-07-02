@@ -11,6 +11,7 @@ use App\Http\Controllers\Petani\ProdukPanenController;
 use App\Http\Controllers\Petani\PesananController;
 use App\Http\Controllers\Petani\LahanController;
 use App\Http\Controllers\User\MarketplaceController;
+use App\Http\Controllers\Admin\PenyuluhController;
 
 // Landing page
 Route::get('/', fn() => view('landing'))->name('landing');
@@ -44,6 +45,11 @@ Route::middleware('auth')->group(function () {
         Route::get('ulasan', [UlasanController::class, 'index'])->name('ulasan.index');
         Route::post('ulasan/{ulasan}/sembunyikan', [UlasanController::class, 'sembunyikan'])->name('ulasan.sembunyikan');
         Route::post('ulasan/{ulasan}/aktifkan', [UlasanController::class, 'aktifkan'])->name('ulasan.aktifkan');
+
+        // Manajemen Penyuluh
+        Route::resource('penyuluh', PenyuluhController::class);
+        Route::post('penyuluh/{penyuluh}/nonaktifkan', [PenyuluhController::class, 'nonaktifkan'])->name('penyuluh.nonaktifkan');
+        Route::post('penyuluh/{penyuluh}/aktifkan', [PenyuluhController::class, 'aktifkan'])->name('penyuluh.aktifkan');
     });
 
     // -----------------------------------------------
