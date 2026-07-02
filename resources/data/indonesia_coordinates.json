@@ -1,0 +1,30 @@
+[
+  {
+    "provinsi": "Jawa Timur",
+    "kabupaten": "Madiun",
+    "kecamatan": "Kare",
+    "latitude": -7.6297,
+    "longitude": 111.5731
+  },
+  {
+    "provinsi": "Jawa Timur",
+    "kabupaten": "Madiun",
+    "kecamatan": "Wungu",
+    "latitude": -7.6156,
+    "longitude": 111.6042
+  },
+  {
+    "provinsi": "Jawa Barat",
+    "kabupaten": "Bandung",
+    "kecamatan": "Cicendo",
+    "latitude": -6.9039,
+    "longitude": 107.5894
+  },
+  {
+    "provinsi": "Jawa Tengah",
+    "kabupaten": "Semarang",
+    "kecamatan": "Banyumanik",
+    "latitude": -7.0542,
+    "longitude": 110.4361
+  }
+]
