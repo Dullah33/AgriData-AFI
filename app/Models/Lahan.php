@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Lahan extends Model
 {
@@ -30,7 +31,7 @@ class Lahan extends Model
     }
 
     // Scope: lahan yang sedang aktif ditanami
-    public function scopeAktif($query)
+    public function scopeAktif(Builder $query)
     {
         return $query->where('status', 'aktif');
     }
