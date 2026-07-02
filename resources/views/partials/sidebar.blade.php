@@ -8,12 +8,12 @@
             'color' => '#1A3C8A', // Warna seragam untuk semua role
             'menu' => [
                 ['label' => 'Dashboard', 'route' => 'dashboard'],
-                ['label' => 'Manajemen Petani', 'route' => null],
+                ['label' => 'Manajemen Petani', 'route' => 'admin.petani.index'],
                 ['label' => 'Manajemen Penyuluh', 'route' => null],
                 ['label' => 'Peta Lahan & Wilayah', 'route' => null],
                 ['label' => 'Pemetaan Penyakit', 'route' => null],
-                ['label' => 'Artikel Pertanian', 'route' => null],
-                ['label' => 'Moderasi Ulasan', 'route' => null],
+                ['label' => 'Artikel Pertanian', 'route' => 'admin.artikel.index'],
+                ['label' => 'Moderasi Ulasan', 'route' => 'admin.ulasan.index'],
                 ['label' => 'Laporan & Ekspor Data', 'route' => null],
                 ['label' => 'Pengaturan Akun', 'route' => null],
             ],
@@ -23,9 +23,9 @@
             'color' => '#1A3C8A', // Disamakan dengan warna Admin
             'menu' => [
                 ['label' => 'Dashboard', 'route' => 'dashboard'],
-                ['label' => 'Profil & Lahan Saya', 'route' => null],
-                ['label' => 'Listing Hasil Panen', 'route' => null],
-                ['label' => 'Pesanan Masuk', 'route' => null],
+                ['label' => 'Profil & Lahan Saya', 'route' => 'petani.lahan.index'],
+                ['label' => 'Listing Hasil Panen', 'route' => 'petani.produk.index'],
+                ['label' => 'Pesanan Masuk', 'route' => 'petani.pesanan.index'],
                 ['label' => 'Analisis Cuaca', 'route' => null],
                 ['label' => 'AI Scanner Penyakit', 'route' => null],
                 ['label' => 'Kunjungan Penyuluh', 'route' => null],
@@ -38,8 +38,8 @@
             'color' => '#1A3C8A', // Disamakan dengan warna Admin
             'menu' => [
                 ['label' => 'Dashboard', 'route' => 'dashboard'],
-                ['label' => 'Marketplace Hasil Panen', 'route' => null],
-                ['label' => 'Keranjang & Pesanan Saya', 'route' => null],
+                ['label' => 'Marketplace Hasil Panen', 'route' => 'user.marketplace'],
+                ['label' => 'Keranjang & Pesanan Saya', 'route' => 'user.pesanan'],
                 ['label' => 'AI Scanner (Terbatas)', 'route' => null],
                 ['label' => 'Analisis Cuaca', 'route' => null],
                 ['label' => 'Profil Petani (Lihat)', 'route' => null],
