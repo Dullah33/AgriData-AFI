@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\Auth;
 class KunjunganController extends Controller
 {
     // GET /penyuluh/kunjungan
-    // Menggabungkan "Jadwal Kunjungan Lapangan" dan "Laporan Hasil
-    // Kunjungan" (BAB 2A.6) dalam satu halaman list, dibedakan lewat
-    // kolom status — sesuai desain tabel field_visits (satu baris bisa
-    // berupa jadwal yang belum dilaksanakan maupun laporan yang sudah selesai).
+    // "Jadwal Kunjungan Lapangan" (BAB 2A.6): kalender & daftar rencana
+    // kunjungan yang BELUM selesai (terjadwal/batal). Kunjungan yang
+    // sudah selesai dipindah ke halaman "Laporan Kunjungan" terpisah
+    // (lihat riwayat()) supaya kedua menu sidebar tidak mengarah ke
+    // halaman yang sama.
     public function index(Request $request)
     {
         $officer = Auth::user()->extensionOfficer;
@@ -22,7 +23,9 @@ class KunjunganController extends Controller
             return view('penyuluh.belum-terdaftar');
         }
 
-        $query = $officer->fieldVisits()->with('petaniProfile.user')->latest('tanggal_kunjungan');
+        $query = $officer->fieldVisits()->with('petaniProfile.user')
+            ->whereIn('status', ['terjadwal', 'batal'])
+            ->latest('tanggal_kunjungan');
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -31,6 +34,27 @@ class KunjunganController extends Controller
         $kunjungans = $query->paginate(10)->withQueryString();
 
         return view('penyuluh.kunjungan.index', [
+            'kunjungans' => $kunjungans,
+        ]);
+    }
+
+    // GET /penyuluh/kunjungan/laporan
+    // "Laporan Hasil Kunjungan" (BAB 2A.6): daftar laporan kunjungan
+    // yang SUDAH selesai diisi, dengan opsi lihat/ubah detail laporan.
+    public function riwayat()
+    {
+        $officer = Auth::user()->extensionOfficer;
+
+        if (! $officer) {
+            return view('penyuluh.belum-terdaftar');
+        }
+
+        $kunjungans = $officer->fieldVisits()->with('petaniProfile.user')
+            ->where('status', 'selesai')
+            ->latest('tanggal_kunjungan')
+            ->paginate(10);
+
+        return view('penyuluh.kunjungan.riwayat', [
             'kunjungans' => $kunjungans,
         ]);
     }
@@ -107,7 +131,7 @@ class KunjunganController extends Controller
 
         $kunjungan->update($data);
 
-        return redirect()->route('penyuluh.kunjungan.index')
+        return redirect()->route('penyuluh.kunjungan.riwayat')
             ->with('success', 'Laporan kunjungan berhasil disimpan.');
     }
 

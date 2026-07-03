@@ -15,7 +15,7 @@
                 ['label' => 'Artikel Pertanian', 'route' => 'admin.artikel.index'],
                 ['label' => 'Moderasi Ulasan', 'route' => 'admin.ulasan.index'],
                 ['label' => 'Laporan & Ekspor Data', 'route' => null],
-                ['label' => 'Pengaturan Akun', 'route' => null],
+                ['label' => 'Pengaturan Akun', 'route' => 'akun.edit'],
             ],
         ],
         'petani' => [
@@ -30,7 +30,7 @@
                 ['label' => 'AI Scanner Penyakit', 'route' => null],
                 ['label' => 'Kunjungan Penyuluh', 'route' => 'petani.kunjungan-penyuluh.index'],
                 ['label' => 'Artikel Pertanian', 'route' => null],
-                ['label' => 'Pengaturan Akun', 'route' => null],
+                ['label' => 'Pengaturan Akun', 'route' => 'akun.edit'],
             ],
         ],
         'user' => [
@@ -45,7 +45,7 @@
                 ['label' => 'Profil Petani (Lihat)', 'route' => null],
                 ['label' => 'Artikel Pertanian', 'route' => null],
                 ['label' => 'Riwayat & Ulasan Saya', 'route' => null],
-                ['label' => 'Pengaturan Akun', 'route' => null],
+                ['label' => 'Pengaturan Akun', 'route' => 'akun.edit'],
             ],
         ],
         'penyuluh' => [
@@ -55,12 +55,12 @@
                 ['label' => 'Dashboard', 'route' => 'dashboard'],
                 ['label' => 'Wilayah Binaan', 'route' => 'penyuluh.wilayah-binaan.index'],
                 ['label' => 'Jadwal Kunjungan', 'route' => 'penyuluh.kunjungan.index'],
-                ['label' => 'Laporan Kunjungan', 'route' => 'penyuluh.kunjungan.index'],
+                ['label' => 'Laporan Kunjungan', 'route' => 'penyuluh.kunjungan.riwayat'],
                 ['label' => 'Deteksi Penyakit (Wilayah)', 'route' => null],
                 ['label' => 'Pelatihan Kelompok Tani', 'route' => 'penyuluh.pelatihan.index'],
                 ['label' => 'Analisis Cuaca (Wilayah)', 'route' => 'cuaca.index'],
                 ['label' => 'Laporan Bulanan', 'route' => 'penyuluh.laporan-bulanan.index'],
-                ['label' => 'Pengaturan Akun', 'route' => null],
+                ['label' => 'Pengaturan Akun', 'route' => 'akun.edit'],
             ],
         ],
     ];

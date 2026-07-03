@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\WeatherController;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\PetaniController;
@@ -33,6 +34,10 @@ Route::middleware('guest')->group(function () {
 // Protected (semua role)
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Pengaturan Akun — dipakai bersama oleh keempat role
+    Route::get('/akun', [AccountController::class, 'edit'])->name('akun.edit');
+    Route::put('/akun', [AccountController::class, 'update'])->name('akun.update');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     
     // ============================================
@@ -116,6 +121,7 @@ Route::middleware('auth')->group(function () {
 
         // Jadwal & Laporan Kunjungan
         Route::get('kunjungan', [KunjunganController::class, 'index'])->name('kunjungan.index');
+        Route::get('kunjungan/laporan', [KunjunganController::class, 'riwayat'])->name('kunjungan.riwayat');
         Route::get('kunjungan/create', [KunjunganController::class, 'create'])->name('kunjungan.create');
         Route::post('kunjungan', [KunjunganController::class, 'store'])->name('kunjungan.store');
         Route::get('kunjungan/{kunjungan}/laporkan', [KunjunganController::class, 'laporkan'])->name('kunjungan.laporkan');
