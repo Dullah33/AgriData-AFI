@@ -9,6 +9,7 @@ use App\Models\Transaksi;
 use App\Models\Artikel;
 use App\Models\UlasanRating;
 use App\Models\FieldVisit;
+use App\Models\DiseaseReport;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -97,6 +98,7 @@ class DashboardController extends Controller
             'kunjungan_bulan_ini' => $officer ? $officer->fieldVisits()->bulanIni()->where('status', 'selesai')->count() : 0,
             'kunjungan_terjadwal' => $officer ? $officer->fieldVisits()->where('status', 'terjadwal')->count() : 0,
             'pelatihan_bulan_ini' => $officer ? $officer->trainingPrograms()->bulanIni()->count() : 0,
+            'laporan_penyakit_baru' => $officer ? DiseaseReport::diWilayah($officer->wilayah_binaan)->baru()->count() : 0,
         ];
 
         $kunjunganMendatang = $officer

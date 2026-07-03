@@ -47,4 +47,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(ExtensionOfficer::class, 'user_id');
     }
+
+    // Laporan deteksi penyakit yang pernah dibuat user ini lewat AI Scanner
+    public function diseaseReports()
+    {
+        return $this->hasMany(DiseaseReport::class, 'user_id');
+    }
 }

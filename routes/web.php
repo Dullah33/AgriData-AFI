@@ -20,6 +20,9 @@ use App\Http\Controllers\Penyuluh\WilayahBinaanController;
 use App\Http\Controllers\Penyuluh\KunjunganController;
 use App\Http\Controllers\Penyuluh\PelatihanController;
 use App\Http\Controllers\Penyuluh\LaporanBulananController;
+use App\Http\Controllers\Penyuluh\DeteksiPenyakitController as PenyuluhDeteksiPenyakitController;
+use App\Http\Controllers\Petani\DeteksiPenyakitController as PetaniDeteksiPenyakitController;
+use App\Http\Controllers\User\DeteksiPenyakitController as UserDeteksiPenyakitController;
 
 // Landing page
 Route::get('/', fn() => view('landing'))->name('landing');
@@ -93,6 +96,12 @@ Route::middleware('auth')->group(function () {
         // Kunjungan Penyuluh (read-only)
         Route::get('kunjungan-penyuluh', [KunjunganPenyuluhController::class, 'index'])->name('kunjungan-penyuluh.index');
 
+        // AI Scanner Penyakit Tanaman & Riwayat Deteksi Penyakit
+        Route::get('deteksi-penyakit', [PetaniDeteksiPenyakitController::class, 'index'])->name('deteksi-penyakit.index');
+        Route::get('deteksi-penyakit/scan', [PetaniDeteksiPenyakitController::class, 'create'])->name('deteksi-penyakit.create');
+        Route::post('deteksi-penyakit/scan', [PetaniDeteksiPenyakitController::class, 'store'])->name('deteksi-penyakit.store');
+        Route::get('deteksi-penyakit/{laporan}', [PetaniDeteksiPenyakitController::class, 'show'])->name('deteksi-penyakit.show');
+
         // Listing produk
         Route::resource('produk', ProdukPanenController::class)->except(['show']);
 
@@ -113,6 +122,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/pesanan-saya', [MarketplaceController::class, 'pesananSaya'])->name('user.pesanan');
         Route::get("/ulasan/{transaksi}/create", [UserUlasanController::class, "create"])->name("user.ulasan.create");
         Route::post("/ulasan/{transaksi}", [UserUlasanController::class, "store"])->name("user.ulasan.store");
+
+        // AI Scanner Penyakit Tanaman (Terbatas)
+        Route::get('/ai-scanner', [UserDeteksiPenyakitController::class, 'create'])->name('user.deteksi-penyakit.create');
+        Route::post('/ai-scanner', [UserDeteksiPenyakitController::class, 'store'])->name('user.deteksi-penyakit.store');
+        Route::get('/ai-scanner/{laporan}', [UserDeteksiPenyakitController::class, 'show'])->name('user.deteksi-penyakit.show');
     });
 
     // ============================================
@@ -130,6 +144,11 @@ Route::middleware('auth')->group(function () {
         Route::get('kunjungan/{kunjungan}/laporkan', [KunjunganController::class, 'laporkan'])->name('kunjungan.laporkan');
         Route::post('kunjungan/{kunjungan}/laporkan', [KunjunganController::class, 'simpanLaporan'])->name('kunjungan.simpan-laporan');
         Route::post('kunjungan/{kunjungan}/batalkan', [KunjunganController::class, 'batalkan'])->name('kunjungan.batalkan');
+
+        // Deteksi Penyakit di Wilayah Binaan
+        Route::get('deteksi-penyakit', [PenyuluhDeteksiPenyakitController::class, 'index'])->name('deteksi-penyakit.index');
+        Route::get('deteksi-penyakit/{laporan}', [PenyuluhDeteksiPenyakitController::class, 'show'])->name('deteksi-penyakit.show');
+        Route::post('deteksi-penyakit/{laporan}/tindak-lanjut', [PenyuluhDeteksiPenyakitController::class, 'tindakLanjut'])->name('deteksi-penyakit.tindak-lanjut');
 
         // Pelatihan Kelompok Tani
         Route::resource('pelatihan', PelatihanController::class)->except(['show']);

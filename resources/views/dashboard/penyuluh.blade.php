@@ -13,7 +13,7 @@
             ⚠️ Akun Penyuluh Anda belum ditetapkan wilayah binaan oleh Admin. Hubungi Admin untuk penetapan wilayah.
         </div>
     @else
-        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-teal-500">
                 <p class="text-xs text-gray-500 uppercase font-semibold">Petani Binaan</p>
                 <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['petani_binaan'] }}</p>
@@ -29,6 +29,12 @@
                 <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['pelatihan_bulan_ini'] }}</p>
                 <p class="text-xs text-gray-400 mt-1">kegiatan</p>
             </div>
+            <a href="{{ route('penyuluh.deteksi-penyakit.index') }}"
+               class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500 hover:shadow-md transition">
+                <p class="text-xs text-gray-500 uppercase font-semibold">Laporan Penyakit Baru</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['laporan_penyakit_baru'] }}</p>
+                <p class="text-xs text-gray-400 mt-1">menunggu ditinjau</p>
+            </a>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm p-5">
