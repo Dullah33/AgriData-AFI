@@ -11,8 +11,13 @@ use App\Http\Controllers\Admin\UlasanController;
 use App\Http\Controllers\Petani\ProdukPanenController;
 use App\Http\Controllers\Petani\PesananController;
 use App\Http\Controllers\Petani\LahanController;
+use App\Http\Controllers\Petani\KunjunganPenyuluhController;
 use App\Http\Controllers\User\MarketplaceController;
 use App\Http\Controllers\Admin\PenyuluhController;
+use App\Http\Controllers\Penyuluh\WilayahBinaanController;
+use App\Http\Controllers\Penyuluh\KunjunganController;
+use App\Http\Controllers\Penyuluh\PelatihanController;
+use App\Http\Controllers\Penyuluh\LaporanBulananController;
 
 // Landing page
 Route::get('/', fn() => view('landing'))->name('landing');
@@ -79,6 +84,9 @@ Route::middleware('auth')->group(function () {
         // Profil & Lahan Saya
         Route::resource('lahan', LahanController::class)->except(['show']);
 
+        // Kunjungan Penyuluh (read-only)
+        Route::get('kunjungan-penyuluh', [KunjunganPenyuluhController::class, 'index'])->name('kunjungan-penyuluh.index');
+
         // Listing produk
         Route::resource('produk', ProdukPanenController::class)->except(['show']);
 
@@ -97,5 +105,32 @@ Route::middleware('auth')->group(function () {
         Route::get('/marketplace/{produk}', [MarketplaceController::class, 'show'])->name('user.marketplace.show');
         Route::post('/marketplace/{produk}/beli', [MarketplaceController::class, 'beli'])->name('user.marketplace.beli');
         Route::get('/pesanan-saya', [MarketplaceController::class, 'pesananSaya'])->name('user.pesanan');
+    });
+
+    // ============================================
+    // PENYULUH ROUTES (Role: Penyuluh)
+    // ============================================
+    Route::middleware('role:penyuluh')->prefix('penyuluh')->name('penyuluh.')->group(function () {
+        // Wilayah Binaan
+        Route::get('wilayah-binaan', [WilayahBinaanController::class, 'index'])->name('wilayah-binaan.index');
+
+        // Jadwal & Laporan Kunjungan
+        Route::get('kunjungan', [KunjunganController::class, 'index'])->name('kunjungan.index');
+        Route::get('kunjungan/create', [KunjunganController::class, 'create'])->name('kunjungan.create');
+        Route::post('kunjungan', [KunjunganController::class, 'store'])->name('kunjungan.store');
+        Route::get('kunjungan/{kunjungan}/laporkan', [KunjunganController::class, 'laporkan'])->name('kunjungan.laporkan');
+        Route::post('kunjungan/{kunjungan}/laporkan', [KunjunganController::class, 'simpanLaporan'])->name('kunjungan.simpan-laporan');
+        Route::post('kunjungan/{kunjungan}/batalkan', [KunjunganController::class, 'batalkan'])->name('kunjungan.batalkan');
+
+        // Pelatihan Kelompok Tani
+        Route::resource('pelatihan', PelatihanController::class)->except(['show']);
+
+        // Laporan Kinerja Bulanan
+        Route::get('laporan-bulanan', [LaporanBulananController::class, 'index'])->name('laporan-bulanan.index');
+        Route::get('laporan-bulanan/create', [LaporanBulananController::class, 'create'])->name('laporan-bulanan.create');
+        Route::post('laporan-bulanan', [LaporanBulananController::class, 'store'])->name('laporan-bulanan.store');
+        Route::get('laporan-bulanan/{laporanBulanan}/edit', [LaporanBulananController::class, 'edit'])->name('laporan-bulanan.edit');
+        Route::put('laporan-bulanan/{laporanBulanan}', [LaporanBulananController::class, 'update'])->name('laporan-bulanan.update');
+        Route::post('laporan-bulanan/{laporanBulanan}/kirim', [LaporanBulananController::class, 'kirim'])->name('laporan-bulanan.kirim');
     });
 });

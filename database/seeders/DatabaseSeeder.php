@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\ExtensionOfficer;
 use App\Models\PetaniProfile;
 use App\Models\User;
 use App\Models\Wilayah;
@@ -34,7 +35,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 3. Petugas Penyuluh Pertanian (PPL)
-        User::create([
+        $penyuluh = User::create([
             'username' => 'penyuluh01',
             'email'    => 'penyuluh@agridata.com',
             'password' => Hash::make('penyuluh123'),
@@ -65,6 +66,18 @@ class DatabaseSeeder extends Seeder
             'nama_kelompok_tani' => 'Kelompok Tani Sumber Makmur',
             'luas_lahan'         => 0.5,
             'status_aktif'       => true,
+        ]);
+
+        // Profil penyuluh untuk akun penyuluh01, wilayah_binaan sengaja
+        // disamakan dengan nama_wilayah di atas supaya relasi petaniBinaan()
+        // (pencocokan lewat nama wilayah) langsung punya data untuk dites.
+        ExtensionOfficer::create([
+            'user_id'        => $penyuluh->id,
+            'nip'            => '198501012024031001',
+            'wilayah_binaan' => $wilayah->nama_wilayah,
+            'phone'          => '081234567890',
+            'status'         => 'aktif',
+            'assigned_by'    => $admin->id,
         ]);
     }
 }

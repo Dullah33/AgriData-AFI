@@ -41,4 +41,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(PetaniProfile::class, 'user_id');
     }
+
+    // Profil penyuluh milik user ini (hanya relevan untuk role penyuluh)
+    public function extensionOfficer()
+    {
+        return $this->hasOne(ExtensionOfficer::class, 'user_id');
+    }
 }
