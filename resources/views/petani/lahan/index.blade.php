@@ -8,7 +8,7 @@
     <h2 class="text-lg font-semibold text-gray-800 mb-6">Riwayat Kunjungan Penyuluh</h2>
 
     <div class="space-y-4">
-        @forelse ($kunjungans as $kunjungan)
+        @forelse ($kunjungan as $kunjungan)
             <div class="border border-gray-200 rounded-lg p-4">
                 <div class="flex items-center justify-between mb-2">
                     <div>

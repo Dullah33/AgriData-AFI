@@ -8,12 +8,13 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\PetaniController;
-use App\Http\Controllers\Admin\UlasanController;
+use App\Http\Controllers\Admin\UlasanController as AdminUlasanController;
 use App\Http\Controllers\Petani\ProdukPanenController;
 use App\Http\Controllers\Petani\PesananController;
 use App\Http\Controllers\Petani\LahanController;
 use App\Http\Controllers\Petani\KunjunganPenyuluhController;
 use App\Http\Controllers\User\MarketplaceController;
+use App\Http\Controllers\User\UlasanController as UserUlasanController;
 use App\Http\Controllers\Admin\PenyuluhController;
 use App\Http\Controllers\Penyuluh\WilayahBinaanController;
 use App\Http\Controllers\Penyuluh\KunjunganController;
@@ -72,9 +73,9 @@ Route::middleware('auth')->group(function () {
         Route::post('petani/{petani}/batalkan-verifikasi', [PetaniController::class, 'batalkanVerifikasi'])->name('petani.batalkan-verifikasi');
 
         // Moderasi ulasan
-        Route::get('ulasan', [UlasanController::class, 'index'])->name('ulasan.index');
-        Route::post('ulasan/{ulasan}/sembunyikan', [UlasanController::class, 'sembunyikan'])->name('ulasan.sembunyikan');
-        Route::post('ulasan/{ulasan}/aktifkan', [UlasanController::class, 'aktifkan'])->name('ulasan.aktifkan');
+        Route::get('ulasan', [AdminUlasanController::class, 'index'])->name('ulasan.index');
+        Route::post('ulasan/{ulasan}/sembunyikan', [AdminUlasanController::class, 'sembunyikan'])->name('ulasan.sembunyikan');
+        Route::post('ulasan/{ulasan}/aktifkan', [AdminUlasanController::class, 'aktifkan'])->name('ulasan.aktifkan');
 
         // Manajemen Penyuluh
         Route::resource('penyuluh', PenyuluhController::class);
@@ -110,6 +111,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/marketplace/{produk}', [MarketplaceController::class, 'show'])->name('user.marketplace.show');
         Route::post('/marketplace/{produk}/beli', [MarketplaceController::class, 'beli'])->name('user.marketplace.beli');
         Route::get('/pesanan-saya', [MarketplaceController::class, 'pesananSaya'])->name('user.pesanan');
+        Route::get("/ulasan/{transaksi}/create", [UserUlasanController::class, "create"])->name("user.ulasan.create");
+        Route::post("/ulasan/{transaksi}", [UserUlasanController::class, "store"])->name("user.ulasan.store");
     });
 
     // ============================================

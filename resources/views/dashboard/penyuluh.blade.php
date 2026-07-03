@@ -1,81 +1,53 @@
 @extends('layouts.dashboard')
-
 @section('title', 'Dashboard Penyuluh')
-
 @section('content')
 
-@if (! $officer)
-    <div class="bg-white rounded-xl shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-2">Selamat datang, {{ Auth::user()->username }} 👋</h2>
-        <p class="text-gray-500 text-sm">
-            Profil Penyuluh Anda belum terdaftar di sistem. Silakan hubungi Admin
-            Dinas Pertanian untuk penetapan wilayah binaan.
-        </p>
-    </div>
-@else
-    <div class="mb-6">
+<div class="space-y-6">
+    <div>
         <h2 class="text-lg font-semibold text-gray-800">Selamat datang, {{ Auth::user()->username }} 👋</h2>
-        <p class="text-sm text-gray-500">Wilayah binaan: <span class="font-medium text-gray-700">{{ $officer->wilayah_binaan }}</span></p>
+        <p class="text-sm text-gray-500">Wilayah binaan: <strong class="text-teal-700">{{ $officer?->wilayah_binaan ?? 'Belum ditetapkan' }}</strong></p>
     </div>
 
-    {{-- Stat cards --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-xl shadow-sm p-5">
-            <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Petani Binaan</p>
-            <p class="text-2xl font-bold text-gray-800">{{ $jumlahPetaniBinaan }}</p>
+    @if (!$officer)
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-5 text-sm text-yellow-800">
+            ⚠️ Akun Penyuluh Anda belum ditetapkan wilayah binaan oleh Admin. Hubungi Admin untuk penetapan wilayah.
         </div>
-        <div class="bg-white rounded-xl shadow-sm p-5">
-            <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Kunjungan Bulan Ini</p>
-            <p class="text-2xl font-bold text-gray-800">{{ $kunjunganBulanIni }}</p>
+    @else
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-teal-500">
+                <p class="text-xs text-gray-500 uppercase font-semibold">Petani Binaan</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['petani_binaan'] }}</p>
+                <p class="text-xs text-gray-400 mt-1">di wilayah Anda</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
+                <p class="text-xs text-gray-500 uppercase font-semibold">Kunjungan Bulan Ini</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['kunjungan_bulan_ini'] }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ $stats['kunjungan_terjadwal'] }} terjadwal</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
+                <p class="text-xs text-gray-500 uppercase font-semibold">Pelatihan Bulan Ini</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['pelatihan_bulan_ini'] }}</p>
+                <p class="text-xs text-gray-400 mt-1">kegiatan</p>
+            </div>
         </div>
-        <div class="bg-white rounded-xl shadow-sm p-5">
-            <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Jadwal Menunggu</p>
-            <p class="text-2xl font-bold text-gray-800">{{ $kunjunganTerjadwal }}</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-5">
-            <p class="text-xs text-gray-400 uppercase font-semibold mb-1">Pelatihan Bulan Ini</p>
-            <p class="text-2xl font-bold text-gray-800">{{ $pelatihanBulanIni }}</p>
-        </div>
-    </div>
 
-    {{-- Kunjungan terbaru --}}
-    <div class="bg-white rounded-xl shadow-sm p-6">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-base font-semibold text-gray-800">Kunjungan Terbaru</h3>
-            <a href="{{ route('penyuluh.kunjungan.index') }}" class="text-xs text-teal-700 hover:underline">Lihat semua →</a>
+        <div class="bg-white rounded-xl shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-gray-800 text-sm">Jadwal Kunjungan Mendatang</h3>
+                <a href="{{ route('penyuluh.kunjungan.index') }}" class="text-xs text-blue-600 hover:underline">Lihat semua →</a>
+            </div>
+            @forelse ($kunjunganMendatang as $k)
+                <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0 text-sm">
+                    <div>
+                        <p class="font-medium text-gray-800">{{ $k->petaniProfile->user->username ?? '-' }}</p>
+                        <p class="text-xs text-gray-400">{{ $k->tanggal_kunjungan->format('d M Y') }}</p>
+                    </div>
+                    <span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">Terjadwal</span>
+                </div>
+            @empty
+                <p class="text-sm text-gray-400 py-2">Tidak ada jadwal mendatang.</p>
+            @endforelse
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-                <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
-                    <tr>
-                        <th class="px-4 py-3">Tanggal</th>
-                        <th class="px-4 py-3">Petani</th>
-                        <th class="px-4 py-3">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse ($kunjunganTerbaru as $kunjungan)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 text-gray-600">{{ $kunjungan->tanggal_kunjungan->format('d M Y') }}</td>
-                            <td class="px-4 py-3 text-gray-800">{{ $kunjungan->petaniProfile->user->username ?? '-' }}</td>
-                            <td class="px-4 py-3">
-                                @php
-                                    $badge = match ($kunjungan->status) {
-                                        'selesai' => 'bg-green-100 text-green-700',
-                                        'batal' => 'bg-red-100 text-red-700',
-                                        default => 'bg-yellow-100 text-yellow-700',
-                                    };
-                                @endphp
-                                <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $badge }}">{{ ucfirst($kunjungan->status) }}</span>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="3" class="px-4 py-6 text-center text-gray-400">Belum ada kunjungan.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-@endif
-
+    @endif
+</div>
 @endsection
