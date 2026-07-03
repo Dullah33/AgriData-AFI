@@ -44,9 +44,10 @@
                     <!-- Card Image -->
                     <div class="h-48 bg-[#eff6ff] flex items-center justify-center overflow-hidden">
                         @if($plant->gambar)
-                            <img src="{{ asset('storage/' . $plant->foto) }}" 
+                            <img src="{{ asset($plant->gambar) }}" 
                                  alt="{{ $plant->nama }}" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                         @else
                             <i data-lucide="sprout" class="w-16 h-16 text-[#4f8a5b]"></i>
                         @endif

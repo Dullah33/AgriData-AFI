@@ -13,7 +13,7 @@ class PlantSeeder extends Seeder
             [
                 'kode' => '01',
                 'nama' => 'Padi',
-                'gambar' => 'https://picsum.photos/seed/padi/400/300',
+                'gambar' => 'assets/images/tanaman/Padi.jpg',
                 'suhu_ideal' => '24-30°C',
                 'min_suhu' => 24.00,
                 'max_suhu' => 30.00,
@@ -51,7 +51,7 @@ class PlantSeeder extends Seeder
             [
                 'kode' => '02',
                 'nama' => 'Jagung',
-                'gambar' => 'https://picsum.photos/seed/jagung/400/300',
+                'gambar' => 'assets/images/tanaman/Jagung.jpg',
                 'suhu_ideal' => '25-30°C',
                 'min_suhu' => 25.00,
                 'max_suhu' => 30.00,
@@ -87,7 +87,7 @@ class PlantSeeder extends Seeder
             [
                 'kode' => '03',
                 'nama' => 'Cabai',
-                'gambar' => 'https://picsum.photos/seed/cabai/400/300',
+                'gambar' => 'assets/images/tanaman/Cabai.jpg',
                 'suhu_ideal' => '25-27°C',
                 'min_suhu' => 25.00,
                 'max_suhu' => 27.00,
@@ -123,7 +123,7 @@ class PlantSeeder extends Seeder
             [
                 'kode' => '04',
                 'nama' => 'Tomat',
-                'gambar' => 'https://picsum.photos/seed/tomat/400/300',
+                'gambar' => 'assets/images/tanaman/Tomat.jpg',
                 'suhu_ideal' => '20-25°C',
                 'min_suhu' => 20.00,
                 'max_suhu' => 25.00,
@@ -159,7 +159,7 @@ class PlantSeeder extends Seeder
             [
                 'kode' => '05',
                 'nama' => 'Wortel',
-                'gambar' => 'https://picsum.photos/seed/wortel/400/300',
+                'gambar' => 'assets/images/tanaman/Wortel.jpg',
                 'suhu_ideal' => '15-21°C',
                 'min_suhu' => 15.00,
                 'max_suhu' => 21.00,
