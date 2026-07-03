@@ -15,6 +15,9 @@ use App\Http\Controllers\Petani\LahanController;
 use App\Http\Controllers\Petani\KunjunganPenyuluhController;
 use App\Http\Controllers\User\MarketplaceController;
 use App\Http\Controllers\User\UlasanController as UserUlasanController;
+use App\Http\Controllers\ArtikelPublicController;
+use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\User\ProfilPetaniController;
 use App\Http\Controllers\Admin\PenyuluhController;
 use App\Http\Controllers\Penyuluh\WilayahBinaanController;
 use App\Http\Controllers\Penyuluh\KunjunganController;
@@ -43,6 +46,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/akun', [AccountController::class, 'edit'])->name('akun.edit');
     Route::put('/akun', [AccountController::class, 'update'])->name('akun.update');
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+    // Artikel Pertanian (baca) — dipakai bersama Petani & User
+    Route::get('/artikel', [ArtikelPublicController::class, 'index'])->name('artikel.index');
+    Route::get('/artikel/{artikel:slug}', [ArtikelPublicController::class, 'show'])->name('artikel.show');
     
     // ============================================
     // WEATHER FEATURE 
@@ -84,6 +91,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('penyuluh', PenyuluhController::class);
         Route::post('penyuluh/{penyuluh}/nonaktifkan', [PenyuluhController::class, 'nonaktifkan'])->name('penyuluh.nonaktifkan');
         Route::post('penyuluh/{penyuluh}/aktifkan', [PenyuluhController::class, 'aktifkan'])->name('penyuluh.aktifkan');
+
+        // Laporan & Ekspor Data
+        Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
+        Route::get('laporan/petani/export', [LaporanController::class, 'exportPetani'])->name('laporan.petani.export');
+        Route::get('laporan/transaksi/export', [LaporanController::class, 'exportTransaksi'])->name('laporan.transaksi.export');
     });
 
     // ============================================
@@ -127,6 +139,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/ai-scanner', [UserDeteksiPenyakitController::class, 'create'])->name('user.deteksi-penyakit.create');
         Route::post('/ai-scanner', [UserDeteksiPenyakitController::class, 'store'])->name('user.deteksi-penyakit.store');
         Route::get('/ai-scanner/{laporan}', [UserDeteksiPenyakitController::class, 'show'])->name('user.deteksi-penyakit.show');
+
+        // Profil Petani (Lihat)
+        Route::get('/profil-petani', [ProfilPetaniController::class, 'index'])->name('user.petani.index');
+        Route::get('/profil-petani/{petani}', [ProfilPetaniController::class, 'show'])->name('user.petani.show');
     });
 
     // ============================================
