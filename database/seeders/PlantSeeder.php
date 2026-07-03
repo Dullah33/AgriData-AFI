@@ -9,12 +9,11 @@ class PlantSeeder extends Seeder
 {
     public function run(): void
     {
-        // Data tanaman yang akan di-seed
         $plants = [
             [
                 'kode' => '01',
                 'nama' => 'Padi',
-                'gambar' => 'images/tanaman/padi.png',
+                'gambar' => 'https://picsum.photos/seed/padi/400/300',
                 'suhu_ideal' => '24-30°C',
                 'min_suhu' => 24.00,
                 'max_suhu' => 30.00,
@@ -24,18 +23,35 @@ class PlantSeeder extends Seeder
                 'curah_hujan_ideal' => 'Tinggi',
                 'musim' => 'Musim Hujan',
                 'jenis_tanah' => 'Lempung',
-                'status_cuaca_hujan' => 'Waktu ideal untuk penanaman. Pastikan drainase baik.',
-                'status_cuaca_panas' => 'Tunda tanam. Risiko puso tinggi akibat kekeringan.',
-                'status_curah_hujan_tinggi' => 'Optimal. Lanjutkan pemupukan dan pengendalian hama.',
-                'status_curah_hujan_rendah' => 'Kritis. Siapkan irigasi tambahan atau tunda.',
-                'deskripsi' => 'Tanaman pangan utama Indonesia. Membutuhkan penggenangan air pada fase vegetatif.',
-                'keunggulan' => 'Produktivitas tinggi dan merupakan sumber karbohidrat utama.',
-                'durasi_panen' => '3-4 bulan'
+                'status_cuaca_hujan' => 'Waktu ideal untuk penanaman.',
+                'status_cuaca_panas' => 'Tunda tanam.',
+                'deskripsi' => 'Tanaman pangan utama Indonesia.',
+                'keunggulan' => 'Produktivitas tinggi.',
+                'durasi_panen' => '3-4 bulan',
+                
+                // DATA BUDIDAYA
+                'budidaya_persiapan_lahan' => 'Bersihkan lahan dari gulma. Cangkul tanah sedalam 20-30 cm hingga gembur. Buat saluran irigasi dan bedengan dengan lebar 1-1.2 meter.',
+                'budidaya_pemupukan' => 'Berikan pupuk dasar (urea, SP-36, KCl) sesuai dosis rekomendasi. Tambahkan pupuk organik atau kompos 2 minggu sebelum tanam.',
+                'budidaya_irigasi' => 'Sistem irigasi penggenangan untuk padi sawah. Pastikan tinggi genangan air terjaga 5-10 cm pada fase vegetatif.',
+                
+                'langkah_budidaya' => json_encode([
+                    ['title' => 'Persiapan Bibit', 'content' => 'Rendam benih padi selama 24 jam, tiriskan, lalu kecambahkan di karung goni lembab selama 2-3 hari.'],
+                    ['title' => 'Pengolahan Tanah', 'content' => 'Lakukan bajak dan garu sebanyak 2-3 kali hingga tanah berlumpur rata.'],
+                    ['title' => 'Penyemaian', 'content' => 'Taburkan benih kecambah di bedengan semai. Siram secara rutin hingga bibit berumur 15-20 hari.'],
+                    ['title' => 'Penanaman', 'content' => 'Pindahkan bibit ke lahan sawah dengan sistem tegel atau tanam baris (jarak 25x25 cm).'],
+                    ['title' => 'Pemeliharaan', 'content' => 'Lakukan penyulaman, penyiangan, dan pengendalian hama secara berkala.'],
+                    ['title' => 'Panen', 'content' => 'Panen saat 80-90% bulir padi menguning (sekitar 30 hari setelah berbunga).'],
+                ]),
+                'tips_budidaya' => json_encode([
+                    ['icon' => '☀️', 'title' => 'Penyinaran', 'content' => 'Padi membutuhkan sinar matahari penuh minimal 8 jam per hari.'],
+                    ['icon' => '💧', 'title' => 'Pengairan', 'content' => 'Jangan sampai lahan kering saat fase pembungaan.'],
+                    ['icon' => '🐛', 'title' => 'Hama', 'content' => 'Waspadai serangan wereng coklat dan penggerek batang.'],
+                ])
             ],
             [
                 'kode' => '02',
                 'nama' => 'Jagung',
-                'gambar' => 'images/tanaman/jagung.png',
+                'gambar' => 'https://picsum.photos/seed/jagung/400/300',
                 'suhu_ideal' => '25-30°C',
                 'min_suhu' => 25.00,
                 'max_suhu' => 30.00,
@@ -45,18 +61,33 @@ class PlantSeeder extends Seeder
                 'curah_hujan_ideal' => 'Sedang',
                 'musim' => 'Musim Kemarau',
                 'jenis_tanah' => 'Lempung Berpasir',
-                'status_cuaca_hujan' => 'Waspadai genangan air. Jagung rentan busuk akar.',
-                'status_cuaca_panas' => 'Kondisi optimal. Pastikan pemupukan nitrogen tercukupi.',
-                'status_curah_hujan_tinggi' => 'Berisiko tinggi. Lakukan perbaikan drainase segera.',
-                'status_curah_hujan_rendah' => 'Cocok. Lakukan irigasi tetes jika tersedia.',
-                'deskripsi' => 'Tanaman serbaguna untuk pangan dan pakan ternak. Tahan kondisi kering relatif baik.',
-                'keunggulan' => 'Perawatan relatif mudah dan harga pasar stabil.',
-                'durasi_panen' => '2.5-3 bulan'
+                'status_cuaca_hujan' => 'Waspadai genangan air.',
+                'status_cuaca_panas' => 'Kondisi optimal.',
+                'deskripsi' => 'Tanaman serbaguna untuk pangan dan pakan.',
+                'keunggulan' => 'Perawatan relatif mudah.',
+                'durasi_panen' => '2.5-3 bulan',
+                
+                'budidaya_persiapan_lahan' => 'Olah tanah hingga gembur sedalam 20 cm. Buat bedengan dengan lebar 1 meter dan tinggi 20 cm.',
+                'budidaya_pemupukan' => 'Berikan pupuk dasar NPK 15-15-15 sebanyak 200 kg/ha. Tambahkan pupuk susulan urea pada umur 21 dan 35 hari.',
+                'budidaya_irigasi' => 'Siram secara teratur terutama pada fase pertumbuhan vegetatif dan pembungaan.',
+                
+                'langkah_budidaya' => json_encode([
+                    ['title' => 'Persiapan Benih', 'content' => 'Pilih benih jagung hibrida unggul. Rendam benih dalam air hangat selama 2 jam sebelum tanam.'],
+                    ['title' => 'Penanaman', 'content' => 'Tanam benih dengan jarak 75x25 cm. Masukkan 2 benih per lubang tanam sedalam 3-5 cm.'],
+                    ['title' => 'Penyulaman', 'content' => 'Ganti benih yang tidak tumbuh pada umur 7-10 hari setelah tanam.'],
+                    ['title' => 'Penyiangan', 'content' => 'Bersihkan gulma pada umur 15 dan 30 hari setelah tanam.'],
+                    ['title' => 'Pemupukan Susulan', 'content' => 'Berikan urea 100 kg/ha pada umur 21 hari dan 100 kg/ha pada umur 35 hari.'],
+                    ['title' => 'Panen', 'content' => 'Panen saat kelobot mengering dan biji jagung mengeras (umur 100-110 hari).'],
+                ]),
+                'tips_budidaya' => json_encode([
+                    ['icon' => '🌽', 'title' => 'Jarak Tanam', 'content' => 'Jarak tanam yang tepat mencegah persaingan nutrisi.'],
+                    ['icon' => '🌱', 'title' => 'Rotasi', 'content' => 'Lakukan rotasi tanaman untuk menjaga kesuburan tanah.'],
+                ])
             ],
             [
                 'kode' => '03',
-                'nama' => 'Cabai Rawit',
-                'gambar' => 'images/tanaman/cabai.png',
+                'nama' => 'Cabai',
+                'gambar' => 'https://picsum.photos/seed/cabai/400/300',
                 'suhu_ideal' => '25-27°C',
                 'min_suhu' => 25.00,
                 'max_suhu' => 27.00,
@@ -66,39 +97,33 @@ class PlantSeeder extends Seeder
                 'curah_hujan_ideal' => 'Rendah',
                 'musim' => 'Musim Kemarau',
                 'jenis_tanah' => 'Gembur & Subur',
-                'status_cuaca_hujan' => 'Rentan penyakit jamur. Gunakan mulsa plastik.',
-                'status_cuaca_panas' => 'Sangat ideal. Tingkatkan frekuensi panen.',
-                'status_curah_hujan_tinggi' => 'Hindari tanam. Risiko busuk buah dan ranting sangat tinggi.',
-                'status_curah_hujan_rendah' => 'Waktu terbaik. Fokus pada pengendalian kutu daun.',
-                'deskripsi' => 'Komoditas hortikultura bernilai ekonomi tinggi. Sensitif terhadap curah hujan berlebih.',
-                'keunggulan' => 'Permintaan pasar selalu tinggi dan harga fluktuatif menguntungkan.',
-                'durasi_panen' => '2-3 bulan (panen berkelanjutan)'
+                'status_cuaca_hujan' => 'Rentan penyakit jamur.',
+                'status_cuaca_panas' => 'Sangat ideal.',
+                'deskripsi' => 'Komoditas hortikultura bernilai ekonomi tinggi.',
+                'keunggulan' => 'Permintaan pasar selalu tinggi.',
+                'durasi_panen' => '2-3 bulan',
+                
+                'budidaya_persiapan_lahan' => 'Cangkul tanah sedalam 30 cm. Buat bedengan lebar 100-120 cm, tinggi 30 cm. Berikan pupuk kandang 20 ton/ha.',
+                'budidaya_pemupukan' => 'Berikan NPK 15-15-15 sebanyak 300 kg/ha. Tambahkan pupuk kandang cair setiap 2 minggu.',
+                'budidaya_irigasi' => 'Siram setiap hari pada musim kemarau. Gunakan mulsa plastik untuk menjaga kelembapan.',
+                
+                'langkah_budidaya' => json_encode([
+                    ['title' => 'Penyemaian', 'content' => 'Semai benih cabai dalam tray semai. Siram rutin hingga bibit berumur 30-40 hari.'],
+                    ['title' => 'Persiapan Lahan', 'content' => 'Buat bedengan dengan mulsa plastik hitam perak. Pasang ajir bambu setinggi 1 meter.'],
+                    ['title' => 'Penanaman', 'content' => 'Tanam bibit pada sore hari dengan jarak 70x60 cm. Siram segera setelah tanam.'],
+                    ['title' => 'Pemeliharaan', 'content' => 'Ikat tanaman pada ajir. Pangkas tunas samping hingga umur 45 hari.'],
+                    ['title' => 'Pengendalian Hama', 'content' => 'Semprot pestisida organik setiap minggu. Waspadai kutu daun dan thrips.'],
+                    ['title' => 'Panen', 'content' => 'Panen pertama umur 75-85 hari. Panen berlanjut setiap 3-4 hari sekali.'],
+                ]),
+                'tips_budidaya' => json_encode([
+                    ['icon' => '🌶️', 'title' => 'Mulsa', 'content' => 'Gunakan mulsa plastik untuk hasil optimal.'],
+                    ['icon' => '🌡️', 'title' => 'Suhu', 'content' => 'Cabai tumbuh optimal di dataran rendah hingga menengah.'],
+                ])
             ],
             [
                 'kode' => '04',
-                'nama' => 'Kedelai',
-                'gambar' => 'images/tanaman/kedelai.png',
-                'suhu_ideal' => '21-30°C',
-                'min_suhu' => 21.00,
-                'max_suhu' => 30.00,
-                'kelembapan_ideal' => '65-75%',
-                'min_kelembaban' => 65.00,
-                'max_kelembaban' => 75.00,
-                'curah_hujan_ideal' => 'Sedang',
-                'musim' => 'Musim Kemarau',
-                'jenis_tanah' => 'Lempung Berliat',
-                'status_cuaca_hujan' => 'Tunda. Tanah basah memicu hama lalat bibit.',
-                'status_cuaca_panas' => 'Ideal. Bantu dengan irigasi hemat air.',
-                'status_curah_hujan_tinggi' => 'Berisiko gagal panen. Lakukan drainase ekstra.',
-                'status_curah_hujan_rendah' => 'Cocok. Lakukan pengairan saat fase pembungaan.',
-                'deskripsi' => 'Sumber protein nabati utama. Membutuhkan drainase baik karena rentan genangan.',
-                'keunggulan' => 'Umur pendek dan dapat ditanam sebagai tanaman sela.',
-                'durasi_panen' => '2-2.5 bulan'
-            ],
-            [
-                'kode' => '05',
                 'nama' => 'Tomat',
-                'gambar' => 'images/tanaman/tomat.png',
+                'gambar' => 'https://picsum.photos/seed/tomat/400/300',
                 'suhu_ideal' => '20-25°C',
                 'min_suhu' => 20.00,
                 'max_suhu' => 25.00,
@@ -108,23 +133,71 @@ class PlantSeeder extends Seeder
                 'curah_hujan_ideal' => 'Rendah',
                 'musim' => 'Musim Kemarau',
                 'jenis_tanah' => 'Gembur & Organik',
-                'status_cuaca_hujan' => 'Hindari. Curah hujan memicu penyakit layu dan bercak daun.',
-                'status_cuaca_panas' => 'Optimal. Gunakan naungan jika suhu >30°C.',
-                'status_curah_hujan_tinggi' => 'Sangat tidak disarankan. Risiko panen nol tinggi.',
-                'status_curah_hujan_rendah' => 'Waktu terbaik. Pastikan ketersediaan air teratur.',
-                'deskripsi' => 'Tanaman hortikultura populer. Sensitif terhadap suhu tinggi dan kelembaban berlebih.',
-                'keunggulan' => 'Nilai jual tinggi dan dapat diolah menjadi berbagai produk turunan.',
-                'durasi_panen' => '2.5-3 bulan'
-            ]
+                'status_cuaca_hujan' => 'Hindari. Curah hujan memicu penyakit.',
+                'status_cuaca_panas' => 'Optimal.',
+                'deskripsi' => 'Tanaman hortikultura populer untuk sayuran dan buah.',
+                'keunggulan' => 'Nilai jual tinggi.',
+                'durasi_panen' => '2.5-3 bulan',
+                
+                'budidaya_persiapan_lahan' => 'Olah tanah gembur sedalam 30 cm. Buat bedengan lebar 100 cm, tinggi 40 cm. Berikan kompos 10 ton/ha.',
+                'budidaya_pemupukan' => 'Berikan NPK 16-16-16 sebanyak 250 kg/ha. Tambahkan pupuk organik cair setiap minggu.',
+                'budidaya_irigasi' => 'Siram setiap pagi dan sore. Jangan biarkan tanah terlalu basah.',
+                
+                'langkah_budidaya' => json_encode([
+                    ['title' => 'Penyemaian', 'content' => 'Semai benih tomat dalam polybag kecil. Rawat hingga bibit berumur 30-35 hari.'],
+                    ['title' => 'Penanaman', 'content' => 'Tanam bibit dengan jarak 60x70 cm. Siram segera setelah tanam.'],
+                    ['title' => 'Pemasangan Ajir', 'content' => 'Pasang ajir bambu setinggi 1.5 meter untuk menopang tanaman.'],
+                    ['title' => 'Pemangkasan', 'content' => 'Pangkas tunas samping setiap minggu. Sisakan 2-3 batang utama.'],
+                    ['title' => 'Pemupukan', 'content' => 'Berikan pupuk NPK setiap 2 minggu. Tambahkan pupuk kandang cair.'],
+                    ['title' => 'Panen', 'content' => 'Panen saat buah berwarna merah sempurna (umur 60-75 hari).'],
+                ]),
+                'tips_budidaya' => json_encode([
+                    ['icon' => '🍅', 'title' => 'Panen', 'content' => 'Panen pagi hari untuk kesegaran optimal.'],
+                    ['icon' => '🌿', 'title' => 'Sirkulasi', 'content' => 'Jaga sirkulasi udara dengan jarak tanam yang tepat.'],
+                ])
+            ],
+            [
+                'kode' => '05',
+                'nama' => 'Wortel',
+                'gambar' => 'https://picsum.photos/seed/wortel/400/300',
+                'suhu_ideal' => '15-21°C',
+                'min_suhu' => 15.00,
+                'max_suhu' => 21.00,
+                'kelembapan_ideal' => '65-75%',
+                'min_kelembaban' => 65.00,
+                'max_kelembaban' => 75.00,
+                'curah_hujan_ideal' => 'Sedang',
+                'musim' => 'Musim Hujan',
+                'jenis_tanah' => 'Gembur & Berpasir',
+                'status_cuaca_hujan' => 'Waktu ideal.',
+                'status_cuaca_panas' => 'Kurang ideal.',
+                'deskripsi' => 'Sayuran umbi kaya vitamin A dan beta karoten.',
+                'keunggulan' => 'Tahan simpan lama.',
+                'durasi_panen' => '3-4 bulan',
+                
+                'budidaya_persiapan_lahan' => 'Cangkul tanah hingga gembur sedalam 40 cm. Buat bedengan lebar 100 cm. Wortel butuh tanah gembur.',
+                'budidaya_pemupukan' => 'Berikan pupuk kandang 15 ton/ha. Tambahkan NPK 100 kg/ha.',
+                'budidaya_irigasi' => 'Siram secara teratur. Jaga tanah tetap lembap tapi tidak becek.',
+                
+                'langkah_budidaya' => json_encode([
+                    ['title' => 'Persiapan Benih', 'content' => 'Rendam benih wortel dalam air hangat selama 2 jam. Tiriskan sebelum tanam.'],
+                    ['title' => 'Penanaman', 'content' => 'Tabur benih secara merata di bedengan. Tutup tipis dengan tanah 1-2 cm.'],
+                    ['title' => 'Penjarangan', 'content' => 'Jarangkan tanaman pada umur 15 hari. Jarak ideal 5-10 cm.'],
+                    ['title' => 'Penyiangan', 'content' => 'Bersihkan gulma secara rutin. Wortel sangat sensitif terhadap gulma.'],
+                    ['title' => 'Pembumbunan', 'content' => 'Timbun pangkal umbi dengan tanah agar tidak hijau.'],
+                    ['title' => 'Panen', 'content' => 'Panen umur 90-120 hari. Cabut umbi dengan hati-hati.'],
+                ]),
+                'tips_budidaya' => json_encode([
+                    ['icon' => '🥕', 'title' => 'Tanah', 'content' => 'Tanah harus gembur untuk umbi sempurna.'],
+                    ['icon' => '💧', 'title' => 'Air', 'content' => 'Penyiraman teratur mencegah umbi pecah.'],
+                ])
+            ],
         ];
 
-        foreach ($plants as $plant) {
-            Plant::updateOrCreate(
-                ['kode' => $plant['kode']], 
-                $plant                      
-            );
+        foreach ($plants as $plantData) {
+            Plant::updateOrCreate(['kode' => $plantData['kode']], $plantData);
         }
 
-        $this->command->info('5 Data Tanaman berhasil di-seed!');
+        $this->command->info('✅ Data Budidaya berhasil ditambahkan untuk 5 tanaman!');
     }
 }

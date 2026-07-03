@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\WeatherController;
+use App\Http\Controllers\BudidayaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\ArtikelController;
 use App\Http\Controllers\Admin\PetaniController;
@@ -48,6 +49,11 @@ Route::middleware('auth')->group(function () {
     // API: Data Tanaman
     Route::get('/api/tanaman', [WeatherController::class, 'getPlants'])->name('api.tanaman');
     Route::get('/api/tanaman/{id}/detail', [WeatherController::class, 'getPlantDetail'])->name('api.tanaman.detail');
+
+    // Halaman list tanaman
+    Route::get('/budidaya', [BudidayaController::class, 'index'])->name('budidaya.index');
+    Route::get('/budidaya/{id}', [BudidayaController::class, 'show'])->name('budidaya.show');
+    Route::get('/api/budidaya/{id}', [BudidayaController::class, 'apiShow'])->name('api.budidaya.show');
 
     // ============================================
     // ADMIN ROUTES (Role: Admin)

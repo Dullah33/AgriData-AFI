@@ -38,6 +38,8 @@ class Plant extends Model
             'max_suhu' => 'decimal:2',
             'min_kelembapan' => 'decimal:2',
             'max_kelembapan' => 'decimal:2',
+            'langkah_budidaya' => 'array',
+            'tips_budidaya' => 'array',
         ];
     }
 

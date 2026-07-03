@@ -1,3 +1,5 @@
+let previousAnalysisState = null;
+
 // DOM Elements
 const panelHasil = document.getElementById('panelHasil');
 const stateIdle = document.getElementById('stateIdle');
@@ -339,6 +341,12 @@ function renderRecommendations(data) {
     if (!data.success) {
         return `<div class="p-6 bg-red-50 rounded-xl"><p class="text-red-700">Error: ${data.error}</p></div>`;
     }
+
+    // Simpan state
+    previousAnalysisState = {
+        type: 'recommendation',
+        data: data
+    };
     
     const recs = data.recommendations;
     const weather = data.weather;
@@ -418,16 +426,35 @@ function renderDetailedAnalysis(data) {
         return `<div class="p-6 bg-red-50 rounded-xl"><p class="text-red-700">Error: ${data.error}</p></div>`;
     }
     
+    // Simpan state untuk navigasi kembali
+    previousAnalysisState = {
+        type: 'detailed',
+        data: data
+    };
+    
     const plant = data.plant;
     const weather = data.weather;
     const analysis = data.analysis;
     
     return `
         <div class="space-y-6">
-            <!-- Header -->
+            <!-- Header dengan Tombol Kembali -->
+            <div class="flex items-center justify-between">
+                <button onclick="kembaliKeRekomendasi()" 
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition flex items-center gap-2 font-semibold">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Kembali
+                </button>
+                <button onclick="lihatRekomendasiLain()" 
+                    class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition font-semibold">
+                    Lihat Tanaman Lain
+                </button>
+            </div>
+            
+            <!-- Konten Detail (sama seperti sebelumnya) -->
             <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-6 rounded-xl">
                 <h2 class="text-3xl font-bold mb-2">${plant.nama}</h2>
-                <p class="text-emerald-100">${data.location.kecamatan}, ${data.location.kabupaten}, ${data.location.provinsi}</p>
+                <p class="text-emerald-100">${data.location.kecamatan}, ${data.location.kabupaten}</p>
             </div>
             
             <!-- Status Badge -->
@@ -439,7 +466,7 @@ function renderDetailedAnalysis(data) {
             
             <!-- Current Conditions vs Ideal -->
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-orange-50 p-5 rounded-xl border-2 border-orange-200">
+                <div class="bg-orange-50 p-5 rounded-xl border-2 ${analysis.match_details.suhu.match ? 'border-green-300' : 'border-red-300'}">
                     <p class="text-sm text-gray-600 mb-2">🌡️ Suhu Saat Ini</p>
                     <p class="text-3xl font-bold text-orange-700 mb-1">${weather.suhu}°C</p>
                     <p class="text-sm text-gray-600">Ideal: ${plant.suhu_ideal}</p>
@@ -447,7 +474,7 @@ function renderDetailedAnalysis(data) {
                         ${analysis.match_details.suhu.match ? '✓ Sesuai' : '✗ Tidak Sesuai'}
                     </p>
                 </div>
-                <div class="bg-blue-50 p-5 rounded-xl border-2 border-blue-200">
+                <div class="bg-blue-50 p-5 rounded-xl border-2 ${analysis.match_details.kelembaban.match ? 'border-green-300' : 'border-red-300'}">
                     <p class="text-sm text-gray-600 mb-2">💧 Kelembaban</p>
                     <p class="text-3xl font-bold text-blue-700 mb-1">${weather.kelembaban}%</p>
                     <p class="text-sm text-gray-600">Ideal: ${plant.kelembapan_ideal}</p>
@@ -489,20 +516,31 @@ function renderDetailedAnalysis(data) {
                     <p class="text-gray-700 text-sm leading-relaxed">${plant.deskripsi}</p>
                 </div>
             </div>
-            
-            <!-- Action Buttons -->
-            <div class="flex gap-3">
-                <button onclick="document.getElementById('tanamanSelect').value = ''; checkFormCompletion();" 
-                    class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition font-semibold">
-                    🔄 Analisis Ulang
-                </button>
-                <button onclick="selectPlantAndAnalyze(${plant.id})" 
-                    class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-semibold">
-                    📥 Download Laporan
-                </button>
-            </div>
         </div>
     `;
+}
+
+//Fungsi untuk kembali ke rekomendasi sebelumnya
+function kembaliKeRekomendasi() {
+    if (previousAnalysisState && previousAnalysisState.type === 'recommendation') {
+        hideLoading(renderRecommendations(previousAnalysisState.data));
+    } else {
+        // Jika tidak ada state, reset ke idle
+        resultContent.innerHTML = '';
+        skeletonLoader.classList.add('hidden');
+        floatingCard.classList.add('hidden');
+        stateIdle.classList.remove('hidden');
+    }
+}
+
+//Fungsi untuk melihat rekomendasi lain (reset form)
+function lihatRekomendasiLain() {
+    // Reset dropdown tanaman
+    selectTanaman.value = '';
+    resultContent.innerHTML = '';
+    skeletonLoader.classList.add('hidden');
+    floatingCard.classList.add('hidden');
+    stateIdle.classList.remove('hidden');
 }
 
 /**

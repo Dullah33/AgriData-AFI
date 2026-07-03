@@ -90,7 +90,7 @@ class WeatherController extends Controller
         $provinsi = urldecode($provinsi);
         $kabupaten = urldecode($kabupaten);
         $kecamatan = urldecode($kecamatan);
-        
+
         try {
             // 1. Dapatkan koordinat dari nama wilayah
             $coords = $this->locationService->geocode($provinsi, $kabupaten, $kecamatan);
@@ -103,15 +103,16 @@ class WeatherController extends Controller
             
             // 4. Hitung matching score untuk setiap tanaman
             $recommendations = $plants->map(function($plant) use ($weather) {
-                $score = $this->analysisService->calculateMatchingScore($plant, $weather);
-                $status = $this->analysisService->determineStatus($score);
+                $analysisResult = $this->analysisService->calculateMatchingScore($plant, $weather);
+                $scoreValue = $analysisResult['score'];
+                $status = $this->analysisService->determineStatus($scoreValue);
                 
                 return [
                     'id' => $plant->id,
                     'kode' => $plant->kode,
                     'nama' => $plant->nama,
                     'gambar' => $plant->gambar,
-                    'score' => $score,
+                    'score' => $scoreValue,
                     'status' => $status,
                     'current_conditions' => [
                         'suhu' => $weather['suhu'],
@@ -119,9 +120,9 @@ class WeatherController extends Controller
                         'curah_hujan' => $weather['curah_hujan']
                     ],
                     'match_details' => [
-                        'suhu_match' => $plant->isTemperatureSuitable($weather['suhu']),
-                        'kelembaban_match' => $plant->isHumiditySuitable($weather['kelembaban']),
-                        'musim_match' => stripos($plant->musim ?? '', 'hujan') !== false // Simplified
+                        'suhu_match' => $analysisResult['details']['suhu']['match'],
+                        'kelembaban_match' => $analysisResult['details']['kelembaban']['match'],
+                        'musim_match' => stripos($plant->musim ?? '', 'hujan') !== false
                     ]
                 ];
             })
@@ -166,44 +167,36 @@ class WeatherController extends Controller
                 $validated['kecamatan']
             );
             
-            // 2. Dapatkan data cuaca + forecast
+            // 2. Dapatkan data cuaca
             $weatherData = $this->weatherService->getWeather($coords['latitude'], $coords['longitude']);
             
             // 3. Ambil data tanaman
             $plant = Plant::findOrFail($validated['plant_id']);
             
-            // 4. Lakukan analisis mendalam
-            $score = $this->analysisService->calculateMatchingScore($plant, $weatherData);
-            $status = $this->analysisService->determineStatus($score);
+            // 4. Lakukan analisis
+            $analysisResult = $this->analysisService->calculateMatchingScore($plant, $weatherData);
+            $scoreValue = $analysisResult['score'];
+            $status = $this->analysisService->determineStatus($scoreValue);
             $recommendation = $this->analysisService->generateRecommendation($plant, $weatherData);
-            
+
             return response()->json([
                 'success' => true,
                 'plant' => $plant,
                 'location' => $coords,
                 'weather' => $weatherData,
                 'analysis' => [
-                    'score' => $score,
+                    'score' => $scoreValue, // ← sekarang integer
                     'status' => $status,
                     'recommendation' => $recommendation,
-                    'match_details' => [
-                        'suhu' => [
-                            'current' => $weatherData['suhu'],
-                            'ideal' => $plant->suhu_ideal,
-                            'match' => $plant->isTemperatureSuitable($weatherData['suhu'])
-                        ],
-                        'kelembaban' => [
-                            'current' => $weatherData['kelembaban'],
-                            'ideal' => $plant->kelembapan_ideal,
-                            'match' => $plant->isHumiditySuitable($weatherData['kelembaban'])
-                        ]
-                    ]
+                    'match_details' => $analysisResult['details'] // ← kirim details ke frontend
                 ]
             ]);
             
         } catch (\Exception $e) {
-            Log::error("Analyze error: " . $e->getMessage());
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'success' => false, 
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 

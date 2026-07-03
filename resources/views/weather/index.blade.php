@@ -5,7 +5,7 @@
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">🌤️ Analisis Cuaca & Jadwal Tanam</h1>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Analisis Cuaca & Jadwal Tanam</h1>
             <p class="text-gray-600">Analisis kondisi cuaca lokal untuk rekomendasi jadwal tanam optimal</p>
         </div>
 
@@ -16,7 +16,6 @@
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 sticky top-6">
                     <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                        <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">📍</span>
                         Parameter Lokasi
                     </h2>
                     
@@ -54,7 +53,7 @@
 
                         <!-- Tanaman (Opsional) -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">🌾 Tanaman (Opsional)</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tanaman (Opsional)</label>
                             <select id="tanamanSelect" 
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all bg-white">
                                 <option value="">--- Rekomendasikan untuk saya ---</option>
@@ -150,5 +149,5 @@
 </div>
 
 <!-- Include JavaScript -->
-<script src="{{ asset('js/weather-analysis.js') }}"></script>
+<script src="{{ asset('assets/js/weather-analysis.js') }}"></script>
 @endsection

@@ -9,46 +9,75 @@ class AnalysisService
     /**
      * Hitung skor kecocokan (0-100) antara tanaman dan kondisi cuaca
      */
-    public function calculateMatchingScore(Plant $plant, array $weather): int
+    public function calculateMatchingScore(Plant $plant, array $weather): array
     {
         $score = 0;
+        $details = [
+            'suhu' => [
+                'current' => $weather['suhu'],
+                'ideal' => $plant->suhu_ideal,
+                'match' => false
+            ],
+            'kelembaban' => [
+                'current' => $weather['kelembaban'],
+                'ideal' => $plant->kelembapan_ideal,
+                'match' => false
+            ]
+        ];
 
-        // 1. Skor Suhu (Bobot 40 poin)
-        $currentTemp = $weather['suhu'];
-        if ($currentTemp >= $plant->min_suhu && $currentTemp <= $plant->max_suhu) {
+        // 1. Skor Suhu (40 poin)
+        $currentTemp = (float) $weather['suhu'];
+        $minSuhu = (float) $plant->min_suhu;
+        $maxSuhu = (float) $plant->max_suhu;
+        
+        if ($currentTemp >= $minSuhu && $currentTemp <= $maxSuhu) {
             $score += 40;
+            $details['suhu']['match'] = true;
         } else {
-            // Penalti jika melenceng dari range ideal
+            // Partial score jika mendekati
             $distance = min(
-                abs($currentTemp - $plant->min_suhu),
-                abs($currentTemp - $plant->max_suhu)
+                abs($currentTemp - $minSuhu),
+                abs($currentTemp - $maxSuhu)
             );
-            $score += max(0, 40 - ($distance * 4));
+            $partialScore = max(0, 40 - ($distance * 4));
+            $score += $partialScore;
         }
 
-        // 2. Skor Kelembaban (Bobot 30 poin)
-        $currentHumidity = $weather['kelembaban'];
-        if ($currentHumidity >= $plant->min_kelembaban && $currentHumidity <= $plant->max_kelembaban) {
+        // 2. Skor Kelembaban (30 poin)
+        $currentHumidity = (float) $weather['kelembaban'];
+        $minHumidity = (float) $plant->min_kelembaban;
+        $maxHumidity = (float) $plant->max_kelembaban;
+        
+        if ($currentHumidity >= $minHumidity && $currentHumidity <= $maxHumidity) {
+            $score += 30;
+            $details['kelembaban']['match'] = true;
+        } else {
+            $distance = min(
+                abs($currentHumidity - $minHumidity),
+                abs($currentHumidity - $maxHumidity)
+            );
+            $partialScore = max(0, 30 - ($distance * 1.5));
+            $score += $partialScore;
+        }
+
+        // 3. Skor Curah Hujan (30 poin)
+        $precipitation = (float) ($weather['curah_hujan'] ?? 0);
+        $plantRainPref = strtolower($plant->curah_hujan_ideal ?? '');
+        
+        if ($precipitation > 50 && str_contains($plantRainPref, 'tinggi')) {
+            $score += 30;
+        } elseif ($precipitation > 10 && $precipitation <= 50 && str_contains($plantRainPref, 'sedang')) {
+            $score += 30;
+        } elseif ($precipitation <= 10 && str_contains($plantRainPref, 'rendah')) {
             $score += 30;
         } else {
-            $distance = min(
-                abs($currentHumidity - $plant->min_kelembaban),
-                abs($currentHumidity - $plant->max_kelembaban)
-            );
-            $score += max(0, 30 - ($distance * 1.5));
+            $score += 10; // Partial score
         }
 
-        // 3. Skor Curah Hujan (Bobot 30 poin)
-        // Logika sederhana: cocokkan kondisi saat ini dengan preferensi tanaman
-        $precipitation = $weather['curah_hujan'];
-        $plantRainPref = strtolower($plant->curah_hujan_ideal ?? '');
-
-        if ($precipitation > 50 && str_contains($plantRainPref, 'tinggi')) $score += 30;
-        elseif ($precipitation > 10 && $precipitation <= 50 && str_contains($plantRainPref, 'sedang')) $score += 30;
-        elseif ($precipitation <= 10 && str_contains($plantRainPref, 'rendah')) $score += 30;
-        else $score += 10; // Partial score jika tidak match sempurna
-
-        return round($score);
+        return [
+            'score' => round($score),
+            'details' => $details
+        ];
     }
 
     /**
@@ -63,17 +92,17 @@ class AnalysisService
     }
 
     /**
-     * Generate rekomendasi teks spesifik berdasarkan kondisi
+     * Generate rekomendasi teks spesifik
      */
     public function generateRecommendation(Plant $plant, array $weather): string
     {
-        $status = $weather['kondisi_cuaca'];
-        $precipitation = $weather['curah_hujan'];
+        $status = $weather['kondisi_cuaca'] ?? '';
+        $precipitation = $weather['curah_hujan'] ?? 0;
 
         if (str_contains(strtolower($status), 'hujan') || $precipitation > 30) {
-            return $plant->status_cuaca_hujan ?? 'Waspadai genangan air. Pastikan drainase lancar.';
-        } elseif ($weather['suhu'] > $plant->max_suhu) {
-            return $plant->status_cuaca_panas ?? 'Suhu terlalu tinggi. Pertimbangkan irigasi tambahan atau naungan.';
+            return $plant->status_cuaca_hujan ?? 'Waspadai genangan air.';
+        } elseif ($weather['suhu'] > ($plant->max_suhu ?? 30)) {
+            return $plant->status_cuaca_panas ?? 'Suhu terlalu tinggi.';
         } else {
             return 'Kondisi lingkungan cukup ideal. Lanjutkan pemeliharaan rutin.';
         }
