@@ -9,15 +9,23 @@ class Artikel extends Model
 {
     protected $table = 'artikel';
 
+    // Kolom-kolom di bawah ini disamakan dengan migration ASLI
+    // (2026_06_14_200509_create_artikel_table.php +
+    // 2026_07_02_000004_add_columns_to_artikel_table.php), BUKAN nama
+    // kolom bahasa Inggris versi dokumen BAB 4.2.9. Sebelumnya model ini
+    // memakai title/category/content/thumbnail/author_id yang tidak ada
+    // di database sama sekali -> Artikel::create() dari ArtikelController
+    // selalu gagal mengisi judul/kategori/konten/foto_sampul karena
+    // mass-assignment silently menolak kolom yang tidak terdaftar di sini.
     protected $fillable = [
-        'author_id', 
-        'title', 
-        'slug', 
-        'category', 
-        'content', 
-        'thumbnail', 
-        'status', 
-        'published_at'
+        'user_id',
+        'judul',
+        'slug',
+        'konten',
+        'foto_sampul',
+        'kategori',
+        'status',
+        'published_at',
     ];
 
     protected $casts = [
@@ -35,5 +43,11 @@ class Artikel extends Model
     public function penulis()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    // Scope: hanya artikel yang sudah dipublish (untuk halaman baca publik)
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published');
     }
 }
