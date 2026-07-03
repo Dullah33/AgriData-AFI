@@ -1,6 +1,8 @@
 @extends('layouts.dashboard')
 @section('title', 'Edit Lahan')
 @section('content')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
 
 <div class="bg-white rounded-xl shadow-sm p-6 max-w-2xl">
     <div class="flex items-center gap-3 mb-6">
@@ -70,6 +72,16 @@
             </div>
         </div>
 
+        {{-- Peta poligon lahan --}}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Area Lahan (Peta)</label>
+            <p class="text-xs text-gray-400 mb-2">
+                Gambar ulang poligon di peta kalau ingin mengubah batas area. Kalau tidak digambar ulang, poligon lama tetap dipakai.
+            </p>
+            <div id="map" class="h-96 w-full border border-gray-300 rounded-lg z-0"></div>
+            <input type="hidden" name="koordinat_poligon" id="koordinat_poligon">
+        </div>
+
         {{-- Status --}}
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Status Lahan <span class="text-red-500">*</span></label>
@@ -94,4 +106,43 @@
         </div>
     </form>
 </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+<script>
+    var map = L.map('map').setView([-7.5539, 111.6565], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    var drawnItems = new L.FeatureGroup();
+    map.addLayer(drawnItems);
+
+    // Pre-fill poligon lama (kalau ada) supaya bisa dilihat/diedit ulang
+    var existing = @json($lahan->koordinat_poligon);
+    if (existing && existing.length >= 3) {
+        var latlngs = existing.map(function (p) { return [p[0], p[1]]; });
+        var existingLayer = L.polygon(latlngs);
+        drawnItems.addLayer(existingLayer);
+        map.fitBounds(existingLayer.getBounds(), { padding: [20, 20] });
+    }
+
+    var drawControl = new L.Control.Draw({
+        edit: { featureGroup: drawnItems },
+        draw: {
+            polygon: true, polyline: false, rectangle: false,
+            circle: false, marker: false, circlemarker: false
+        }
+    });
+    map.addControl(drawControl);
+
+    map.on(L.Draw.Event.CREATED, function (event) {
+        drawnItems.clearLayers();
+        drawnItems.addLayer(event.layer);
+        var latlngs = event.layer.getLatLngs()[0].map(function (p) { return [p.lat, p.lng]; });
+        document.getElementById('koordinat_poligon').value = JSON.stringify(latlngs);
+    });
+</script>
 @endsection

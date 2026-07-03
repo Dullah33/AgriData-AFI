@@ -37,7 +37,7 @@ class PenyuluhController extends Controller
 
         $penyuluhs = $query->paginate(10)->withQueryString();
 
-        return view('Admin.penyuluh.index', [
+        return view('admin.penyuluh.index', [
             'penyuluhs' => $penyuluhs,
         ]);
     }
@@ -48,7 +48,7 @@ class PenyuluhController extends Controller
     // sekaligus penetapan wilayah binaan.
     public function create()
     {
-        return view('Admin.penyuluh.create');
+        return view('admin.penyuluh.create');
     }
 
     // POST /admin/penyuluh
@@ -113,7 +113,7 @@ class PenyuluhController extends Controller
             ->take(6)
             ->get();
 
-        return view('Admin.penyuluh.show', [
+        return view('admin.penyuluh.show', [
             'penyuluh'         => $penyuluh,
             'kunjunganTerbaru' => $kunjunganTerbaru,
             'laporanBulanan'   => $laporanBulanan,
@@ -126,7 +126,7 @@ class PenyuluhController extends Controller
     {
         $penyuluh->load('user');
 
-        return view('Admin.penyuluh.edit', [
+        return view('admin.penyuluh.edit', [
             'penyuluh' => $penyuluh,
         ]);
     }

@@ -36,7 +36,7 @@ class WeatherController extends Controller
     public function getProvinces()
     {
         try {
-            $response = Http::timeout(10)->get('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json');
+            $response = Http::timeout(10)->get('https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json');
             
             if (!$response->successful()) {
                 return response()->json(['error' => 'Gagal memuat data provinsi'], 500);
@@ -53,7 +53,7 @@ class WeatherController extends Controller
     public function getRegencies($provCode)
     {
         try {
-            $url = "https://www.emsifa.com/api-wilayah-indonesia/api/regencies/{$provCode}.json";
+            $url = "https://emsifa.github.io/api-wilayah-indonesia/api/regencies/{$provCode}.json";
             $response = Http::timeout(10)->get($url);
             
             if (!$response->successful()) {
@@ -71,7 +71,7 @@ class WeatherController extends Controller
     public function getDistricts($regCode)
     {
         try {
-            $url = "https://www.emsifa.com/api-wilayah-indonesia/api/districts/{$regCode}.json";
+            $url = "https://emsifa.github.io/api-wilayah-indonesia/api/districts/{$regCode}.json";
             $response = Http::timeout(10)->get($url);
             
             if (!$response->successful()) {

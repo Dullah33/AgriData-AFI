@@ -44,6 +44,12 @@ class PetaniProfile extends Model
         return $this->hasMany(Lahan::class, 'petani_profile_id');
     }
 
+    // Riwayat kunjungan lapangan dari Petugas Penyuluh (BAB 2A.3)
+    public function fieldVisits()
+    {
+        return $this->hasMany(FieldVisit::class, 'petani_profile_id');
+    }
+
     // Status verifikasi ditentukan dari ada/tidaknya verified_by,
     // bukan kolom enum terpisah — konsisten dengan desain migration
     // 2026_07_01_000001_add_columns_to_petani_profile_table.

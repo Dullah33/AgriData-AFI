@@ -18,6 +18,7 @@
                     <th class="px-4 py-3">Total</th>
                     <th class="px-4 py-3">Status</th>
                     <th class="px-4 py-3">Tanggal</th>
+                    <th class="px-4 py-3">Ulasan</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -29,12 +30,33 @@
                         <td class="px-4 py-3 font-semibold">Rp {{ number_format($p->total_harga, 0, ',', '.') }}</td>
                         <td class="px-4 py-3">
                             @php $badge = ['pending'=>'yellow','diproses'=>'blue','selesai'=>'green','batal'=>'red'][$p->status_transaksi] ?? 'gray'; @endphp
-                            <span class="px-2 py-1 text-xs font-semibold bg-{{ $badge }}-100 text-{{ $badge }}-700 rounded-full capitalize">{{ $p->status_transaksi }}</span>
+                            <span class="px-2 py-1 text-xs font-semibold bg-{{ $badge }}-100 text-{{ $badge }}-700 rounded-full capitalize">
+                                {{ $p->status_transaksi }}
+                            </span>
                         </td>
                         <td class="px-4 py-3 text-gray-500">{{ $p->created_at->format('d M Y') }}</td>
+                        <td class="px-4 py-3">
+                            @if ($p->status_transaksi === 'selesai')
+                                @if ($p->ulasan)
+                                    <div class="flex items-center gap-1">
+                                        <span class="text-amber-400 font-bold">{{ $p->ulasan->rating }}★</span>
+                                        <span class="text-xs text-gray-400">Sudah diulas</span>
+                                    </div>
+                                @else
+                                    <a href="{{ route('user.ulasan.create', $p) }}"
+                                       class="px-3 py-1.5 text-xs font-semibold text-amber-700 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200">
+                                        ⭐ Beri Ulasan
+                                    </a>
+                                @endif
+                            @else
+                                <span class="text-xs text-gray-300">—</span>
+                            @endif
+                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Belum ada pesanan.</td></tr>
+                    <tr>
+                        <td colspan="7" class="px-4 py-8 text-center text-gray-400">Belum ada pesanan.</td>
+                    </tr>
                 @endforelse
             </tbody>
         </table>
