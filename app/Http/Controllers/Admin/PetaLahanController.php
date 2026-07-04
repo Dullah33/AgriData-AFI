@@ -37,7 +37,7 @@ class PetaLahanController extends Controller
                 'koordinat'      => $l->koordinat_poligon,
             ])->values();
 
-        return view('admin.peta.index', [
+        return view('admin.peta-lahan.index', [
             'wilayahList'   => $wilayahList,
             'markerWilayah' => $markerWilayah,
             'poligonLahan'  => $lahans,

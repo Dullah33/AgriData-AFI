@@ -18,6 +18,8 @@ use App\Http\Controllers\User\MarketplaceController;
 use App\Http\Controllers\User\UlasanController as UserUlasanController;
 use App\Http\Controllers\ArtikelPublicController;
 use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\PetaLahanController;
+use App\Http\Controllers\Admin\PemetaanPenyakitController;
 use App\Http\Controllers\User\ProfilPetaniController;
 use App\Http\Controllers\Admin\PenyuluhController;
 use App\Http\Controllers\Penyuluh\WilayahBinaanController;
@@ -102,6 +104,12 @@ Route::middleware('auth')->group(function () {
         Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index');
         Route::get('laporan/petani/export', [LaporanController::class, 'exportPetani'])->name('laporan.petani.export');
         Route::get('laporan/transaksi/export', [LaporanController::class, 'exportTransaksi'])->name('laporan.transaksi.export');
+
+        // Peta Lahan & Wilayah
+        Route::get('peta-lahan', [PetaLahanController::class, 'index'])->name('peta-lahan.index');
+
+        // Pemetaan Penyakit
+        Route::get('pemetaan-penyakit', [PemetaanPenyakitController::class, 'index'])->name('pemetaan-penyakit.index');
     });
 
     // ============================================
