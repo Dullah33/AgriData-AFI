@@ -103,7 +103,9 @@
                 <div class="absolute left-6 md:left-7 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#4f8a5b] via-[#1e40af] to-[#3b82f6]"></div>
 
                 @php
-                    $steps = $plant->langkah_budidaya ?? [];
+                    $steps = is_string($plant->langkah_budidaya)
+                        ? json_decode($plant->langkah_budidaya, true)
+                        : ($plant->langkah_budidaya ?? []);
                 @endphp
 
                 @forelse($steps as $index => $step)
@@ -134,18 +136,21 @@
                 <div class="w-16 h-1 mx-auto bg-gradient-to-r from-[#4f8a5b] to-[#1e40af] rounded"></div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
                 @php
-                    $tips = $plant->tips_budidaya ?? [];
+                    $tips = is_string($plant->tips_budidaya) 
+                        ? json_decode($plant->tips_budidaya, true) 
+                        : ($plant->tips_budidaya ?? []);
+                    if (!is_array($tips)) $tips = [];
                 @endphp
                 @forelse($tips as $tip)
-                <div class="bg-white rounded-xl border-l-4 border-[#4f8a5b] p-5 shadow hover:shadow-md transition-all">
+                <div class="bg-white rounded-xl border-l-4 border-[#4f8a5b] p-5 shadow hover:shadow-md transition-all w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)] max-w-sm">
                     <div class="text-2xl mb-2">{{ $tip['icon'] ?? '💡' }}</div>
                     <h3 class="font-semibold text-gray-800 mb-1">{{ $tip['title'] ?? 'Tips' }}</h3>
                     <p class="text-gray-600 text-sm">{{ $tip['content'] ?? 'Deskripsi tips akan tersedia segera.' }}</p>
                 </div>
                 @empty
-                <div class="col-span-full text-center py-8 bg-white rounded-xl border border-gray-200">
+                <div class="w-full text-center py-8 bg-white rounded-xl border border-gray-200">
                     <p class="text-gray-500">Tips budidaya akan segera ditambahkan.</p>
                 </div>
                 @endforelse
@@ -172,6 +177,12 @@
 <!-- Scroll Animation Script -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Langsung tampilkan semua elemen fade-up (tanpa animation observer)
+    document.querySelectorAll('.fade-up').forEach(el => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+    });
+    
     const observerOptions = {
         root: null,
         rootMargin: '0px',
@@ -182,6 +193,8 @@ document.addEventListener('DOMContentLoaded', function() {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
                 observer.unobserve(entry.target);
             }
         });
@@ -193,15 +206,6 @@ document.addEventListener('DOMContentLoaded', function() {
         el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
         observer.observe(el);
     });
-
-    const style = document.createElement('style');
-    style.textContent = `
-        .fade-up.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    `;
-    document.head.appendChild(style);
 });
 </script>
 @endsection

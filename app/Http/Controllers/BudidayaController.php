@@ -22,7 +22,7 @@ class BudidayaController extends Controller
      */
     public function show($id)
     {
-        $plant = Plant::with(['cuaca', 'penyakit'])->findOrFail($id);
+        $plant = Plant::findOrFail($id);
         
         return view('budidaya.show', compact('plant'));
     }
@@ -32,7 +32,7 @@ class BudidayaController extends Controller
      */
     public function apiShow($id)
     {
-        $plant = Plant::with(['cuaca', 'penyakit'])->findOrFail($id);
+        $plant = Plant::findOrFail($id);
         
         return response()->json([
             'success' => true,
