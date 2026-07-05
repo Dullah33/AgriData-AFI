@@ -105,13 +105,13 @@ class WeatherController extends Controller
             $recommendations = $plants->map(function($plant) use ($weather) {
                 $analysisResult = $this->analysisService->calculateMatchingScore($plant, $weather);
                 $scoreValue = $analysisResult['score'];
-                $status = $this->analysisService->determineStatus($scoreValue);
+                $status = $this->analysisService->determineStatus($scoreValue, $analysisResult['details']);
                 
                 return [
                     'id' => $plant->id,
                     'kode' => $plant->kode,
                     'nama' => $plant->nama,
-                    'gambar' => $plant->gambar,
+                    'gambar' => $plant->gambar ? asset($plant->gambar) : null,
                     'score' => $scoreValue,
                     'status' => $status,
                     'current_conditions' => [
@@ -202,7 +202,7 @@ class WeatherController extends Controller
             // 4. Lakukan analisis
             $analysisResult = $this->analysisService->calculateMatchingScore($plant, $weatherData);
             $scoreValue = $analysisResult['score'];
-            $status = $this->analysisService->determineStatus($scoreValue);
+            $status = $this->analysisService->determineStatus($scoreValue, $analysisResult['details']);
             $recommendation = $this->analysisService->generateRecommendation($plant, $weatherData);
             
             return response()->json([

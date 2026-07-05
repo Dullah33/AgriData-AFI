@@ -83,8 +83,20 @@ class AnalysisService
     /**
      * Tentukan status rekomendasi berdasarkan skor
      */
-    public function determineStatus(int $score): string
+    public function determineStatus(int $score, array $matchDetails = []): string
     {
+        $suhuMatch = $matchDetails['suhu']['match'] ?? false;
+        $kelembabanMatch = $matchDetails['kelembaban']['match'] ?? false;
+        
+        // Jika salah satu parameter kritis tidak matc
+        if (!$suhuMatch || !$kelembabanMatch) {
+            if ($score >= 85) return 'Cocok'; 
+            if ($score >= 70) return 'Bisa Ditanam';
+            if ($score >= 50) return 'Kurang Cocok';
+            return 'Tidak Cocok';
+        }
+        
+        // Jika semua match, gunakan threshold normal
         if ($score >= 85) return 'Sangat Cocok';
         if ($score >= 70) return 'Cocok';
         if ($score >= 50) return 'Bisa Ditanam';

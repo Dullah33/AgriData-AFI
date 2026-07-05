@@ -251,24 +251,19 @@ async function jalankanAnalisis() {
     const kabupaten = selectKabupaten;
     const kecamatan = selectKecamatan;
     const tanamanId = selectTanaman.value;
-    
     const namaProv = provinsi.options[provinsi.selectedIndex]?.text || '';
     const namaKab = kabupaten.options[kabupaten.selectedIndex]?.text || '';
     const namaKec = kecamatan.options[kecamatan.selectedIndex]?.text || '';
-    
+
     // Validation
     if (!namaProv || !namaKab || !namaKec) {
-        hideLoading(`
-            <div class="p-6 bg-red-50 border border-red-200 rounded-xl">
-                <p class="text-red-700 font-semibold">⚠️ Harap lengkapi Provinsi, Kabupaten, dan Kecamatan</p>
-            </div>
-        `);
+        hideLoading(`<div class="p-6 bg-red-50 border border-red-200 rounded-xl"> <p class="text-red-700 font-semibold"> Harap lengkapi Provinsi, Kabupaten, dan Kecamatan</p> </div>`);
         return;
     }
-    
+
     // Show loading
     showLoading();
-    
+
     // Start progress simulation
     let currentStep = 0;
     let currentPercent = 0;
@@ -281,56 +276,79 @@ async function jalankanAnalisis() {
             updateProgress(currentPercent, currentStep);
         }
     }, 200);
-    
+
     try {
         if (!tanamanId) {
             // Smart recommendation (no specific plant selected)
+            console.log('Fetching recommendations...');
             const response = await fetch(
                 `/api/cuaca/recommendations/${encodeURIComponent(namaProv)}/${encodeURIComponent(namaKab)}/${encodeURIComponent(namaKec)}`
             );
+            
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
+            console.log('Recommendations data:', data);
             
             clearInterval(progressInterval);
             updateProgress(100, 3);
-            
+
             setTimeout(() => {
                 hideLoading(renderRecommendations(data));
             }, 500);
         } else {
             // Detailed analysis for specific plant
+            console.log('Analyzing specific plant...', {
+                provinsi: namaProv,
+                kabupaten: namaKab,
+                kecamatan: namaKec,
+                plant_id: tanamanId
+            });
+            
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            console.log('CSRF Token:', csrfToken ? 'Found' : 'NOT FOUND');
+            
             const response = await fetch('/api/cuaca/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({
                     provinsi: namaProv,
                     kabupaten: namaKab,
                     kecamatan: namaKec,
-                    plant_id: tanamanId
+                    plant_id: parseInt(tanamanId)
                 })
             });
+            
+            console.log('Response status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Server error:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
+            console.log('Analysis data:', data);
             
             clearInterval(progressInterval);
             updateProgress(100, 3);
-            
+
             setTimeout(() => {
                 hideLoading(renderDetailedAnalysis(data));
             }, 500);
         }
     } catch (error) {
+        console.error('Analysis error:', error);
         clearInterval(progressInterval);
-        hideLoading(`
-            <div class="p-6 bg-red-50 border border-red-200 rounded-xl">
-                <h3 class="text-lg font-bold text-red-800 mb-2">❌ Gagal Menganalisis</h3>
-                <p class="text-red-700">${error.message}</p>
-                <button onclick="jalankanAnalisis()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                    Coba Lagi
-                </button>
-            </div>
-        `);
+        hideLoading(`<div class="p-6 bg-red-50 border border-red-200 rounded-xl"> <h3 class="text-lg font-bold text-red-800 mb-2">Gagal Menganalisis</h3> <p class="text-red-700">${error.message}</p> <button onclick="jalankanAnalisis()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"> 🔄 Coba Lagi </button> </div>`);
     }
 }
 
@@ -341,8 +359,7 @@ function renderRecommendations(data) {
     if (!data.success) {
         return `<div class="p-6 bg-red-50 rounded-xl"><p class="text-red-700">Error: ${data.error}</p></div>`;
     }
-
-    // Simpan state
+    
     previousAnalysisState = {
         type: 'recommendation',
         data: data
@@ -354,40 +371,54 @@ function renderRecommendations(data) {
     let html = `
         <div class="space-y-6">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl">
-                <h2 class="text-2xl font-bold mb-2">Rekomendasi Tanaman</h2>
-                <p class="text-blue-100">Berdasarkan kondisi cuaca di ${data.location.kecamatan}, ${data.location.kabupaten}</p>
+            <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-6 rounded-xl">
+                <div class="flex items-center gap-4">
+                    ${plant.gambar ? 
+                        `<img src="${plant.gambar}" alt="${plant.nama}" class="w-20 h-20 rounded-lg object-cover border-2 border-white/30">` :
+                        ''
+                    }
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">${plant.nama}</h2>
+                        <p class="text-emerald-100">${data.location.kecamatan}, ${data.location.kabupaten}</p>
+                    </div>
+                </div>
             </div>
             
             <!-- Current Weather -->
             <div class="grid grid-cols-3 gap-4">
                 <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
-                    <p class="text-sm text-gray-600 mb-1">🌡️ Suhu</p>
+                    <p class="text-sm text-gray-600 mb-1">Suhu</p>
                     <p class="text-2xl font-bold text-orange-700">${weather.suhu}°C</p>
                 </div>
                 <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
-                    <p class="text-sm text-gray-600 mb-1">💧 Kelembaban</p>
+                    <p class="text-sm text-gray-600 mb-1">Kelembaban</p>
                     <p class="text-2xl font-bold text-blue-700">${weather.kelembaban}%</p>
                 </div>
                 <div class="bg-cyan-50 p-4 rounded-xl border border-cyan-200">
-                    <p class="text-sm text-gray-600 mb-1">🌧️ Curah Hujan</p>
+                    <p class="text-sm text-gray-600 mb-1">Curah Hujan</p>
                     <p class="text-2xl font-bold text-cyan-700">${weather.curah_hujan}mm</p>
                 </div>
             </div>
-            
+
             <!-- Recommendations List -->
             <div class="space-y-4">
     `;
     
     recs.forEach((rec, index) => {
         const statusColor = getStatusColor(rec.status);
-        const icon = getPlantIcon(rec.kode);
+        
         html += `
             <div class="bg-white border-2 border-gray-200 rounded-xl p-5 hover:border-blue-400 transition-all cursor-pointer" onclick="selectPlantAndAnalyze(${rec.id})">
                 <div class="flex items-start justify-between">
-                    <div class="flex items-start gap-4 flex-1">
-                        <div class="text-4xl">${icon}</div>
-                        <div class="flex-1">
+                    <div class="flex items-start gap-4">
+                        <!-- GANTI EMOJI DENGAN GAMBAR -->
+                        <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                            ${rec.gambar ? 
+                                `<img src="${rec.gambar}" alt="${rec.nama}" class="w-full h-full object-cover">` :
+                                `<div class="w-full h-full flex items-center justify-center text-gray-400 text-2xl">🌱</div>`
+                            }
+                        </div>
+                        <div>
                             <h3 class="text-xl font-bold text-gray-800 mb-1">${index + 1}. ${rec.nama}</h3>
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusColor.bg} ${statusColor.text}">
@@ -410,7 +441,7 @@ function renderRecommendations(data) {
                             Analisis
                         </button>
                         <a href="/budidaya/${rec.id}" 
-                        class="px-4 py-2 bg-[#4f8a5b] text-white rounded-lg hover:bg-[#2f5d3a] transition font-semibold text-center no-underline whitespace-nowrap">
+                           class="px-4 py-2 bg-[#4f8a5b] text-white rounded-lg hover:bg-[#2f5d3a] transition font-semibold text-center no-underline whitespace-nowrap">
                             Budidaya
                         </a>
                     </div>
@@ -458,8 +489,16 @@ function renderDetailedAnalysis(data) {
             
             <!-- Konten Detail -->
             <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-6 rounded-xl">
-                <h2 class="text-3xl font-bold mb-2">${plant.nama}</h2>
-                <p class="text-emerald-100">${data.location.kecamatan}, ${data.location.kabupaten}</p>
+                <div class="flex items-center gap-4">
+                    ${plant.gambar ? 
+                        `<img src="${plant.gambar}" alt="${plant.nama}" class="w-20 h-20 rounded-lg object-cover border-2 border-white/30">` :
+                        ''
+                    }
+                    <div>
+                        <h2 class="text-3xl font-bold mb-2">${plant.nama}</h2>
+                        <p class="text-emerald-100">${data.location.kecamatan}, ${data.location.kabupaten}</p>
+                    </div>
+                </div>
             </div>
             
             <!-- Status Badge -->
@@ -582,21 +621,6 @@ function getAnalysisStatusBg(score) {
     if (score >= 50) return 'bg-yellow-500 text-white';
     return 'bg-red-500 text-white';
 }
-
-/**
- * Helper: Get plant icon
- */
-function getPlantIcon(kode) {
-    const icons = {
-        '01': '🌾', // Padi
-        '02': '🌽', // Jagung
-        '03': '🌶️', // Cabai
-        '04': '🫘', // Kedelai
-        '05': '🍅'  // Tomat
-    };
-    return icons[kode] || '🌱';
-}
-
 /**
  * Select plant and analyze (for recommendations)
  */
