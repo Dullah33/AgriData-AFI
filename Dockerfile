@@ -37,6 +37,9 @@ COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.con
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader
 
+# Copy .env.example to .env (required for key:generate)
+RUN cp .env.example .env
+
 # Generate application key (will be overridden by env var)
 RUN php artisan key:generate --force
 
