@@ -153,9 +153,9 @@ class WeatherController extends Controller
     public function analyze(Request $request)
     {
         $validated = $request->validate([
-            'provinsi' => 'required|string',
-            'kabupaten' => 'required|string',
-            'kecamatan' => 'required|string',
+            'provinsi' => 'required|string|max:255',
+            'kabupaten' => 'required|string|max:255',
+            'kecamatan' => 'required|string|max:255',
             'plant_id' => 'required|exists:plants,id'
         ]);
         
@@ -167,8 +167,34 @@ class WeatherController extends Controller
                 $validated['kecamatan']
             );
             
+            // VALIDASI
+            if (!isset($coords['latitude']) || !isset($coords['longitude'])) {
+                \Log::error('Geocoding failed - no coordinates', [
+                    'response' => $coords,
+                    'location' => $validated
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Gagal mendapatkan koordinat lokasi. Pastikan nama wilayah benar.'
+                ], 400);
+            }
+            
             // 2. Dapatkan data cuaca
             $weatherData = $this->weatherService->getWeather($coords['latitude'], $coords['longitude']);
+            
+            // VALIDASI
+            if (!isset($weatherData['suhu']) || !isset($weatherData['kelembaban'])) {
+                \Log::error('Weather API failed', [
+                    'response' => $weatherData,
+                    'coords' => $coords
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Gagal mendapatkan data cuaca. Silakan coba lagi.'
+                ], 500);
+            }
             
             // 3. Ambil data tanaman
             $plant = Plant::findOrFail($validated['plant_id']);
@@ -178,24 +204,36 @@ class WeatherController extends Controller
             $scoreValue = $analysisResult['score'];
             $status = $this->analysisService->determineStatus($scoreValue);
             $recommendation = $this->analysisService->generateRecommendation($plant, $weatherData);
-
+            
             return response()->json([
                 'success' => true,
                 'plant' => $plant,
-                'location' => $coords,
+                'location' => [
+                    'provinsi' => $validated['provinsi'],
+                    'kabupaten' => $validated['kabupaten'],
+                    'kecamatan' => $validated['kecamatan'],
+                    'latitude' => $coords['latitude'],
+                    'longitude' => $coords['longitude']
+                ],
                 'weather' => $weatherData,
                 'analysis' => [
-                    'score' => $scoreValue, // ← sekarang integer
+                    'score' => $scoreValue,
                     'status' => $status,
                     'recommendation' => $recommendation,
-                    'match_details' => $analysisResult['details'] // ← kirim details ke frontend
+                    'match_details' => $analysisResult['details']
                 ]
             ]);
             
         } catch (\Exception $e) {
+            \Log::error('Analyze error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'input' => $validated
+            ]);
+            
             return response()->json([
-                'success' => false, 
-                'error' => $e->getMessage()
+                'success' => false,
+                'error' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
     }

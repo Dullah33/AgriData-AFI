@@ -25,21 +25,27 @@ class LocationService
 
     public function geocode(string $provinsi, string $kabupaten, string $kecamatan): array
     {
-        
         $cacheKey = self::CACHE_PREFIX . md5("{$provinsi}|{$kabupaten}|{$kecamatan}");
         
         if (Cache::has($cacheKey)) {
             Log::info("Geocoding cache hit: {$cacheKey}");
-            return Cache::get($cacheKey);
+            $cached = Cache::get($cacheKey);
+            
+            if (isset($cached['latitude']) && isset($cached['longitude'])) {
+                return $cached;
+            }
         }
         
         try {
             $result = $this->fetchFromNominatim($provinsi, $kabupaten, $kecamatan);
             
-            Cache::put($cacheKey, $result, self::CACHE_DURATION);
+            //memastikan ada latitude dan longitude
+            $normalizedResult = $this->normalizeGeocodeResult($result);
+            
+            Cache::put($cacheKey, $normalizedResult, self::CACHE_DURATION);
             Log::info("Geocoding cached: {$cacheKey}");
             
-            return $result;
+            return $normalizedResult;
             
         } catch (\Exception $e) {
             Log::warning("Nominatim API failed: {$e->getMessage()}");
@@ -47,10 +53,12 @@ class LocationService
             $fallback = $this->fetchFromFallback($provinsi, $kabupaten, $kecamatan);
             
             if ($fallback) {
+                $normalizedFallback = $this->normalizeGeocodeResult($fallback);
+                
                 Log::info("Geocoding fallback success: {$cacheKey}");
-
-                Cache::put($cacheKey, $fallback, self::CACHE_DURATION);
-                return $fallback;
+                Cache::put($cacheKey, $normalizedFallback, self::CACHE_DURATION);
+                
+                return $normalizedFallback;
             }
             
             throw new \Exception(
@@ -58,6 +66,39 @@ class LocationService
                 "Silakan coba lagi nanti atau periksa nama wilayah."
             );
         }
+    }
+
+    private function normalizeGeocodeResult(array $result): array
+    {
+        $normalized = [
+            'latitude' => null,
+            'longitude' => null,
+            'provinsi' => $result['provinsi'] ?? null,
+            'kabupaten' => $result['kabupaten'] ?? null,
+            'kecamatan' => $result['kecamatan'] ?? null,
+        ];
+        
+        // Cek berbagai kemungkinan key untuk latitude
+        if (isset($result['latitude'])) {
+            $normalized['latitude'] = $result['latitude'];
+        } elseif (isset($result['lat'])) {
+            $normalized['latitude'] = $result['lat'];
+        } elseif (isset($result['Latitude'])) {
+            $normalized['latitude'] = $result['Latitude'];
+        }
+        
+        // Cek berbagai kemungkinan key untuk longitude
+        if (isset($result['longitude'])) {
+            $normalized['longitude'] = $result['longitude'];
+        } elseif (isset($result['lon'])) {
+            $normalized['longitude'] = $result['lon'];
+        } elseif (isset($result['Longitude'])) {
+            $normalized['longitude'] = $result['Longitude'];
+        } elseif (isset($result['long'])) {
+            $normalized['longitude'] = $result['long'];
+        }
+        
+        return $normalized;
     }
     
     /**
@@ -99,6 +140,9 @@ class LocationService
         return [
             'latitude'  => (float) $data[0]['lat'],
             'longitude' => (float) $data[0]['lon'],
+            'provinsi' => $prov,
+            'kabupaten' => $kab,
+            'kecamatan' => $kec,
             'display_name' => $data[0]['display_name'],
             'source' => 'nominatim' // Untuk debugging
         ];
@@ -141,6 +185,9 @@ class LocationService
                     return [
                         'latitude'  => (float) $location['latitude'],
                         'longitude' => (float) $location['longitude'],
+                        'provinsi' => $prov,
+                        'kabupaten' => $kab,
+                        'kecamatan' => $kec,
                         'display_name' => "{$location['kecamatan']}, {$location['kabupaten']}, {$location['provinsi']}, Indonesia",
                         'source' => 'fallback_json'
                     ];
@@ -155,6 +202,9 @@ class LocationService
                     return [
                         'latitude'  => (float) $location['latitude'],
                         'longitude' => (float) $location['longitude'],
+                        'provinsi' => $prov,
+                        'kabupaten' => $kab,
+                        'kecamatan' => $kec,
                         'display_name' => "{$location['kabupaten']}, {$location['provinsi']}, Indonesia",
                         'source' => 'fallback_json_partial'
                     ];

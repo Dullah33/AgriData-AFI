@@ -2,27 +2,6 @@
 
 @section('content')
 <div class="min-h-screen bg-[#eff6ff]">
-    
-    <!-- Navbar -->
-    <nav class="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <i data-lucide="leaf" class="w-8 h-8 text-[#1e40af]"></i>
-                <span class="font-bold text-2xl text-gray-800">AgriData</span>
-            </div>
-            <ul class="flex gap-2 list-none">
-                <li><a href="{{ route('dashboard') }}" class="text-gray-600 hover:text-[#1e40af] px-4 py-2 rounded-lg transition font-medium">Beranda</a></li>
-                <li><a href="{{ route('budidaya.index') }}" class="text-white bg-[#4f8a5b] px-4 py-2 rounded-lg transition font-medium">Budidaya</a></li>
-                <li><a href="{{ route('cuaca.index') }}" class="text-gray-600 hover:text-[#1e40af] px-4 py-2 rounded-lg transition font-medium">Analisis</a></li>
-                <li><a href="#" class="text-gray-600 hover:text-[#1e40af] px-4 py-2 rounded-lg transition font-medium">Jenis Tanaman</a></li>
-            </ul>
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-[#1e40af] rounded-full flex items-center justify-center text-white font-semibold">
-                    {{ substr(auth()->user()->username, 0, 1) }}
-                </div>
-            </div>
-        </div>
-    </nav>
 
     <!-- Hero Section -->
     <section class="bg-gradient-to-r from-[#1e40af] to-[#3b82f6] text-white py-16">

@@ -9,25 +9,30 @@ class Plant extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'code',
+        'kode',
         'nama',
         'gambar',
         'suhu_ideal',
         'min_suhu',
         'max_suhu',
         'kelembapan_ideal',
-        'min_kelembapan',
-        'max_kelembapan',
+        'min_kelembaban',
+        'max_kelembaban',
         'curah_hujan_ideal',
         'musim',
         'jenis_tanah',
+        'durasi_panen',
         'status_cuaca_hujan',
         'status_cuaca_panas',
         'status_curah_hujan_tinggi',
         'status_curah_hujan_rendah',
         'deskripsi',
         'keunggulan',
-        'durasi_panen',
+        'budidaya_persiapan_lahan',
+        'budidaya_pemupukan',
+        'budidaya_irigasi',
+        'langkah_budidaya',
+        'tips_budidaya',
 
     ];
 

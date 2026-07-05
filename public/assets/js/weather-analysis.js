@@ -327,7 +327,7 @@ async function jalankanAnalisis() {
                 <h3 class="text-lg font-bold text-red-800 mb-2">❌ Gagal Menganalisis</h3>
                 <p class="text-red-700">${error.message}</p>
                 <button onclick="jalankanAnalisis()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                    🔄 Coba Lagi
+                    Coba Lagi
                 </button>
             </div>
         `);
@@ -355,7 +355,7 @@ function renderRecommendations(data) {
         <div class="space-y-6">
             <!-- Header -->
             <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl">
-                <h2 class="text-2xl font-bold mb-2">🌾 Rekomendasi Tanaman</h2>
+                <h2 class="text-2xl font-bold mb-2">Rekomendasi Tanaman</h2>
                 <p class="text-blue-100">Berdasarkan kondisi cuaca di ${data.location.kecamatan}, ${data.location.kabupaten}</p>
             </div>
             
@@ -382,13 +382,12 @@ function renderRecommendations(data) {
     recs.forEach((rec, index) => {
         const statusColor = getStatusColor(rec.status);
         const icon = getPlantIcon(rec.kode);
-        
         html += `
             <div class="bg-white border-2 border-gray-200 rounded-xl p-5 hover:border-blue-400 transition-all cursor-pointer" onclick="selectPlantAndAnalyze(${rec.id})">
                 <div class="flex items-start justify-between">
-                    <div class="flex items-start gap-4">
+                    <div class="flex items-start gap-4 flex-1">
                         <div class="text-4xl">${icon}</div>
-                        <div>
+                        <div class="flex-1">
                             <h3 class="text-xl font-bold text-gray-800 mb-1">${index + 1}. ${rec.nama}</h3>
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusColor.bg} ${statusColor.text}">
@@ -406,9 +405,15 @@ function renderRecommendations(data) {
                             </div>
                         </div>
                     </div>
-                    <button class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition font-semibold">
-                        Analisis
-                    </button>
+                    <div class="flex flex-col gap-2 ml-4">
+                        <button class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition font-semibold whitespace-nowrap">
+                            Analisis
+                        </button>
+                        <a href="/budidaya/${rec.id}" 
+                        class="px-4 py-2 bg-[#4f8a5b] text-white rounded-lg hover:bg-[#2f5d3a] transition font-semibold text-center no-underline whitespace-nowrap">
+                            Budidaya
+                        </a>
+                    </div>
                 </div>
             </div>
         `;
@@ -451,7 +456,7 @@ function renderDetailedAnalysis(data) {
                 </button>
             </div>
             
-            <!-- Konten Detail (sama seperti sebelumnya) -->
+            <!-- Konten Detail -->
             <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-6 rounded-xl">
                 <h2 class="text-3xl font-bold mb-2">${plant.nama}</h2>
                 <p class="text-emerald-100">${data.location.kecamatan}, ${data.location.kabupaten}</p>
@@ -492,7 +497,7 @@ function renderDetailedAnalysis(data) {
             
             <!-- Plant Info -->
             <div class="bg-gray-50 p-6 rounded-xl">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">📋 Informasi Tanaman</h3>
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Informasi Tanaman</h3>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                     <div>
                         <p class="text-gray-600">Musim Tanam</p>
@@ -515,6 +520,18 @@ function renderDetailedAnalysis(data) {
                     <p class="text-gray-600 text-sm mb-1">Deskripsi:</p>
                     <p class="text-gray-700 text-sm leading-relaxed">${plant.deskripsi}</p>
                 </div>
+            </div>
+
+            <!-- TOMBOL BUDIDAYA BARU -->
+            <div class="flex gap-3">
+                <a href="/budidaya/${plant.id}" 
+                class="flex-1 px-6 py-3 bg-[#4f8a5b] hover:bg-[#2f5d3a] text-white font-semibold rounded-xl transition-all text-center no-underline flex items-center justify-center gap-2">
+                    Lihat Panduan Budidaya
+                </a>
+                <a href="/budidaya" 
+                class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl transition-all text-center no-underline">
+                    Lihat Semua Tanaman
+                </a>
             </div>
         </div>
     `;

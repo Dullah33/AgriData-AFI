@@ -110,6 +110,8 @@ Route::middleware('auth')->group(function () {
 
         // Pemetaan Penyakit
         Route::get('pemetaan-penyakit', [PemetaanPenyakitController::class, 'index'])->name('pemetaan-penyakit.index');
+        // Plant Management
+        Route::resource('plants', \App\Http\Controllers\Admin\PlantController::class);
     });
 
     // ============================================
