@@ -247,6 +247,12 @@ function hideLoading(htmlContent) {
  * Main analysis function
  */
 async function jalankanAnalisis() {
+    console.log('=== ANALYSIS STARTED ===');
+    console.log('Provinsi:', selectProvinsi.value);
+    console.log('Kabupaten:', selectKabupaten.value);
+    console.log('Kecamatan:', selectKecamatan.value);
+    console.log('Tanaman ID:', selectTanaman.value);
+
     const provinsi = selectProvinsi;
     const kabupaten = selectKabupaten;
     const kecamatan = selectKecamatan;
@@ -357,7 +363,7 @@ async function jalankanAnalisis() {
  */
 function renderRecommendations(data) {
     if (!data.success) {
-        return `<div class="p-6 bg-red-50 rounded-xl"><p class="text-red-700">Error: ${data.error}</p></div>`;
+        return `<div class="p-6 bg-red-50 border border-red-200 rounded-xl"> <p class="text-red-700">Error: ${data.error}</p> </div>`;
     }
     
     previousAnalysisState = {
@@ -371,17 +377,9 @@ function renderRecommendations(data) {
     let html = `
         <div class="space-y-6">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-6 rounded-xl">
-                <div class="flex items-center gap-4">
-                    ${plant.gambar ? 
-                        `<img src="${plant.gambar}" alt="${plant.nama}" class="w-20 h-20 rounded-lg object-cover border-2 border-white/30">` :
-                        ''
-                    }
-                    <div>
-                        <h2 class="text-3xl font-bold mb-2">${plant.nama}</h2>
-                        <p class="text-emerald-100">${data.location.kecamatan}, ${data.location.kabupaten}</p>
-                    </div>
-                </div>
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl">
+                <h2 class="text-2xl font-bold mb-2">Rekomendasi Tanaman</h2>
+                <p class="text-blue-100">Berdasarkan kondisi cuaca di ${data.location.kecamatan}, ${data.location.kabupaten}</p>
             </div>
             
             <!-- Current Weather -->
@@ -411,7 +409,7 @@ function renderRecommendations(data) {
             <div class="bg-white border-2 border-gray-200 rounded-xl p-5 hover:border-blue-400 transition-all cursor-pointer" onclick="selectPlantAndAnalyze(${rec.id})">
                 <div class="flex items-start justify-between">
                     <div class="flex items-start gap-4">
-                        <!-- GANTI EMOJI DENGAN GAMBAR -->
+                        <!-- Gambar Tanaman -->
                         <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                             ${rec.gambar ? 
                                 `<img src="${rec.gambar}" alt="${rec.nama}" class="w-full h-full object-cover">` :
