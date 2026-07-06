@@ -70,14 +70,33 @@ class MarketplaceController extends Controller
             ->with('success', 'Pesanan berhasil dibuat! Menunggu konfirmasi petani.');
     }
 
-    // GET /pesanan-saya (riwayat pesanan user)
+    // GET /pesanan-saya (pesanan yang masih berjalan: pending/diproses/batal)
+    // "Keranjang & Pesanan Saya" (BAB 2A.4). Pesanan yang sudah selesai
+    // dipindah ke halaman "Riwayat & Ulasan Saya" terpisah (lihat
+    // riwayatUlasan()) supaya kedua menu sidebar tidak mengarah ke
+    // halaman yang sama persis.
     public function pesananSaya()
     {
         $pesanans = Transaksi::with(['produk.petani', 'ulasan'])
             ->where('user_id', Auth::id())
+            ->where('status_transaksi', '!=', 'selesai')
             ->latest()
             ->paginate(10);
 
         return view('user.marketplace.pesanan', compact('pesanans'));
+    }
+
+    // GET /riwayat-ulasan
+    // "Riwayat & Ulasan Saya" (BAB 2A.4): pesanan yang SUDAH selesai,
+    // dengan status ulasan (sudah/belum diulas).
+    public function riwayatUlasan()
+    {
+        $pesanans = Transaksi::with(['produk.petani', 'ulasan'])
+            ->where('user_id', Auth::id())
+            ->where('status_transaksi', 'selesai')
+            ->latest()
+            ->paginate(10);
+
+        return view('user.marketplace.riwayat-ulasan', compact('pesanans'));
     }
 }

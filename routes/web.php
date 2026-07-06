@@ -148,6 +148,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/marketplace/{produk}', [MarketplaceController::class, 'show'])->name('user.marketplace.show');
         Route::post('/marketplace/{produk}/beli', [MarketplaceController::class, 'beli'])->name('user.marketplace.beli');
         Route::get('/pesanan-saya', [MarketplaceController::class, 'pesananSaya'])->name('user.pesanan');
+        Route::get('/riwayat-ulasan', [MarketplaceController::class, 'riwayatUlasan'])->name('user.riwayat-ulasan');
         Route::get("/ulasan/{transaksi}/create", [UserUlasanController::class, "create"])->name("user.ulasan.create");
         Route::post("/ulasan/{transaksi}", [UserUlasanController::class, "store"])->name("user.ulasan.store");
 

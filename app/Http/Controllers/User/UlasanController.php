@@ -48,7 +48,7 @@ class UlasanController extends Controller
             'status'       => 'aktif',
         ]);
 
-        return redirect()->route('user.pesanan')
+        return redirect()->route('user.riwayat-ulasan')
             ->with('success', 'Ulasan berhasil dikirim, terima kasih!');
     }
 }
