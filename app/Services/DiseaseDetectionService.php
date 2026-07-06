@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\PlantNotDetectedException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -10,22 +11,28 @@ use Illuminate\Support\Facades\Log;
  *
  * CATATAN ARSITEKTUR:
  * Dokumen modul sistem (BAB 5.3.1) menyebut deteksi penyakit memakai model
- * Python/TensorFlow yang diakses lewat REST API terpisah. Server model
- * tersebut belum tersedia di tahap ini, jadi kelas ini untuk sementara
- * memakai mesin klasifikasi berbasis katalog (rule-based, bukan machine
- * learning sungguhan) supaya seluruh alur AI Scanner — upload foto,
- * validasi, simpan laporan, tampilkan hasil, pemetaan, tindak lanjut
- * Penyuluh — bisa langsung berjalan end-to-end.
+ * Python/TensorFlow yang diakses lewat REST API terpisah. Kelas ini
+ * mendukung 3 provider yang bisa dipilih lewat .env (AI_SCANNER_PROVIDER):
  *
- * Begitu API model AI Python/TensorFlow yang sebenarnya sudah siap, cukup
- * ganti isi method `analisis()` untuk memanggil `analisisViaApi()` (contoh
- * implementasinya sudah disediakan di bawah) — controller dan tampilan
- * yang memakai service ini TIDAK perlu diubah sama sekali, karena bentuk
- * array hasilnya sudah dibuat konsisten dengan yang dibutuhkan tabel
- * `disease_reports`.
+ *   - "local"   (default) — mesin klasifikasi katalog lokal (rule-based,
+ *     bukan machine learning sungguhan), supaya alur aplikasi bisa
+ *     langsung dites tanpa API key apa pun.
+ *   - "plantid" — Plant.id API v3 milik Kindwise (lihat PlantIdService),
+ *     hasil deteksi sungguhan berbasis machine learning.
+ *   - "custom"  — API model AI custom (mis. server Python/TensorFlow
+ *     sendiri), lihat analisisViaApi().
+ *
+ * Controller dan tampilan yang memakai service ini TIDAK perlu tahu
+ * provider mana yang aktif, karena bentuk array hasilnya selalu sama
+ * (konsisten dengan kolom tabel `disease_reports`).
  */
 class DiseaseDetectionService
 {
+    public function __construct(private ?PlantIdService $plantId = null)
+    {
+        $this->plantId ??= new PlantIdService();
+    }
+
     /**
      * Katalog penyakit tanaman umum di Indonesia. Data gejala/penyebab/
      * penanganan bersifat edukatif umum (BAB 2.5.1: "Informasi lengkap
@@ -98,11 +105,25 @@ class DiseaseDetectionService
      */
     public function analisis(string $absoluteImagePath): array
     {
-        if (config('services.ai_scanner.use_external_api') && config('services.ai_scanner.url')) {
+        $provider = config('services.ai_scanner.provider', 'local');
+
+        if ($provider === 'plantid') {
+            try {
+                return $this->plantId->analisis($absoluteImagePath);
+            } catch (PlantNotDetectedException $e) {
+                // Bukan kesalahan sistem — biarkan naik ke controller supaya
+                // pengguna diberi pesan yang jelas, jangan di-fallback diam-diam.
+                throw $e;
+            } catch (\Throwable $e) {
+                Log::warning('AI Scanner: gagal memanggil Plant.id API, fallback ke katalog lokal.', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        } elseif ($provider === 'custom' && config('services.ai_scanner.url')) {
             try {
                 return $this->analisisViaApi($absoluteImagePath);
             } catch (\Throwable $e) {
-                Log::warning('AI Scanner: gagal memanggil API eksternal, fallback ke katalog lokal.', [
+                Log::warning('AI Scanner: gagal memanggil API custom, fallback ke katalog lokal.', [
                     'error' => $e->getMessage(),
                 ]);
             }

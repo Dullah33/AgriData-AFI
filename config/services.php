@@ -35,13 +35,19 @@ return [
         ],
     ],
 
-    // AI Scanner Penyakit Tanaman (BAB 5.3.1) — jika model AI Python/
-    // TensorFlow eksternal sudah tersedia, set AI_SCANNER_USE_API=true
-    // dan isi AI_SCANNER_API_URL di .env. Selama false, sistem memakai
-    // mesin klasifikasi katalog lokal (lihat DiseaseDetectionService).
+    // AI Scanner Penyakit Tanaman (BAB 5.3.1) — pilih provider deteksi lewat
+    // AI_SCANNER_PROVIDER di .env:
+    //   local   -> mesin klasifikasi katalog lokal (default, tanpa API key)
+    //   plantid -> Plant.id API v3 (Kindwise), lihat PLANT_ID_API_KEY di bawah
+    //   custom  -> API model AI custom (mis. server Python/TensorFlow sendiri)
     'ai_scanner' => [
-        'use_external_api' => env('AI_SCANNER_USE_API', false),
-        'url' => env('AI_SCANNER_API_URL'),
+        'provider' => env('AI_SCANNER_PROVIDER', 'local'),
+        'url' => env('AI_SCANNER_API_URL'), // hanya dipakai provider "custom"
+    ],
+
+    // Plant.id API v3 (Kindwise) — https://web.plant.id / admin.kindwise.com
+    'plant_id' => [
+        'api_key' => env('PLANT_ID_API_KEY'),
     ],
 
 ];

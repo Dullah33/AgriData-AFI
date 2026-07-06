@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Petani;
 
+use App\Exceptions\PlantNotDetectedException;
 use App\Http\Controllers\Controller;
 use App\Models\DiseaseReport;
 use App\Services\DiseaseDetectionService;
@@ -61,7 +62,13 @@ class DeteksiPenyakitController extends Controller
 
         $path = $request->file('foto_tanaman')->store('deteksi-penyakit', 'public');
 
-        $hasil = $this->aiScanner->analisis(Storage::disk('public')->path($path));
+        try {
+            $hasil = $this->aiScanner->analisis(Storage::disk('public')->path($path));
+        } catch (PlantNotDetectedException $e) {
+            Storage::disk('public')->delete($path);
+
+            return back()->withInput()->withErrors(['foto_tanaman' => $e->getMessage()]);
+        }
 
         $laporan = DiseaseReport::create([
             'user_id'          => Auth::id(),
