@@ -81,24 +81,69 @@ class PlantIdService
         $treatment = $details['treatment'] ?? [];
 
         $penanganan = collect([
-            $treatment['biological'] ?? null,
-            $treatment['chemical'] ?? null,
+            $this->teksLokal($treatment['biological'] ?? null),
+            $this->teksLokal($treatment['chemical'] ?? null),
         ])->filter()->implode(' ');
 
         if (empty($penanganan)) {
-            $penanganan = $treatment['prevention'] ?? 'Tidak ada rekomendasi penanganan spesifik dari Plant.id untuk kelas ini.';
+            $penanganan = $this->teksLokal($treatment['prevention'] ?? null)
+                ?? 'Tidak ada rekomendasi penanganan spesifik dari Plant.id untuk kelas ini.';
         }
 
         $probability = (float) ($top['probability'] ?? 0);
 
         return [
-            'nama_penyakit'    => $details['local_name'] ?? $top['name'] ?? 'Tidak Teridentifikasi',
+            'nama_penyakit'    => $this->teksLokal($details['local_name'] ?? null) ?? $this->teksLokal($top['name'] ?? null) ?? 'Tidak Teridentifikasi',
             'confidence_score' => round($probability * 100, 2),
-            'gejala'           => $details['description'] ?? 'Deskripsi tidak tersedia dari Plant.id untuk kelas ini.',
-            'penyebab'         => $details['cause'] ?? '-',
+            'gejala'           => $this->teksLokal($details['description'] ?? null) ?? 'Deskripsi tidak tersedia dari Plant.id untuk kelas ini.',
+            'penyebab'         => $this->teksLokal($details['cause'] ?? null) ?? '-',
             'penanganan'       => $penanganan,
             'tingkat_risiko'   => $this->tingkatRisikoDariProbabilitas($probability),
         ];
+    }
+
+    /**
+     * Karena parameter `language` yang berisi lebih dari satu bahasa
+     * (mis. "id,en") membuat Plant.id mengembalikan field terlokalisasi
+     * (local_name, description, cause, treatment.*) sebagai object
+     * per-bahasa (mis. {"id": null, "en": "..."}) alih-alih string biasa,
+     * method ini menangani KEDUA kemungkinan bentuk dengan aman:
+     *   - string           -> dipakai langsung
+     *   - array/object     -> ambil bahasa Indonesia dulu, kalau kosong
+     *                         fallback ke Inggris, kalau masih kosong
+     *                         ambil nilai pertama yang tidak kosong
+     *   - null/kosong      -> null (biar pemanggil bisa kasih fallback teks)
+     *
+     * Tanpa ini, array akan lolos ke Eloquent dan meledak jadi error
+     * "Array to string conversion" saat disimpan ke database.
+     */
+    private function teksLokal(mixed $value, array $prioritasBahasa = ['id', 'en']): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_string($value)) {
+            return $value;
+        }
+
+        if (is_array($value)) {
+            foreach ($prioritasBahasa as $lang) {
+                if (! empty($value[$lang]) && is_string($value[$lang])) {
+                    return $value[$lang];
+                }
+            }
+
+            foreach ($value as $isi) {
+                if (is_string($isi) && $isi !== '') {
+                    return $isi;
+                }
+            }
+
+            return null;
+        }
+
+        return (string) $value;
     }
 
     private function tingkatRisikoDariProbabilitas(float $probability): string
