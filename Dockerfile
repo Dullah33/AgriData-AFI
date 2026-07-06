@@ -19,6 +19,10 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
+# Pastikan hanya prefork MPM yang aktif (dibutuhkan oleh mod_php)
+RUN a2dismod mpm_event mpm_worker 2>/dev/null; a2enmod mpm_prefork
+RUN a2enmod rewrite
+
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
