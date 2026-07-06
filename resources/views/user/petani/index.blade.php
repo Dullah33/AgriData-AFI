@@ -1,102 +1,42 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Verifikasi Akun Petani')
+@section('title', 'Profil Petani')
 
 @section('content')
 
-{{-- Flash message --}}
-@if (session('success'))
-    <div class="mb-4 px-4 py-3 bg-green-100 border border-green-300 text-green-800 rounded-lg text-sm">
-        {{ session('success') }}
-    </div>
-@endif
-
-<div class="bg-white rounded-xl shadow-sm p-6">
-    {{-- Header --}}
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-semibold text-gray-800">Verifikasi Akun Petani</h2>
-    </div>
-
-    {{-- Filter --}}
-    <form method="GET" action="{{ route('admin.petani.index') }}" class="flex gap-3 mb-6">
-        <select name="status" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-            <option value="">Semua Status</option>
-            <option value="belum" {{ request('status') === 'belum' ? 'selected' : '' }}>Belum Diverifikasi</option>
-            <option value="terverifikasi" {{ request('status') === 'terverifikasi' ? 'selected' : '' }}>Terverifikasi</option>
-        </select>
-        <button type="submit" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-sm rounded-lg">Filter</button>
-        <a href="{{ route('admin.petani.index') }}" class="px-4 py-2 text-sm text-gray-500 hover:underline self-center">Reset</a>
+<div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">Profil Petani</h2>
+    <form method="GET" action="{{ route('user.petani.index') }}" class="flex gap-3">
+        <input type="text" name="cari" value="{{ request('cari') }}" placeholder="Cari nama petani..."
+               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">Cari</button>
     </form>
-
-    {{-- Tabel --}}
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-            <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
-                <tr>
-                    <th class="px-4 py-3">Nama / Username</th>
-                    <th class="px-4 py-3">NIK</th>
-                    <th class="px-4 py-3">Wilayah</th>
-                    <th class="px-4 py-3">Komoditas Utama</th>
-                    <th class="px-4 py-3">Status</th>
-                    <th class="px-4 py-3">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse ($petaniProfiles as $petani)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-800">
-                            {{ $petani->user->username ?? '-' }}
-                        </td>
-                        <td class="px-4 py-3 text-gray-600">{{ $petani->nik ?? '-' }}</td>
-                        <td class="px-4 py-3 text-gray-600">{{ $petani->wilayah->nama_wilayah ?? '-' }}</td>
-                        <td class="px-4 py-3 text-gray-600">{{ $petani->komoditas_utama ?? '-' }}</td>
-                        <td class="px-4 py-3">
-                            @if ($petani->isTerverifikasi())
-                                <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">Terverifikasi</span>
-                            @else
-                                <span class="px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-700 rounded-full">Belum Diverifikasi</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3 flex gap-2">
-                            <a href="{{ route('admin.petani.show', $petani) }}"
-                               class="px-3 py-1 text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-semibold">
-                                Detail
-                            </a>
-                            @if (! $petani->isTerverifikasi())
-                                <form method="POST" action="{{ route('admin.petani.verifikasi', $petani) }}">
-                                    @csrf
-                                    <button type="submit"
-                                            class="px-3 py-1 text-xs bg-green-50 text-green-700 hover:bg-green-100 rounded-lg font-semibold">
-                                        Verifikasi
-                                    </button>
-                                </form>
-                            @else
-                                <form method="POST" action="{{ route('admin.petani.batalkan-verifikasi', $petani) }}"
-                                      onsubmit="return confirm('Batalkan verifikasi petani ini?')">
-                                    @csrf
-                                    <button type="submit"
-                                            class="px-3 py-1 text-xs bg-red-50 text-red-700 hover:bg-red-100 rounded-lg font-semibold">
-                                        Batalkan
-                                    </button>
-                                </form>
-                            @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-4 py-8 text-center text-gray-400">
-                            Belum ada profil petani yang terdaftar.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    {{-- Pagination --}}
-    @if ($petaniProfiles->hasPages())
-        <div class="mt-4">{{ $petaniProfiles->links() }}</div>
-    @endif
 </div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    @forelse ($petanis as $petani)
+        <a href="{{ route('user.petani.show', $petani) }}"
+           class="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow">
+            <h3 class="font-semibold text-gray-800">{{ $petani->user->username ?? '-' }}</h3>
+            <p class="text-sm text-gray-500 mt-1">{{ $petani->nama_kelompok_tani ?? 'Tanpa kelompok tani' }}</p>
+            <div class="flex items-center gap-2 mt-3 text-xs text-gray-400">
+                <span>📍 {{ $petani->wilayah->nama_wilayah ?? '-' }}</span>
+            </div>
+            @if ($petani->komoditas_utama)
+                <span class="inline-block mt-3 px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-full">
+                    {{ $petani->komoditas_utama }}
+                </span>
+            @endif
+        </a>
+    @empty
+        <div class="col-span-full bg-white rounded-xl shadow-sm p-8 text-center text-gray-400">
+            Belum ada profil petani yang terverifikasi.
+        </div>
+    @endforelse
+</div>
+
+@if ($petanis->hasPages())
+    <div class="mt-6">{{ $petanis->links() }}</div>
+@endif
 
 @endsection

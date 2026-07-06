@@ -1,5 +1,5 @@
 @extends('layouts.dashboard')
-@section('title', 'Keranjang & Pesanan Saya')
+@section('title', 'Riwayat & Ulasan Saya')
 @section('content')
 
 @if (session('success'))
@@ -7,12 +7,7 @@
 @endif
 
 <div class="bg-white rounded-xl shadow-sm p-6">
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-semibold text-gray-800">Pesanan Saya (Sedang Berjalan)</h2>
-        <a href="{{ route('user.riwayat-ulasan') }}" class="text-xs text-blue-600 hover:underline">
-            Lihat Riwayat & Ulasan Saya →
-        </a>
-    </div>
+    <h2 class="text-lg font-semibold text-gray-800 mb-6">Riwayat & Ulasan Saya</h2>
     <div class="overflow-x-auto">
         <table class="w-full text-sm text-left">
             <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
@@ -21,8 +16,8 @@
                     <th class="px-4 py-3">Petani</th>
                     <th class="px-4 py-3">Jumlah</th>
                     <th class="px-4 py-3">Total</th>
-                    <th class="px-4 py-3">Status</th>
-                    <th class="px-4 py-3">Tanggal</th>
+                    <th class="px-4 py-3">Tanggal Selesai</th>
+                    <th class="px-4 py-3">Ulasan</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -32,17 +27,24 @@
                         <td class="px-4 py-3 text-gray-600">{{ $p->produk->petani->username }}</td>
                         <td class="px-4 py-3">{{ $p->jumlah }} {{ $p->produk->satuan }}</td>
                         <td class="px-4 py-3 font-semibold">Rp {{ number_format($p->total_harga, 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-gray-500">{{ $p->updated_at->format('d M Y') }}</td>
                         <td class="px-4 py-3">
-                            @php $badge = ['pending'=>'yellow','diproses'=>'blue','batal'=>'red'][$p->status_transaksi] ?? 'gray'; @endphp
-                            <span class="px-2 py-1 text-xs font-semibold bg-{{ $badge }}-100 text-{{ $badge }}-700 rounded-full capitalize">
-                                {{ $p->status_transaksi }}
-                            </span>
+                            @if ($p->ulasan)
+                                <div class="flex items-center gap-1">
+                                    <span class="text-amber-400 font-bold">{{ $p->ulasan->rating }}★</span>
+                                    <span class="text-xs text-gray-400">{{ $p->ulasan->komentar ?? 'Sudah diulas' }}</span>
+                                </div>
+                            @else
+                                <a href="{{ route('user.ulasan.create', $p) }}"
+                                   class="px-3 py-1.5 text-xs font-semibold text-amber-700 bg-amber-100 border border-amber-300 rounded-lg hover:bg-amber-200">
+                                    ⭐ Beri Ulasan
+                                </a>
+                            @endif
                         </td>
-                        <td class="px-4 py-3 text-gray-500">{{ $p->created_at->format('d M Y') }}</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-8 text-center text-gray-400">Belum ada pesanan yang sedang berjalan.</td>
+                        <td colspan="6" class="px-4 py-8 text-center text-gray-400">Belum ada pesanan yang selesai.</td>
                     </tr>
                 @endforelse
             </tbody>

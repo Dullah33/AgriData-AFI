@@ -48,7 +48,7 @@
                 ['label' => 'Profil Petani (Lihat)', 'route' => 'user.petani.index'],
                 ['label' => 'Panduan Budidaya', 'route' => 'budidaya.index'],
                 ['label' => 'Artikel Pertanian', 'route' => 'artikel.index'],
-                ['label' => 'Riwayat & Ulasan Saya', 'route' => 'user.pesanan'],
+                ['label' => 'Riwayat & Ulasan Saya', 'route' => 'user.riwayat-ulasan'],
                 ['label' => 'Pengaturan Akun', 'route' => 'akun.edit'],
             ],
         ],
