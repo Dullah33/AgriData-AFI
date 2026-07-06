@@ -5,7 +5,7 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "apache2-foreground",
+    "startCommand": "sh -c 'apache2ctl -M; echo ---; cat /etc/apache2/ports.conf; echo ---; ls -la /etc/apache2/mods-enabled/ | grep mpm; tail -f /dev/null'",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
