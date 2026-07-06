@@ -41,7 +41,7 @@ class PlantIdService
             ])
             ->withQueryParameters([
                 'details'  => self::DISEASE_DETAILS,
-                'language' => 'id', // hasil dalam Bahasa Indonesia jika tersedia, fallback ke Inggris
+                'language' => 'id,en', // Indonesia diutamakan, fallback ke Inggris kalau Plant.id belum punya terjemahan Indonesianya
             ])
             ->post(self::ENDPOINT, [
                 'images' => [$base64],
