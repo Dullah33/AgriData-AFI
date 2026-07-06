@@ -22,9 +22,7 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 # Pastikan hanya prefork MPM yang aktif (dibutuhkan oleh mod_php)
 RUN a2dismod mpm_event mpm_worker 2>/dev/null; a2enmod mpm_prefork
 RUN a2enmod rewrite
-
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+RUN apache2ctl -M
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
