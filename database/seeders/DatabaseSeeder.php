@@ -93,5 +93,12 @@ class DatabaseSeeder extends Seeder
                 'assigned_by'    => $admin->id,
             ]
         );
+
+        // Ensiklopedia tanaman (Panduan Budidaya) — sebelumnya PlantSeeder
+        // tidak pernah dipanggil dari sini, jadi php artisan migrate:fresh
+        // --seed tidak akan pernah mengisi tabel plants sama sekali.
+        $this->call([
+            PlantSeeder::class,
+        ]);
     }
 }
