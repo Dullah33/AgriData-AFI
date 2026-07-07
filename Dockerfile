@@ -11,18 +11,14 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     nodejs \
-    npm
-
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+    npm \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Pastikan hanya prefork MPM yang aktif (dibutuhkan oleh mod_php)
-RUN a2dismod mpm_event mpm_worker 2>/dev/null; a2enmod mpm_prefork
+# Aktifkan mod_rewrite (dibutuhkan untuk routing Laravel)
 RUN a2enmod rewrite
-RUN apache2ctl -M
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
