@@ -5,7 +5,7 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "php artisan migrate --force --seed && apache2-foreground",
+    "startCommand": "sh -c 'php artisan migrate --force --seed; apache2-foreground & sleep 3; echo \"=== PS AUX ===\"; ps aux; echo \"=== CURL LOCALHOST ===\"; curl -v http://localhost/ 2>&1; echo \"=== APACHE ERROR LOG (jika ada file) ===\"; cat /var/log/apache2/error.log 2>&1; tail -f /dev/null'",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
