@@ -35,7 +35,7 @@ class ProdukPanenController extends Controller
     /**
      * POST /api/produk-panen
      */
-    public function store(StoreProdukPanenRequest $request)
+    public function store(Request $request)
     {
         $produk = ProdukPanen::create($request->validated() + [
             'petani_id' => $request->user()->id,
