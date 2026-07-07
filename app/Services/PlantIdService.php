@@ -24,6 +24,11 @@ class PlantIdService
     // Detail penyakit yang diminta ke Plant.id (BAB 2.5.1: gejala, penyebab, penanganan)
     private const DISEASE_DETAILS = 'local_name,description,treatment,cause,common_names';
 
+    public function __construct(private ?GeminiEnricherService $enricher = null)
+    {
+        $this->enricher ??= new GeminiEnricherService();
+    }
+
     public function analisis(string $absoluteImagePath): array
     {
         $apiKey = config('services.plant_id.api_key');
@@ -92,11 +97,35 @@ class PlantIdService
 
         $probability = (float) ($top['probability'] ?? 0);
 
+        $namaPenyakit = $this->teksLokal($details['local_name'] ?? null) ?? $this->teksLokal($top['name'] ?? null) ?? 'Tidak Teridentifikasi';
+        $gejala = $this->teksLokal($details['description'] ?? null) ?? 'Deskripsi tidak tersedia dari Plant.id untuk kelas ini.';
+        $penyebab = $this->teksLokal($details['cause'] ?? null) ?? '-';
+
+        // Kalau Plant.id tidak menyediakan penyebab dan/atau penanganan
+        // spesifik untuk kelas ini, lengkapi lewat Gemini API (kalau
+        // dikonfigurasi). Kalau enrichment gagal/tidak dikonfigurasi,
+        // teks fallback bawaan di atas tetap dipakai — tidak ada error.
+        $butuhPenyebab = $penyebab === '-';
+        $butuhPenanganan = empty($penanganan) || $penanganan === 'Tidak ada rekomendasi penanganan spesifik dari Plant.id untuk kelas ini.';
+
+        if ($butuhPenyebab || $butuhPenanganan) {
+            $hasilEnrich = $this->enricher->lengkapi($namaPenyakit, $gejala);
+
+            if ($hasilEnrich !== null) {
+                if ($butuhPenyebab && ! empty($hasilEnrich['penyebab'])) {
+                    $penyebab = $hasilEnrich['penyebab'];
+                }
+                if ($butuhPenanganan && ! empty($hasilEnrich['penanganan'])) {
+                    $penanganan = $hasilEnrich['penanganan'];
+                }
+            }
+        }
+
         return [
-            'nama_penyakit'    => $this->teksLokal($details['local_name'] ?? null) ?? $this->teksLokal($top['name'] ?? null) ?? 'Tidak Teridentifikasi',
+            'nama_penyakit'    => $namaPenyakit,
             'confidence_score' => round($probability * 100, 2),
-            'gejala'           => $this->teksLokal($details['description'] ?? null) ?? 'Deskripsi tidak tersedia dari Plant.id untuk kelas ini.',
-            'penyebab'         => $this->teksLokal($details['cause'] ?? null) ?? '-',
+            'gejala'           => $gejala,
+            'penyebab'         => $penyebab,
             'penanganan'       => $penanganan,
             'tingkat_risiko'   => $this->tingkatRisikoDariProbabilitas($probability),
         ];

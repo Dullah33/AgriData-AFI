@@ -50,4 +50,12 @@ return [
         'api_key' => env('PLANT_ID_API_KEY'),
     ],
 
+    // Google Gemini API — https://aistudio.google.com/apikey
+    // Dipakai untuk melengkapi field "penyebab" & "penanganan" saat
+    // Plant.id tidak menyediakan data tersebut untuk kelas penyakit tertentu.
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+    ],
+
 ];
