@@ -50,7 +50,7 @@ class ProdukPanenController extends Controller
     /**
      * GET /api/produk-panen/{id}
      */
-    public function show($id)
+    public function show(int $id)
     {
         try {
             $produk = ProdukPanen::findOrFail($id);
@@ -66,7 +66,7 @@ class ProdukPanenController extends Controller
     /**
      * PUT/PATCH /api/produk-panen/{id}
      */
-    public function update(StoreProdukPanenRequest $request, $id)
+    public function update(StoreProdukPanenRequest $request, int $id)
     {
         try {
             $produk = ProdukPanen::findOrFail($id);
@@ -85,7 +85,7 @@ class ProdukPanenController extends Controller
     /**
      * DELETE /api/produk-panen/{id}
      */
-    public function destroy($id)
+    public function destroy(int $id)
     {
         try {
             $produk = ProdukPanen::findOrFail($id);
