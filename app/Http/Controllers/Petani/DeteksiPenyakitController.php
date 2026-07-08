@@ -70,6 +70,18 @@ class DeteksiPenyakitController extends Controller
             return back()->withInput()->withErrors(['foto_tanaman' => $e->getMessage()]);
         }
 
+        // Tentukan koordinat laporan: prioritas dari titik tengah poligon
+        // lahan yang dipilih, jatuh ke koordinat wilayah kalau lahan tidak
+        // dipilih/tidak punya poligon. Sebelumnya kolom ini TIDAK PERNAH
+        // diisi sama sekali, sehingga laporan tidak pernah muncul di peta
+        // manapun (Pemetaan Penyakit maupun Peta Lahan & Wilayah).
+        $lahan = ! empty($data['lahan_id']) ? $petaniProfile?->lahans()->find($data['lahan_id']) : null;
+        $koordinat = $lahan?->centroid();
+
+        if (! $koordinat && $petaniProfile?->wilayah) {
+            $koordinat = [$petaniProfile->wilayah->latitude, $petaniProfile->wilayah->longitude];
+        }
+
         $laporan = DiseaseReport::create([
             'user_id'          => Auth::id(),
             'lahan_id'         => $data['lahan_id'] ?? null,
@@ -81,6 +93,8 @@ class DeteksiPenyakitController extends Controller
             'penyebab'         => $hasil['penyebab'],
             'penanganan'       => $hasil['penanganan'],
             'tingkat_risiko'   => $hasil['tingkat_risiko'],
+            'latitude'         => $koordinat[0] ?? null,
+            'longitude'        => $koordinat[1] ?? null,
             'status'           => 'baru',
         ]);
 

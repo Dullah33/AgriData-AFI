@@ -30,6 +30,27 @@ class Lahan extends Model
         return $this->belongsTo(PetaniProfile::class, 'petani_profile_id');
     }
 
+    // Riwayat laporan deteksi penyakit AI Scanner yang terkait lahan ini
+    public function diseaseReports()
+    {
+        return $this->hasMany(DiseaseReport::class, 'lahan_id');
+    }
+
+    // Titik tengah (centroid) poligon lahan — dipakai sebagai lokasi
+    // default laporan penyakit yang dibuat untuk lahan ini, supaya
+    // laporan tersebut bisa muncul di peta tanpa perlu GPS asli.
+    public function centroid(): ?array
+    {
+        if (! is_array($this->koordinat_poligon) || count($this->koordinat_poligon) < 3) {
+            return null;
+        }
+
+        $lat = collect($this->koordinat_poligon)->avg(fn ($p) => $p[0]);
+        $lng = collect($this->koordinat_poligon)->avg(fn ($p) => $p[1]);
+
+        return [$lat, $lng];
+    }
+
     // Scope: lahan yang sedang aktif ditanami
     public function scopeAktif(Builder $query)
     {

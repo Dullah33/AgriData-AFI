@@ -39,9 +39,8 @@
             <ul class="nav-menu" id="nav-menu">
                 <li><a href="#" class="nav-link active">Home</a></li>
                 <li><a href="#features" class="nav-link">Features</a></li>
-                <li><a href="#" class="nav-link">Resources</a></li>
-                <li><a href="#" class="nav-link">About Us</a></li>
-                <li><a href="#" class="nav-link">Contact</a></li>
+                <li><a href="#about" class="nav-link">About Us</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
                 <!-- Mobile Only Actions -->
                 @auth
                     <li class="mobile-actions">
@@ -99,20 +98,13 @@
                 </p>
                 
                 <div class="hero-buttons">
-                    <a href="#features" class="btn btn-primary">
+                    <a href="{{ route('login') }}" class="btn btn-primary">
                         Explore Features
                         <!-- Arrow Right Icon -->
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                             <polyline points="12 5 19 12 12 19"></polyline>
                         </svg>
-                    </a>
-                    <a href="#" class="btn btn-secondary">
-                        <!-- Play Icon -->
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                        </svg>
-                        Watch Demo
                     </a>
                 </div>
                 
@@ -338,6 +330,80 @@
             </div>
         </section>
         
+        <!-- About Us Section -->
+        <section id="about" class="about-section">
+            <div class="about-container">
+                <div class="section-header">
+                    <span class="section-badge">Tentang Kami</span>
+                    <h2 class="section-title">Tentang Agri Data</h2>
+                    <p class="section-desc">Platform data pertanian pintar yang dikembangkan untuk mendukung petani, penyuluh, dan pemangku kepentingan pertanian di Indonesia.</p>
+                </div>
+
+                <div class="about-grid">
+                    <div class="about-text">
+                        <p>Agri Data hadir sebagai jembatan antara petani, penyuluh pertanian, dan teknologi. Kami percaya bahwa akses terhadap data yang akurat dan teknologi AI dapat membantu petani mengambil keputusan yang lebih baik dalam mengelola lahan dan tanaman mereka.</p>
+                        <p>Melalui platform ini, petani dapat memantau kondisi tanaman, mendeteksi penyakit tanaman lebih dini, mengakses informasi cuaca, serta terhubung dengan penyuluh pertanian dan pasar hasil panen — semua dalam satu tempat.</p>
+                    </div>
+                    <div class="about-values">
+                        <div class="value-item">
+                            <h4>Misi Kami</h4>
+                            <p>Memberdayakan petani Indonesia dengan data dan teknologi yang mudah diakses.</p>
+                        </div>
+                        <div class="value-item">
+                            <h4>Visi Kami</h4>
+                            <p>Mewujudkan pertanian Indonesia yang lebih modern, efisien, dan berkelanjutan.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact-section">
+            <div class="contact-container">
+                <div class="section-header">
+                    <span class="section-badge">Hubungi Kami</span>
+                    <h2 class="section-title">Ada Pertanyaan?</h2>
+                    <p class="section-desc">Tim kami siap membantu jika Anda memiliki pertanyaan seputar Agri Data.</p>
+                </div>
+
+                <div class="contact-grid">
+                    <div class="contact-item">
+                        <!-- Mail Icon -->
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                            <path d="M22 6l-10 7L2 6"></path>
+                        </svg>
+                        <div>
+                            <h4>Email</h4>
+                            <p>info@agridata.id</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <!-- Phone Icon -->
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        <div>
+                            <h4>Telepon</h4>
+                            <p>(0351) 123-4567</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <!-- Map Pin Icon -->
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <div>
+                            <h4>Alamat</h4>
+                            <p>Madiun, Jawa Timur, Indonesia</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- CTA Section -->
         <section class="cta-section">
             <div class="cta-bar">
@@ -384,9 +450,8 @@
             <ul class="footer-nav">
                 <li><a href="#" class="footer-nav-link">Home</a></li>
                 <li><a href="#features" class="footer-nav-link">Features</a></li>
-                <li><a href="#" class="footer-nav-link">Resources</a></li>
-                <li><a href="#" class="footer-nav-link">About Us</a></li>
-                <li><a href="#" class="footer-nav-link">Contact</a></li>
+                <li><a href="#about" class="footer-nav-link">About Us</a></li>
+                <li><a href="#contact" class="footer-nav-link">Contact</a></li>
             </ul>
             <p>&copy; {{ date('Y') }} Dinas Pertanian & Agri Data. Hak Cipta Dilindungi Undang-Undang.</p>
         </div>
