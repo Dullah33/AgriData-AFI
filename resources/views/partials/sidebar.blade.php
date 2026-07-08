@@ -11,8 +11,7 @@
                 ['label' => 'Manajemen Petani', 'route' => 'admin.petani.index'],
                 ['label' => 'Manajemen Penyuluh', 'route' => 'admin.penyuluh.index'],
                 ['label' => 'Manajemen Tanaman', 'route' => 'admin.plants.index'],
-                ['label' => 'Peta Lahan & Wilayah', 'route' => 'admin.peta-lahan.index'],
-                ['label' => 'Pemetaan Penyakit', 'route' => 'admin.pemetaan-penyakit.index'],
+                ['label' => 'Peta Lahan, Wilayah & Penyakit', 'route' => 'admin.peta-lahan.index'],
                 ['label' => 'Artikel Pertanian', 'route' => 'admin.artikel.index'],
                 ['label' => 'Moderasi Ulasan', 'route' => 'admin.ulasan.index'],
                 ['label' => 'Laporan & Ekspor Data', 'route' => 'admin.laporan.index'],
@@ -74,7 +73,15 @@
     $config = $sidebarConfig[$role] ?? $sidebarConfig['user'];
 @endphp
 
-<aside class="w-64 shrink-0 text-white" style="background-color: {{ $config['color'] }};">
+<!-- Overlay gelap, muncul di layar kecil saat sidebar terbuka -->
+<div id="sidebar-overlay"
+     class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"
+     onclick="toggleSidebar()"></div>
+
+<aside id="sidebar"
+       class="w-64 shrink-0 text-white fixed inset-y-0 left-0 z-40 overflow-y-auto
+              transform -translate-x-full transition-transform duration-300 ease-in-out"
+       style="background-color: {{ $config['color'] }};">
     <div class="px-5 py-4 border-b border-white/20 flex items-center gap-2">
         <span class="text-lg font-bold">Agri Data</span>
     </div>

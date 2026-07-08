@@ -30,13 +30,17 @@
         {{-- Sidebar (sempat kehilangan baris @include ini saat rombak layout untuk fitur budidaya) --}}
         @include('partials.sidebar')
 
-        <div class="flex-1 flex flex-col">
+        <div id="main-content" class="flex-1 flex flex-col transition-[margin] duration-300 ease-in-out">
             <!-- Navbar -->
             <nav class="bg-white shadow-md border-b border-gray-200">
                 <div class="px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
-                        <!-- Judul halaman -->
-                        <div class="flex items-center">
+                        <!-- Tombol hamburger: toggle sidebar, aktif di semua ukuran layar (desktop & mobile) -->
+                        <div class="flex items-center gap-3">
+                            <button id="sidebar-toggle" onclick="toggleSidebar()"
+                                    class="text-gray-600 hover:text-gray-900 p-1 -ml-1">
+                                <i data-lucide="menu" class="w-6 h-6"></i>
+                            </button>
                             <h1 class="font-semibold text-lg text-gray-800">@yield('title', 'Dashboard')</h1>
                         </div>
 
@@ -64,6 +68,32 @@
     <!-- Initialize Lucide Icons -->
     <script>
         lucide.createIcons();
+
+        // Toggle sidebar — bekerja di semua ukuran layar.
+        // Desktop (>=1024px): konten ikut bergeser (margin-left), tanpa overlay.
+        // Mobile (<1024px): sidebar menimpa konten sebagai overlay + latar gelap.
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebar-overlay');
+            var main = document.getElementById('main-content');
+            var isDesktop = window.innerWidth >= 1024;
+
+            sidebar.classList.toggle('-translate-x-full');
+
+            if (isDesktop) {
+                main.classList.toggle('lg:ml-64');
+            } else {
+                overlay.classList.toggle('hidden');
+            }
+        }
+
+        // Default: sidebar otomatis terbuka di layar besar, tertutup di layar kecil.
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.innerWidth >= 1024) {
+                document.getElementById('sidebar').classList.remove('-translate-x-full');
+                document.getElementById('main-content').classList.add('lg:ml-64');
+            }
+        });
     </script>
 </body>
 </html>
