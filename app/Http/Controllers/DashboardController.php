@@ -34,7 +34,9 @@ class DashboardController extends Controller
         $stats = [
             'total_petani'        => PetaniProfile::count(),
             'petani_terverifikasi' => PetaniProfile::whereNotNull('verified_by')->count(),
-            'transaksi_bulan_ini' => Transaksi::whereMonth('created_at', now()->month)->count(),
+            // Rentang tanggal (bukan whereMonth saja) supaya bulan yang sama di
+            // tahun lalu tidak ikut terhitung, dan index created_at bisa dipakai.
+            'transaksi_bulan_ini' => Transaksi::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])->count(),
             'transaksi_pending'   => Transaksi::where('status_transaksi', 'pending')->count(),
             'pembayaran_menunggu' => Pembayaran::status(Pembayaran::MENUNGGU_VERIFIKASI)->count(),
             'penyuluh_aktif'      => ExtensionOfficer::where('status', 'aktif')->count(),
@@ -133,7 +135,7 @@ class DashboardController extends Controller
         $officer = ExtensionOfficer::where('user_id', Auth::id())->first();
 
         $stats = [
-            'petani_binaan'       => $officer ? count($officer->petaniBinaan()) : 0,
+            'petani_binaan'       => $officer ? $officer->petaniBinaanQuery()->count() : 0,
             'kunjungan_bulan_ini' => $officer ? $officer->fieldVisits()->bulanIni()->where('status', 'selesai')->count() : 0,
             'kunjungan_terjadwal' => $officer ? $officer->fieldVisits()->where('status', 'terjadwal')->count() : 0,
             'pelatihan_bulan_ini' => $officer ? $officer->trainingPrograms()->bulanIni()->count() : 0,

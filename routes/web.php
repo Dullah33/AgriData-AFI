@@ -46,9 +46,9 @@ Route::post('/webhook/midtrans', MidtransWebhookController::class)
 // Guest
 Route::middleware('guest')->group(function () {
     Route::get('/login', fn() => view('auth.login'))->name('login');
-    Route::post('/login', [LoginController::class, 'authenticate']);
+    Route::post('/login', [LoginController::class, 'authenticate'])->middleware('throttle:login');
     Route::get('/register', fn() => view('auth.register'))->name('register');
-    Route::post('/register', [RegisterController::class, 'store']);
+    Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:6,1');
 });
 
 // Protected (semua role)
@@ -71,8 +71,8 @@ Route::middleware('auth')->group(function () {
     
     // API: Cascading Location (EMSIFA)
     Route::get('/api/provinces', [WeatherController::class, 'getProvinces'])->name('api.provinces');
-    Route::get('/api/regencies/{provCode}', [WeatherController::class, 'getRegencies'])->name('api.regencies');
-    Route::get('/api/districts/{regCode}', [WeatherController::class, 'getDistricts'])->name('api.districts');
+    Route::get('/api/regencies/{provCode}', [WeatherController::class, 'getRegencies'])->whereNumber('provCode')->name('api.regencies');
+    Route::get('/api/districts/{regCode}', [WeatherController::class, 'getDistricts'])->whereNumber('regCode')->name('api.districts');
     
     // API: Analisis Cuaca
     Route::get('/api/cuaca/recommendations/{provinsi}/{kabupaten}/{kecamatan}', 
@@ -81,7 +81,7 @@ Route::middleware('auth')->group(function () {
     
     // API: Data Tanaman
     Route::get('/api/tanaman', [WeatherController::class, 'getPlants'])->name('api.tanaman');
-    Route::get('/api/tanaman/{id}/detail', [WeatherController::class, 'getPlantDetail'])->name('api.tanaman.detail');
+    Route::get('/api/tanaman/{plant}/detail', [WeatherController::class, 'getPlantDetail'])->name('api.tanaman.detail');
 
     // Halaman list tanaman
     Route::get('/budidaya', [BudidayaController::class, 'index'])->name('budidaya.index');
@@ -119,7 +119,8 @@ Route::middleware('auth')->group(function () {
         Route::get('peta-lahan', [PetaLahanController::class, 'index'])->name('peta-lahan.index');
 
         // Plant Management
-        Route::resource('plants', \App\Http\Controllers\Admin\PlantController::class);
+        // Tanpa halaman detail (view admin.plants.show memang tidak ada; dulu 500)
+        Route::resource('plants', \App\Http\Controllers\Admin\PlantController::class)->except(['show']);
 
         // Verifikasi pembayaran marketplace
         Route::get('pembayaran', [AdminPembayaranController::class, 'index'])->name('pembayaran.index');

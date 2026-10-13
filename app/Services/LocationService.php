@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\LokasiTidakDitemukanException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -61,7 +62,7 @@ class LocationService
                 return $normalizedFallback;
             }
             
-            throw new \Exception(
+            throw new LokasiTidakDitemukanException(
                 "Gagal mendapatkan koordinat untuk {$kecamatan}, {$kabupaten}, {$provinsi}. " .
                 "Silakan coba lagi nanti atau periksa nama wilayah."
             );

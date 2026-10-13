@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\Penyuluh\BuatAkunPenyuluh;
+use App\Actions\Penyuluh\HapusAkunPenyuluh;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\SimpanPenyuluhRequest;
 use App\Models\ExtensionOfficer;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class PenyuluhController extends Controller
 {
@@ -52,44 +51,9 @@ class PenyuluhController extends Controller
     }
 
     // POST /admin/penyuluh
-    public function store(Request $request)
+    public function store(SimpanPenyuluhRequest $request, BuatAkunPenyuluh $buatAkun)
     {
-        $data = $request->validate([
-            'username'       => 'required|string|max:255|unique:users,username',
-            'email'          => 'required|email|max:255|unique:users,email',
-            'password'       => 'required|string|min:8|confirmed',
-            'nip'            => 'nullable|string|max:30|unique:extension_officers,nip',
-            'wilayah_binaan' => 'required|string|max:150',
-            'phone'          => 'nullable|string|max:20',
-        ], [
-            'username.required'       => 'Username harus diisi.',
-            'username.unique'         => 'Username sudah digunakan.',
-            'email.required'          => 'Email harus diisi.',
-            'email.unique'            => 'Email sudah terdaftar.',
-            'password.required'       => 'Password harus diisi.',
-            'password.min'            => 'Password minimal 8 karakter.',
-            'password.confirmed'      => 'Konfirmasi password tidak cocok.',
-            'nip.unique'               => 'NIP sudah terdaftar.',
-            'wilayah_binaan.required' => 'Wilayah binaan harus diisi.',
-        ]);
-
-        DB::transaction(function () use ($data) {
-            $user = User::create([
-                'username' => $data['username'],
-                'email'    => $data['email'],
-                'password' => Hash::make($data['password']),
-                'role'     => 'penyuluh',
-            ]);
-
-            ExtensionOfficer::create([
-                'user_id'        => $user->id,
-                'nip'            => $data['nip'] ?? null,
-                'wilayah_binaan' => $data['wilayah_binaan'],
-                'phone'          => $data['phone'] ?? null,
-                'status'         => 'aktif',
-                'assigned_by'    => Auth::id(),
-            ]);
-        });
+        $buatAkun($request->validated(), $request->user());
 
         return redirect()->route('admin.penyuluh.index')
             ->with('success', 'Akun Petugas Penyuluh berhasil dibuat.');
@@ -117,7 +81,8 @@ class PenyuluhController extends Controller
             'penyuluh'         => $penyuluh,
             'kunjunganTerbaru' => $kunjunganTerbaru,
             'laporanBulanan'   => $laporanBulanan,
-            'jumlahPetaniBinaan' => count($penyuluh->petaniBinaan()),
+            // COUNT di database, bukan memuat semua petani lalu dihitung di PHP
+            'jumlahPetaniBinaan' => $penyuluh->petaniBinaanQuery()->count(),
         ]);
     }
 
@@ -132,18 +97,9 @@ class PenyuluhController extends Controller
     }
 
     // PUT /admin/penyuluh/{penyuluh}
-    public function update(Request $request, ExtensionOfficer $penyuluh)
+    public function update(SimpanPenyuluhRequest $request, ExtensionOfficer $penyuluh)
     {
-        $data = $request->validate([
-            'nip'            => 'nullable|string|max:30|unique:extension_officers,nip,' . $penyuluh->id,
-            'wilayah_binaan' => 'required|string|max:150',
-            'phone'          => 'nullable|string|max:20',
-            'status'         => 'required|in:aktif,nonaktif',
-        ], [
-            'wilayah_binaan.required' => 'Wilayah binaan harus diisi.',
-        ]);
-
-        $penyuluh->update($data);
+        $penyuluh->update($request->validated());
 
         return redirect()->route('admin.penyuluh.index')
             ->with('success', 'Data Penyuluh berhasil diperbarui.');
@@ -167,11 +123,9 @@ class PenyuluhController extends Controller
 
     // DELETE /admin/penyuluh/{penyuluh}
     // Menghapus akun Penyuluh sekaligus akun user-nya (cascade).
-    public function destroy(ExtensionOfficer $penyuluh)
+    public function destroy(ExtensionOfficer $penyuluh, HapusAkunPenyuluh $hapusAkun)
     {
-        $user = $penyuluh->user;
-        $penyuluh->delete();
-        $user?->delete();
+        $hapusAkun($penyuluh);
 
         return back()->with('success', 'Akun Penyuluh berhasil dihapus.');
     }

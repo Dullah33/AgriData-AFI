@@ -10,6 +10,10 @@ class Lahan extends Model
 {
     protected $table = 'lahan';
 
+    public const JENIS_TANAH = [
+        'Aluvial', 'Andosol', 'Latosol', 'Regosol', 'Grumusol', 'Podsolik', 'Lainnya',
+    ];
+
     protected $fillable = [
         'petani_profile_id', 'nama_lahan', 'koordinat_poligon', 'latitude', 'longitude', 'luas_ha',
         'jenis_tanah', 'tanaman_aktif', 'tanggal_tanam', 'perkiraan_panen',

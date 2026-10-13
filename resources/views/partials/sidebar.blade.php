@@ -8,9 +8,8 @@
     // - 'icon'   : nama ikon Lucide (https://lucide.dev/icons).
     // - 'badge'  : angka kecil di sisi kanan (mis. isi keranjang), opsional.
     // "Pengaturan Akun" dipindah ke bagian bawah sidebar dan menu profil.
+    // $jumlahKeranjang & $jumlahVerifikasi dari App\View\Composers\NavigasiComposer
     $peran = Auth::user()->role;
-    $jumlahKeranjang = $peran === 'user' ? \App\Models\KeranjangItem::where('user_id', Auth::id())->count() : 0;
-    $jumlahVerifikasi = $peran === 'admin' ? \App\Models\Pembayaran::status(\App\Models\Pembayaran::MENUNGGU_VERIFIKASI)->count() : 0;
 
     $sidebarConfig = [
         'admin' => [

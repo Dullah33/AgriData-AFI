@@ -3,17 +3,15 @@
 namespace App\Http\Controllers\Petani;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Petani\LahanRequest;
 use App\Models\Lahan;
+use App\Models\PetaniProfile;
 use App\Services\WeatherService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class LahanController extends Controller
 {
-    private array $jenisTanahList = [
-        'Aluvial', 'Andosol', 'Latosol', 'Regosol', 'Grumusol', 'Podsolik', 'Lainnya',
-    ];
-
     // GET /petani/lahan
     // Halaman "Profil & Lahan Saya" (BAB 2A.3): daftar seluruh lahan
     // milik petani yang sedang login.
@@ -46,38 +44,19 @@ class LahanController extends Controller
     // GET /petani/lahan/create
     public function create()
     {
-        abort_if(! Auth::user()->petaniProfile, 403, 'Profil petani belum terdaftar. Hubungi Admin.');
+        $this->profilPetani();
 
-        return view('petani.lahan.create', [
-            'jenisTanahList' => $this->jenisTanahList,
-        ]);
+        return view('petani.lahan.create', ['jenisTanahList' => Lahan::JENIS_TANAH]);
     }
 
     // POST /petani/lahan
-    public function store(Request $request)
+    public function store(LahanRequest $request)
     {
-        $petaniProfile = Auth::user()->petaniProfile;
-        abort_if(! $petaniProfile, 403, 'Profil petani belum terdaftar. Hubungi Admin.');
+        $data = $request->dataLahan();
 
-        $data = $request->validate([
-            'nama_lahan'          => 'required|string|max:100',
-            'luas_ha'             => 'required|numeric|min:0.01',
-            'jenis_tanah'         => 'nullable|string|max:50',
-            'tanaman_aktif'       => 'nullable|string|max:100',
-            'tanggal_tanam'       => 'nullable|date',
-            'perkiraan_panen'     => 'nullable|date|after_or_equal:tanggal_tanam',
-            'koordinat_poligon'   => 'nullable|string',
-        ], [
-            'nama_lahan.required' => 'Nama/kode lahan harus diisi.',
-            'luas_ha.required'    => 'Luas lahan harus diisi.',
-            'luas_ha.min'         => 'Luas lahan minimal 0.01 hektar.',
+        $this->profilPetani()->lahans()->create($data + [
+            'status' => filled($data['tanaman_aktif'] ?? null) ? 'aktif' : 'bera',
         ]);
-
-        $data['petani_profile_id'] = $petaniProfile->id;
-        $data['status'] = $data['tanaman_aktif'] ?? null ? 'aktif' : 'bera';
-        $data['koordinat_poligon'] = $this->decodePoligon($request->input('koordinat_poligon'));
-
-        Lahan::create($data);
 
         return redirect()->route('petani.lahan.index')
             ->with('success', 'Lahan berhasil ditambahkan.');
@@ -86,39 +65,20 @@ class LahanController extends Controller
     // GET /petani/lahan/{lahan}/edit
     public function edit(Lahan $lahan)
     {
-        $this->pastikanPemilik($lahan);
+        Gate::authorize('update', $lahan);
 
         return view('petani.lahan.edit', [
             'lahan'          => $lahan,
-            'jenisTanahList' => $this->jenisTanahList,
+            'jenisTanahList' => Lahan::JENIS_TANAH,
         ]);
     }
 
     // PUT /petani/lahan/{lahan}
-    public function update(Request $request, Lahan $lahan)
+    public function update(LahanRequest $request, Lahan $lahan)
     {
-        $this->pastikanPemilik($lahan);
+        Gate::authorize('update', $lahan);
 
-        $data = $request->validate([
-            'nama_lahan'          => 'required|string|max:100',
-            'luas_ha'             => 'required|numeric|min:0.01',
-            'jenis_tanah'         => 'nullable|string|max:50',
-            'tanaman_aktif'       => 'nullable|string|max:100',
-            'tanggal_tanam'       => 'nullable|date',
-            'perkiraan_panen'     => 'nullable|date|after_or_equal:tanggal_tanam',
-            'status'              => 'required|in:aktif,bera,panen',
-            'koordinat_poligon'   => 'nullable|string',
-        ]);
-
-        // Kalau field poligon tidak dikirim sama sekali (mis. peta belum
-        // digambar ulang saat edit), pertahankan poligon lama alih-alih menimpanya jadi null.
-        if ($request->filled('koordinat_poligon')) {
-            $data['koordinat_poligon'] = $this->decodePoligon($request->input('koordinat_poligon'));
-        } else {
-            unset($data['koordinat_poligon']);
-        }
-
-        $lahan->update($data);
+        $lahan->update($request->dataLahan());
 
         return redirect()->route('petani.lahan.index')
             ->with('success', 'Data lahan berhasil diperbarui.');
@@ -127,38 +87,19 @@ class LahanController extends Controller
     // DELETE /petani/lahan/{lahan}
     public function destroy(Lahan $lahan)
     {
-        $this->pastikanPemilik($lahan);
+        Gate::authorize('delete', $lahan);
 
         $lahan->delete();
 
         return back()->with('success', 'Lahan berhasil dihapus.');
     }
 
-    // Pastikan lahan yang diakses benar-benar milik petani yang sedang login
-    private function pastikanPemilik(Lahan $lahan): void
+    // Akun petani yang belum didaftarkan profilnya oleh admin belum bisa menambah lahan
+    private function profilPetani(): PetaniProfile
     {
-        $petaniProfile = Auth::user()->petaniProfile;
-        abort_if(! $petaniProfile || $lahan->petani_profile_id !== $petaniProfile->id, 403);
-    }
+        $profil = Auth::user()->petaniProfile;
+        abort_if(! $profil, 403, 'Profil petani belum terdaftar. Hubungi Admin.');
 
-    // Widget peta (Leaflet + Leaflet.draw) mengirim koordinat poligon sebagai
-    // string JSON lewat hidden input, berbentuk array pasangan [lat, lng].
-    // Di-decode di sini (bukan pakai cast otomatis) supaya kita bisa validasi
-    // isinya benar-benar array yang valid sebelum disimpan ke kolom JSON.
-    private function decodePoligon(?string $json): ?array
-    {
-        if (! $json) {
-            return null;
-        }
-
-        $decoded = json_decode($json, true);
-
-        if (! is_array($decoded) || count($decoded) < 3) {
-            // Poligon butuh minimal 3 titik. Kalau tidak valid, abaikan saja
-            // (jangan gagalkan penyimpanan hanya karena peta belum digambar).
-            return null;
-        }
-
-        return $decoded;
+        return $profil;
     }
 }

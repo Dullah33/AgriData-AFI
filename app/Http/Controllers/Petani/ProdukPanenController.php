@@ -3,25 +3,23 @@
 namespace App\Http\Controllers\Petani;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Petani\ProdukPanenRequest;
 use App\Models\ProdukPanen;
-use Illuminate\Http\Request;
+use App\Services\PenyimpananFoto;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
 
 class ProdukPanenController extends Controller
 {
-    private array $kategoriList = [
-        'Sayuran', 'Buah-buahan', 'Biji-bijian',
-        'Umbi-umbian', 'Rempah-rempah', 'Lainnya',
-    ];
+    public function __construct(private PenyimpananFoto $foto) {}
 
     // GET /petani/produk
     public function index()
     {
-        // FIX: filter out 'dihapus' — hanya tampilkan tersedia & habis
         $produk = ProdukPanen::where('petani_id', Auth::id())
-            ->whereIn('status', ['tersedia', 'habis'])
-            ->latest()->paginate(10);
+            ->terlihat()
+            ->latest()
+            ->paginate(10);
 
         return view('petani.produk.index', compact('produk'));
     }
@@ -29,38 +27,19 @@ class ProdukPanenController extends Controller
     // GET /petani/produk/create
     public function create()
     {
-        return view('petani.produk.create', [
-            'kategoriList' => $this->kategoriList,
-        ]);
+        return view('petani.produk.create', ['kategoriList' => ProdukPanen::KATEGORI]);
     }
 
     // POST /petani/produk
-    public function store(Request $request)
+    public function store(ProdukPanenRequest $request)
     {
-        $data = $request->validate([
-            'nama_produk' => 'required|string|max:150',
-            'kategori'    => 'required|string|max:50',
-            'deskripsi'   => 'required|string',
-            'harga'       => 'required|numeric|min:0',
-            'satuan'      => 'required|string|max:20',
-            'stok'        => 'required|integer|min:0',
-            'foto_produk' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ], [
-            'nama_produk.required' => 'Nama produk harus diisi.',
-            'kategori.required'    => 'Kategori harus dipilih.',
-            'deskripsi.required'   => 'Deskripsi harus diisi.',
-            'harga.required'       => 'Harga harus diisi.',
-            'stok.required'        => 'Stok harus diisi.',
-            'foto_produk.image'    => 'File harus berupa gambar.',
-            'foto_produk.max'      => 'Ukuran foto maksimal 2MB.',
-        ]);
-
-        $data['petani_id'] = Auth::id();
-        $data['status']    = 'tersedia';
+        $data = $request->safe()->except('foto_produk') + [
+            'petani_id' => $request->user()->id,
+            'status'    => 'tersedia',
+        ];
 
         if ($request->hasFile('foto_produk')) {
-            $data['foto_produk'] = $request->file('foto_produk')
-                ->store('produk', 'public');
+            $data['foto_produk'] = $this->foto->ganti($request->file('foto_produk'), 'produk');
         }
 
         ProdukPanen::create($data);
@@ -69,39 +48,26 @@ class ProdukPanenController extends Controller
             ->with('success', 'Produk berhasil ditambahkan.');
     }
 
-    // GET /petani/produk/{id}/edit
+    // GET /petani/produk/{produk}/edit
     public function edit(ProdukPanen $produk)
     {
-        abort_if($produk->petani_id !== Auth::id(), 403);
+        Gate::authorize('update', $produk);
 
         return view('petani.produk.edit', [
             'produk'       => $produk,
-            'kategoriList' => $this->kategoriList,
+            'kategoriList' => ProdukPanen::KATEGORI,
         ]);
     }
 
-    // PUT /petani/produk/{id}
-    public function update(Request $request, ProdukPanen $produk)
+    // PUT /petani/produk/{produk}
+    public function update(ProdukPanenRequest $request, ProdukPanen $produk)
     {
-        abort_if($produk->petani_id !== Auth::id(), 403);
+        Gate::authorize('update', $produk);
 
-        $data = $request->validate([
-            'nama_produk' => 'required|string|max:150',
-            'kategori'    => 'required|string|max:50',
-            'deskripsi'   => 'required|string',
-            'harga'       => 'required|numeric|min:0',
-            'satuan'      => 'required|string|max:20',
-            'stok'        => 'required|integer|min:0',
-            'status'      => 'required|in:tersedia,habis',
-            'foto_produk' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
+        $data = $request->safe()->except('foto_produk');
 
         if ($request->hasFile('foto_produk')) {
-            if ($produk->foto_produk) {
-                Storage::disk('public')->delete($produk->foto_produk);
-            }
-            $data['foto_produk'] = $request->file('foto_produk')
-                ->store('produk', 'public');
+            $data['foto_produk'] = $this->foto->ganti($request->file('foto_produk'), 'produk', $produk->foto_produk);
         }
 
         $produk->update($data);
@@ -110,16 +76,13 @@ class ProdukPanenController extends Controller
             ->with('success', 'Produk berhasil diperbarui.');
     }
 
-    // DELETE /petani/produk/{id}
+    // DELETE /petani/produk/{produk}
+    // Hapus lunak lewat status. Foto sengaja tidak dihapus karena riwayat
+    // pesanan pembeli masih menampilkan produk ini.
     public function destroy(ProdukPanen $produk)
     {
-        abort_if($produk->petani_id !== Auth::id(), 403);
+        Gate::authorize('delete', $produk);
 
-        if ($produk->foto_produk) {
-            Storage::disk('public')->delete($produk->foto_produk);
-        }
-
-        // Soft delete via status — data transaksi terkait tetap aman
         $produk->update(['status' => 'dihapus']);
 
         return back()->with('success', 'Produk berhasil dihapus.');

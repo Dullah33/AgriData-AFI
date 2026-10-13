@@ -2,50 +2,41 @@
 
 namespace App\Http\Controllers\Penyuluh;
 
+use App\Http\Controllers\Concerns\MembutuhkanPenyuluh;
 use App\Http\Controllers\Controller;
 use App\Models\FieldVisit;
+use App\Services\PenyimpananFoto;
+use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class KunjunganController extends Controller
 {
+    use MembutuhkanPenyuluh;
+
     // GET /penyuluh/kunjungan
-    // "Jadwal Kunjungan Lapangan" (BAB 2A.6): kalender & daftar rencana
-    // kunjungan yang BELUM selesai (terjadwal/batal). Kunjungan yang
-    // sudah selesai dipindah ke halaman "Laporan Kunjungan" terpisah
-    // (lihat riwayat()) supaya kedua menu sidebar tidak mengarah ke
-    // halaman yang sama.
+    // "Jadwal Kunjungan Lapangan" (BAB 2A.6): rencana kunjungan yang BELUM
+    // selesai (terjadwal/batal). Yang sudah selesai ada di riwayat().
     public function index(Request $request)
     {
-        $officer = Auth::user()->extensionOfficer;
-
-        if (! $officer) {
+        if (! $officer = $this->penyuluhAtauNull()) {
             return view('penyuluh.belum-terdaftar');
         }
 
-        $query = $officer->fieldVisits()->with('petaniProfile.user')
+        $kunjungans = $officer->fieldVisits()->with('petaniProfile.user')
             ->whereIn('status', ['terjadwal', 'batal'])
-            ->latest('tanggal_kunjungan');
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
+            ->latest('tanggal_kunjungan')
+            ->paginate(10)
+            ->withQueryString();
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        $kunjungans = $query->paginate(10)->withQueryString();
-
-        return view('penyuluh.kunjungan.index', [
-            'kunjungans' => $kunjungans,
-        ]);
+        return view('penyuluh.kunjungan.index', ['kunjungans' => $kunjungans]);
     }
 
     // GET /penyuluh/kunjungan/laporan
-    // "Laporan Hasil Kunjungan" (BAB 2A.6): daftar laporan kunjungan
-    // yang SUDAH selesai diisi, dengan opsi lihat/ubah detail laporan.
+    // "Laporan Hasil Kunjungan" (BAB 2A.6): kunjungan yang SUDAH selesai.
     public function riwayat()
     {
-        $officer = Auth::user()->extensionOfficer;
-
-        if (! $officer) {
+        if (! $officer = $this->penyuluhAtauNull()) {
             return view('penyuluh.belum-terdaftar');
         }
 
@@ -54,31 +45,33 @@ class KunjunganController extends Controller
             ->latest('tanggal_kunjungan')
             ->paginate(10);
 
-        return view('penyuluh.kunjungan.riwayat', [
-            'kunjungans' => $kunjungans,
-        ]);
+        return view('penyuluh.kunjungan.riwayat', ['kunjungans' => $kunjungans]);
     }
 
     // GET /penyuluh/kunjungan/create
-    // Form penjadwalan kunjungan baru: pilih petani binaan, tanggal, catatan persiapan.
     public function create()
     {
-        $officer = Auth::user()->extensionOfficer;
-        abort_if(! $officer, 403, 'Profil Penyuluh belum terdaftar. Hubungi Admin.');
-
         return view('penyuluh.kunjungan.create', [
-            'petaniBinaan' => $officer->petaniBinaan(),
+            'petaniBinaan' => $this->penyuluh()->petaniBinaan(),
         ]);
     }
 
     // POST /penyuluh/kunjungan
     public function store(Request $request)
     {
-        $officer = Auth::user()->extensionOfficer;
-        abort_if(! $officer, 403, 'Profil Penyuluh belum terdaftar. Hubungi Admin.');
+        $officer = $this->penyuluh();
 
         $data = $request->validate([
-            'petani_profile_id' => 'required|exists:petani_profile,id',
+            'petani_profile_id' => [
+                'required', 'integer',
+                // Hanya petani di wilayah binaan sendiri. Sebelumnya cukup
+                // "exists", jadi penyuluh bisa menjadwalkan petani wilayah lain.
+                function (string $atribut, mixed $nilai, Closure $gagal) use ($officer) {
+                    if (! $officer->petaniBinaanQuery()->whereKey($nilai)->exists()) {
+                        $gagal('Petani ini tidak berada di wilayah binaan Anda.');
+                    }
+                },
+            ],
             'tanggal_kunjungan' => 'required|date',
             'catatan_persiapan' => 'nullable|string|max:1000',
         ], [
@@ -86,21 +79,17 @@ class KunjunganController extends Controller
             'tanggal_kunjungan.required' => 'Tanggal kunjungan harus diisi.',
         ]);
 
-        $data['extension_officer_id'] = $officer->id;
-        $data['status'] = 'terjadwal';
-
-        FieldVisit::create($data);
+        $officer->fieldVisits()->create($data + ['status' => 'terjadwal']);
 
         return redirect()->route('penyuluh.kunjungan.index')
             ->with('success', 'Jadwal kunjungan berhasil dibuat.');
     }
 
     // GET /penyuluh/kunjungan/{kunjungan}/laporkan
-    // Form Laporan Kunjungan (BAB 2A.6): diisi setelah kunjungan
-    // dilaksanakan (kondisi lahan, kendala, rekomendasi, foto).
+    // Form Laporan Kunjungan (BAB 2A.6): kondisi lahan, kendala, rekomendasi, foto.
     public function laporkan(FieldVisit $kunjungan)
     {
-        $this->pastikanPemilik($kunjungan);
+        $this->pastikanMilikPenyuluh($kunjungan);
 
         return view('penyuluh.kunjungan.laporkan', [
             'kunjungan' => $kunjungan->load('petaniProfile.user'),
@@ -108,9 +97,9 @@ class KunjunganController extends Controller
     }
 
     // POST /penyuluh/kunjungan/{kunjungan}/laporkan
-    public function simpanLaporan(Request $request, FieldVisit $kunjungan)
+    public function simpanLaporan(Request $request, FieldVisit $kunjungan, PenyimpananFoto $foto)
     {
-        $this->pastikanPemilik($kunjungan);
+        $this->pastikanMilikPenyuluh($kunjungan);
 
         $data = $request->validate([
             'kondisi_lahan'     => 'required|string|max:2000',
@@ -123,13 +112,10 @@ class KunjunganController extends Controller
         ]);
 
         if ($request->hasFile('foto_dokumentasi')) {
-            $data['foto_dokumentasi'] = $request->file('foto_dokumentasi')
-                ->store('kunjungan-penyuluh', 'public');
+            $data['foto_dokumentasi'] = $foto->ganti($request->file('foto_dokumentasi'), 'kunjungan-penyuluh', $kunjungan->foto_dokumentasi);
         }
 
-        $data['status'] = 'selesai';
-
-        $kunjungan->update($data);
+        $kunjungan->update($data + ['status' => 'selesai']);
 
         return redirect()->route('penyuluh.kunjungan.riwayat')
             ->with('success', 'Laporan kunjungan berhasil disimpan.');
@@ -138,16 +124,10 @@ class KunjunganController extends Controller
     // POST /penyuluh/kunjungan/{kunjungan}/batalkan
     public function batalkan(FieldVisit $kunjungan)
     {
-        $this->pastikanPemilik($kunjungan);
+        $this->pastikanMilikPenyuluh($kunjungan);
 
         $kunjungan->update(['status' => 'batal']);
 
         return back()->with('success', 'Jadwal kunjungan dibatalkan.');
-    }
-
-    private function pastikanPemilik(FieldVisit $kunjungan): void
-    {
-        $officer = Auth::user()->extensionOfficer;
-        abort_if(! $officer || $kunjungan->extension_officer_id !== $officer->id, 403);
     }
 }

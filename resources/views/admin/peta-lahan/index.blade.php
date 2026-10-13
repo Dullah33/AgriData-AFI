@@ -69,10 +69,10 @@
         </label>
     </div>
 
-    <script type="application/json" id="peta-wilayah-data">{!! json_encode($markerWilayah, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!}</script>
-    <script type="application/json" id="peta-lahan-data">{!! json_encode($poligonLahan, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!}</script>
-    <script type="application/json" id="titik-penyakit-data">{!! json_encode($titikPenyakitTanpaLahan, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!}</script>
-    <script type="application/json" id="heatmap-data">{!! json_encode($heatmapPoints, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!}</script>
+    <script type="application/json" id="peta-wilayah-data">@json($markerWilayah)</script>
+    <script type="application/json" id="peta-lahan-data">@json($poligonLahan)</script>
+    <script type="application/json" id="titik-penyakit-data">@json($titikPenyakitTanpaLahan)</script>
+    <script type="application/json" id="heatmap-data">@json($heatmapPoints)</script>
 
     <div id="peta-lahan-wilayah" class="w-full rounded-lg border border-gray-200" style="height: 520px;"></div>
 
@@ -179,13 +179,22 @@
 
     var bounds = [];
 
+    // Popup Leaflet dirender sebagai HTML. Nama lahan, username, dan nama
+    // tanaman diisi petani, jadi wajib di-escape supaya tidak bisa
+    // menyisipkan <script> yang ikut jalan di browser admin.
+    function esc(nilai) {
+        return String(nilai ?? '').replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
     // Marker wilayah
     var wilayahData = JSON.parse(document.getElementById('peta-wilayah-data').textContent);
     wilayahData.forEach(function (w) {
         var coord = [w.latitude, w.longitude];
         bounds.push(coord);
         L.marker(coord).addTo(map)
-            .bindPopup('<strong>' + w.nama_wilayah + '</strong><br>' + w.jumlah_petani + ' petani terdaftar');
+            .bindPopup('<strong>' + esc(w.nama_wilayah) + '</strong><br>' + esc(w.jumlah_petani) + ' petani terdaftar');
     });
 
     // Poligon lahan, warna & popup mengikuti status penyakit terkini
@@ -198,15 +207,15 @@
 
         var infoPenyakit = l.laporan_penyakit.length
             ? '<hr class="my-1">' + l.laporan_penyakit.map(function (d) {
-                  return '⚠ ' + d.nama_penyakit + ' (' + d.tingkat_risiko + ') - ' + d.tanggal;
+                  return '⚠ ' + esc(d.nama_penyakit) + ' (' + esc(d.tingkat_risiko) + ') - ' + esc(d.tanggal);
               }).join('<br>')
             : '<hr class="my-1"><span style="color:#16A34A">Tidak ada laporan penyakit</span>';
 
         polygon.bindPopup(
-            '<strong>' + l.nama_lahan + '</strong><br>' +
-            'Pemilik: ' + l.petani + '<br>' +
-            'Luas: ' + l.luas_ha + ' ha &middot; Tanaman: ' + (l.tanaman_aktif || '-') + '<br>' +
-            'Status Lahan: ' + l.status +
+            '<strong>' + esc(l.nama_lahan) + '</strong><br>' +
+            'Pemilik: ' + esc(l.petani) + '<br>' +
+            'Luas: ' + esc(l.luas_ha) + ' ha &middot; Tanaman: ' + esc(l.tanaman_aktif || '-') + '<br>' +
+            'Status Lahan: ' + esc(l.status) +
             infoPenyakit
         );
         latlngs.forEach(function (c) { bounds.push(c); });
@@ -222,7 +231,7 @@
             color: warna[t.tingkat_risiko] || '#9CA3AF',
             fillColor: warna[t.tingkat_risiko] || '#9CA3AF',
             fillOpacity: 0.8
-        }).addTo(map).bindPopup('<strong>' + t.nama_penyakit + '</strong><br>Risiko: ' + t.tingkat_risiko + '<br><em>Tidak terkait lahan spesifik</em>');
+        }).addTo(map).bindPopup('<strong>' + esc(t.nama_penyakit) + '</strong><br>Risiko: ' + esc(t.tingkat_risiko) + '<br><em>Tidak terkait lahan spesifik</em>');
     });
 
     if (bounds.length > 0) {

@@ -2,33 +2,34 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Akun\DaftarkanPengguna;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * Autentikasi API berbasis token Sanctum.
+ */
 class AuthController extends Controller
 {
     /**
      * POST /api/register
      */
-    public function register(Request $request)
+    public function register(Request $request, DaftarkanPengguna $daftarkan)
     {
-        $validated = $request->validate([
-            'username' => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
-            'role'     => 'required|in:admin,petani,penyuluh,user',
+        // Field role sengaja tidak diterima: semua pendaftar menjadi 'user'
+        $data = $request->validate([
+            'username' => 'required|string|max:50|unique:users,username',
+            'email'    => 'required|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8',
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
-        $user = User::create($validated);
-
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $user = $daftarkan($data['email'], $data['password'], $data['username']);
 
         return response()->json([
-            'access_token' => $token,
+            'access_token' => $user->createToken('auth_token')->plainTextToken,
             'token_type'   => 'Bearer',
-            'user'         => $user,
+            'user'         => $user->only(['id', 'username', 'email', 'role']),
         ], 201);
     }
 
@@ -37,20 +38,21 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $user = User::where('email', $request->email)->first();
+        $data = $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
+        ]);
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Kredensial salah',
-            ], 401);
+        $user = User::where('email', $data['email'])->first();
+
+        if (! $user || ! Hash::check($data['password'], $user->password)) {
+            return response()->json(['message' => 'Kredensial salah'], 401);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-
         return response()->json([
-            'access_token' => $token,
+            'access_token' => $user->createToken('auth_token')->plainTextToken,
             'token_type'   => 'Bearer',
-        ], 200);
+        ]);
     }
 
     /**
@@ -60,8 +62,6 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json([
-            'message' => 'Logout berhasil',
-        ], 200);
+        return response()->json(['message' => 'Logout berhasil']);
     }
 }

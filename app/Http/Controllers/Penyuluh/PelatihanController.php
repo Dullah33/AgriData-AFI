@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers\Penyuluh;
 
+use App\Http\Controllers\Concerns\MembutuhkanPenyuluh;
 use App\Http\Controllers\Controller;
 use App\Models\TrainingProgram;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class PelatihanController extends Controller
 {
+    use MembutuhkanPenyuluh;
+
     // GET /penyuluh/pelatihan
     // "Jadwal Pelatihan Kelompok Tani" (BAB 2A.6): daftar & kalender
     // kegiatan pelatihan/penyuluhan kelompok tani.
     public function index()
     {
-        $officer = Auth::user()->extensionOfficer;
-
-        if (! $officer) {
+        if (! $officer = $this->penyuluhAtauNull()) {
             return view('penyuluh.belum-terdaftar');
         }
 
@@ -30,7 +30,7 @@ class PelatihanController extends Controller
     // GET /penyuluh/pelatihan/create
     public function create()
     {
-        abort_if(! Auth::user()->extensionOfficer, 403, 'Profil Penyuluh belum terdaftar. Hubungi Admin.');
+        $this->penyuluh();
 
         return view('penyuluh.pelatihan.create');
     }
@@ -38,8 +38,7 @@ class PelatihanController extends Controller
     // POST /penyuluh/pelatihan
     public function store(Request $request)
     {
-        $officer = Auth::user()->extensionOfficer;
-        abort_if(! $officer, 403, 'Profil Penyuluh belum terdaftar. Hubungi Admin.');
+        $officer = $this->penyuluh();
 
         $data = $request->validate([
             'judul'                => 'required|string|max:150',
@@ -53,10 +52,7 @@ class PelatihanController extends Controller
             'tanggal_pelaksanaan.required' => 'Tanggal pelaksanaan harus diisi.',
         ]);
 
-        $data['extension_officer_id'] = $officer->id;
-        $data['status'] = 'terjadwal';
-
-        TrainingProgram::create($data);
+        $officer->trainingPrograms()->create($data + ['status' => 'terjadwal']);
 
         return redirect()->route('penyuluh.pelatihan.index')
             ->with('success', 'Kegiatan pelatihan berhasil dijadwalkan.');
@@ -65,7 +61,7 @@ class PelatihanController extends Controller
     // GET /penyuluh/pelatihan/{pelatihan}/edit
     public function edit(TrainingProgram $pelatihan)
     {
-        $this->pastikanPemilik($pelatihan);
+        $this->pastikanMilikPenyuluh($pelatihan);
 
         return view('penyuluh.pelatihan.edit', [
             'pelatihan' => $pelatihan,
@@ -75,7 +71,7 @@ class PelatihanController extends Controller
     // PUT /penyuluh/pelatihan/{pelatihan}
     public function update(Request $request, TrainingProgram $pelatihan)
     {
-        $this->pastikanPemilik($pelatihan);
+        $this->pastikanMilikPenyuluh($pelatihan);
 
         $data = $request->validate([
             'judul'                => 'required|string|max:150',
@@ -95,16 +91,10 @@ class PelatihanController extends Controller
     // DELETE /penyuluh/pelatihan/{pelatihan}
     public function destroy(TrainingProgram $pelatihan)
     {
-        $this->pastikanPemilik($pelatihan);
+        $this->pastikanMilikPenyuluh($pelatihan);
 
         $pelatihan->delete();
 
         return back()->with('success', 'Kegiatan pelatihan berhasil dihapus.');
-    }
-
-    private function pastikanPemilik(TrainingProgram $pelatihan): void
-    {
-        $officer = Auth::user()->extensionOfficer;
-        abort_if(! $officer || $pelatihan->extension_officer_id !== $officer->id, 403);
     }
 }

@@ -16,4 +16,9 @@ class Wilayah extends Model
     {
         return $this->hasMany(PetaniProfile::class, 'wilayah_id');
     }
+
+    public function diseaseReports()
+    {
+        return $this->hasMany(DiseaseReport::class, 'wilayah_id');
+    }
 }

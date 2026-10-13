@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 class ExtensionOfficer extends Model
@@ -38,14 +40,20 @@ class ExtensionOfficer extends Model
         return $this->hasMany(MonthlyReport::class, 'extension_officer_id');
     }
 
-    // Daftar petani binaan: dicocokkan lewat nama wilayah (desa/kecamatan)
-    // yang sama dengan wilayah_binaan milik penyuluh, mengacu ke relasi
-    // petani -> wilayah pada tabel wilayah/petani_profile.
-    public function petaniBinaan()
+    // Petani binaan: dicocokkan lewat nama wilayah (desa/kecamatan) yang
+    // sama dengan wilayah_binaan milik penyuluh. Dipakai sebagai query supaya
+    // bisa langsung di-count/whereKey tanpa memuat semua baris ke memori.
+    public function petaniBinaanQuery(): Builder
     {
-        return PetaniProfile::whereHas('wilayah', function ($q) {
-            $q->where('nama_wilayah', $this->wilayah_binaan);
-        })->with('wilayah')->get();
+        return PetaniProfile::whereHas('wilayah', fn ($q) => $q->where('nama_wilayah', $this->wilayah_binaan));
+    }
+
+    // Daftar petani binaan untuk ditampilkan. Relasi user ikut di-eager load
+    // karena view selalu menampilkan username (sebelumnya N+1: satu query
+    // users per petani).
+    public function petaniBinaan(): Collection
+    {
+        return $this->petaniBinaanQuery()->with(['user', 'wilayah'])->get();
     }
 
     public function scopeAktif($query)

@@ -1,3 +1,18 @@
+// Data dari server (nama tanaman, deskripsi, nama wilayah, pesan error) disisipkan
+// ke HTML lewat innerHTML, jadi setiap nilai teks wajib di-escape dulu.
+function esc(nilai) {
+    return String(nilai ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Server mengirim {success:false, error:"..."} yang aman ditampilkan
+async function pesanGalat(response) {
+    try {
+        const data = await response.json();
+        if (data && data.error) return data.error;
+    } catch (e) {}
+    return `Server sedang bermasalah (kode ${response.status}). Silakan coba lagi.`;
+}
+
 let previousAnalysisState = null;
 
 // DOM Elements
@@ -294,7 +309,7 @@ async function jalankanAnalisis() {
             console.log('Response status:', response.status);
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(await pesanGalat(response));
             }
             
             const data = await response.json();
@@ -336,9 +351,7 @@ async function jalankanAnalisis() {
             console.log('Response status:', response.status);
             
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Server error:', errorText);
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(await pesanGalat(response));
             }
             
             const data = await response.json();
@@ -354,7 +367,7 @@ async function jalankanAnalisis() {
     } catch (error) {
         console.error('Analysis error:', error);
         clearInterval(progressInterval);
-        hideLoading(`<div class="p-6 bg-red-50 border border-red-200 rounded-xl"> <h3 class="text-lg font-bold text-red-800 mb-2">Gagal Menganalisis</h3> <p class="text-red-700">${error.message}</p> <button onclick="jalankanAnalisis()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"> 🔄 Coba Lagi </button> </div>`);
+        hideLoading(`<div class="p-6 bg-red-50 border border-red-200 rounded-xl"> <h3 class="text-lg font-bold text-red-800 mb-2">Gagal Menganalisis</h3> <p class="text-red-700">${esc(error.message)}</p> <button onclick="jalankanAnalisis()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"> 🔄 Coba Lagi </button> </div>`);
     }
 }
 
@@ -363,7 +376,7 @@ async function jalankanAnalisis() {
  */
 function renderRecommendations(data) {
     if (!data.success) {
-        return `<div class="p-6 bg-red-50 border border-red-200 rounded-xl"> <p class="text-red-700">Error: ${data.error}</p> </div>`;
+        return `<div class="p-6 bg-red-50 border border-red-200 rounded-xl"> <p class="text-red-700">Error: ${esc(data.error)}</p> </div>`;
     }
     
     previousAnalysisState = {
@@ -379,22 +392,22 @@ function renderRecommendations(data) {
             <!-- Header -->
             <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl">
                 <h2 class="text-2xl font-bold mb-2">Rekomendasi Tanaman</h2>
-                <p class="text-blue-100">Berdasarkan kondisi cuaca di ${data.location.kecamatan}, ${data.location.kabupaten}</p>
+                <p class="text-blue-100">Berdasarkan kondisi cuaca di ${esc(data.location.kecamatan)}, ${esc(data.location.kabupaten)}</p>
             </div>
             
             <!-- Current Weather -->
             <div class="grid grid-cols-3 gap-4">
                 <div class="bg-orange-50 p-4 rounded-xl border border-orange-200">
                     <p class="text-sm text-gray-600 mb-1">Suhu</p>
-                    <p class="text-2xl font-bold text-orange-700">${weather.suhu}°C</p>
+                    <p class="text-2xl font-bold text-orange-700">${esc(weather.suhu)}°C</p>
                 </div>
                 <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
                     <p class="text-sm text-gray-600 mb-1">Kelembaban</p>
-                    <p class="text-2xl font-bold text-blue-700">${weather.kelembaban}%</p>
+                    <p class="text-2xl font-bold text-blue-700">${esc(weather.kelembaban)}%</p>
                 </div>
                 <div class="bg-cyan-50 p-4 rounded-xl border border-cyan-200">
                     <p class="text-sm text-gray-600 mb-1">Curah Hujan</p>
-                    <p class="text-2xl font-bold text-cyan-700">${weather.curah_hujan}mm</p>
+                    <p class="text-2xl font-bold text-cyan-700">${esc(weather.curah_hujan)}mm</p>
                 </div>
             </div>
 
@@ -406,23 +419,23 @@ function renderRecommendations(data) {
         const statusColor = getStatusColor(rec.status);
         
         html += `
-            <div class="bg-white border-2 border-gray-200 rounded-xl p-5 hover:border-blue-400 transition-all cursor-pointer" onclick="selectPlantAndAnalyze(${rec.id})">
+            <div class="bg-white border-2 border-gray-200 rounded-xl p-5 hover:border-blue-400 transition-all cursor-pointer" onclick="selectPlantAndAnalyze(${Number(rec.id)})">
                 <div class="flex items-start justify-between">
                     <div class="flex items-start gap-4">
                         <!-- Gambar Tanaman -->
                         <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                             ${rec.gambar ? 
-                                `<img src="${rec.gambar}" alt="${rec.nama}" class="w-full h-full object-cover">` :
+                                `<img src="${esc(rec.gambar)}" alt="${esc(rec.nama)}" class="w-full h-full object-cover">` :
                                 `<div class="w-full h-full flex items-center justify-center text-gray-400 text-2xl">🌱</div>`
                             }
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-gray-800 mb-1">${index + 1}. ${rec.nama}</h3>
+                            <h3 class="text-xl font-bold text-gray-800 mb-1">${index + 1}. ${esc(rec.nama)}</h3>
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusColor.bg} ${statusColor.text}">
-                                    ${rec.status}
+                                    ${esc(rec.status)}
                                 </span>
-                                <span class="text-sm text-gray-600">Score: ${rec.score}/100</span>
+                                <span class="text-sm text-gray-600">Score: ${esc(rec.score)}/100</span>
                             </div>
                             <div class="flex gap-4 text-sm">
                                 <span class="${rec.match_details.suhu_match ? 'text-green-600' : 'text-red-600'}">
@@ -438,7 +451,7 @@ function renderRecommendations(data) {
                         <button class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition font-semibold whitespace-nowrap">
                             Analisis
                         </button>
-                        <a href="/budidaya/${rec.id}" 
+                        <a href="/budidaya/${Number(rec.id)}"
                            class="px-4 py-2 bg-[#4f8a5b] text-white rounded-lg hover:bg-[#2f5d3a] transition font-semibold text-center no-underline whitespace-nowrap">
                             Budidaya
                         </a>
@@ -457,7 +470,7 @@ function renderRecommendations(data) {
  */
 function renderDetailedAnalysis(data) {
     if (!data.success) {
-        return `<div class="p-6 bg-red-50 rounded-xl"><p class="text-red-700">Error: ${data.error}</p></div>`;
+        return `<div class="p-6 bg-red-50 rounded-xl"><p class="text-red-700">Error: ${esc(data.error)}</p></div>`;
     }
     
     // Simpan state untuk navigasi kembali
@@ -489,12 +502,12 @@ function renderDetailedAnalysis(data) {
             <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white p-6 rounded-xl">
                 <div class="flex items-center gap-4">
                     ${plant.gambar ? 
-                        `<img src="${plant.gambar}" alt="${plant.nama}" class="w-20 h-20 rounded-lg object-cover border-2 border-white/30">` :
+                        `<img src="${esc(plant.gambar)}" alt="${esc(plant.nama)}" class="w-20 h-20 rounded-lg object-cover border-2 border-white/30">` :
                         ''
                     }
                     <div>
-                        <h2 class="text-3xl font-bold mb-2">${plant.nama}</h2>
-                        <p class="text-emerald-100">${data.location.kecamatan}, ${data.location.kabupaten}</p>
+                        <h2 class="text-3xl font-bold mb-2">${esc(plant.nama)}</h2>
+                        <p class="text-emerald-100">${esc(data.location.kecamatan)}, ${esc(data.location.kabupaten)}</p>
                     </div>
                 </div>
             </div>
@@ -502,7 +515,7 @@ function renderDetailedAnalysis(data) {
             <!-- Status Badge -->
             <div class="text-center py-4">
                 <div class="inline-block px-6 py-3 rounded-full text-lg font-bold ${getAnalysisStatusBg(analysis.score)}">
-                    ${analysis.status} (Score: ${analysis.score}/100)
+                    ${esc(analysis.status)} (Score: ${esc(analysis.score)}/100)
                 </div>
             </div>
             
@@ -510,16 +523,16 @@ function renderDetailedAnalysis(data) {
             <div class="grid grid-cols-2 gap-4">
                 <div class="bg-orange-50 p-5 rounded-xl border-2 ${analysis.match_details.suhu.match ? 'border-green-300' : 'border-red-300'}">
                     <p class="text-sm text-gray-600 mb-2">🌡️ Suhu Saat Ini</p>
-                    <p class="text-3xl font-bold text-orange-700 mb-1">${weather.suhu}°C</p>
-                    <p class="text-sm text-gray-600">Ideal: ${plant.suhu_ideal}</p>
+                    <p class="text-3xl font-bold text-orange-700 mb-1">${esc(weather.suhu)}°C</p>
+                    <p class="text-sm text-gray-600">Ideal: ${esc(plant.suhu_ideal)}</p>
                     <p class="text-sm mt-2 ${analysis.match_details.suhu.match ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">
                         ${analysis.match_details.suhu.match ? '✓ Sesuai' : '✗ Tidak Sesuai'}
                     </p>
                 </div>
                 <div class="bg-blue-50 p-5 rounded-xl border-2 ${analysis.match_details.kelembaban.match ? 'border-green-300' : 'border-red-300'}">
                     <p class="text-sm text-gray-600 mb-2">💧 Kelembaban</p>
-                    <p class="text-3xl font-bold text-blue-700 mb-1">${weather.kelembaban}%</p>
-                    <p class="text-sm text-gray-600">Ideal: ${plant.kelembapan_ideal}</p>
+                    <p class="text-3xl font-bold text-blue-700 mb-1">${esc(weather.kelembaban)}%</p>
+                    <p class="text-sm text-gray-600">Ideal: ${esc(plant.kelembapan_ideal)}</p>
                     <p class="text-sm mt-2 ${analysis.match_details.kelembaban.match ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}">
                         ${analysis.match_details.kelembaban.match ? '✓ Sesuai' : '✗ Tidak Sesuai'}
                     </p>
@@ -529,7 +542,7 @@ function renderDetailedAnalysis(data) {
             <!-- Recommendation Text -->
             <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border-2 border-green-300">
                 <h3 class="text-lg font-bold text-gray-800 mb-3">💡 Rekomendasi:</h3>
-                <p class="text-gray-700 leading-relaxed">${analysis.recommendation}</p>
+                <p class="text-gray-700 leading-relaxed">${esc(analysis.recommendation)}</p>
             </div>
             
             <!-- Plant Info -->
@@ -538,30 +551,30 @@ function renderDetailedAnalysis(data) {
                 <div class="grid grid-cols-2 gap-4 text-sm">
                     <div>
                         <p class="text-gray-600">Musim Tanam</p>
-                        <p class="font-semibold text-gray-800">${plant.musim}</p>
+                        <p class="font-semibold text-gray-800">${esc(plant.musim)}</p>
                     </div>
                     <div>
                         <p class="text-gray-600">Jenis Tanah</p>
-                        <p class="font-semibold text-gray-800">${plant.jenis_tanah}</p>
+                        <p class="font-semibold text-gray-800">${esc(plant.jenis_tanah)}</p>
                     </div>
                     <div>
                         <p class="text-gray-600">Durasi Panen</p>
-                        <p class="font-semibold text-gray-800">${plant.durasi_panen}</p>
+                        <p class="font-semibold text-gray-800">${esc(plant.durasi_panen)}</p>
                     </div>
                     <div>
                         <p class="text-gray-600">Curah Hujan Ideal</p>
-                        <p class="font-semibold text-gray-800">${plant.curah_hujan_ideal}</p>
+                        <p class="font-semibold text-gray-800">${esc(plant.curah_hujan_ideal)}</p>
                     </div>
                 </div>
                 <div class="mt-4">
                     <p class="text-gray-600 text-sm mb-1">Deskripsi:</p>
-                    <p class="text-gray-700 text-sm leading-relaxed">${plant.deskripsi}</p>
+                    <p class="text-gray-700 text-sm leading-relaxed">${esc(plant.deskripsi)}</p>
                 </div>
             </div>
 
             <!-- TOMBOL BUDIDAYA BARU -->
             <div class="flex gap-3">
-                <a href="/budidaya/${plant.id}" 
+                <a href="/budidaya/${Number(plant.id)}"
                 class="flex-1 px-6 py-3 bg-[#4f8a5b] hover:bg-[#2f5d3a] text-white font-semibold rounded-xl transition-all text-center no-underline flex items-center justify-center gap-2">
                     Lihat Panduan Budidaya
                 </a>

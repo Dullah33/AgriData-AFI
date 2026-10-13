@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers\Penyuluh;
 
+use App\Http\Controllers\Concerns\MembutuhkanPenyuluh;
 use App\Http\Controllers\Controller;
 use App\Models\DiseaseReport;
+use App\Models\ExtensionOfficer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class DeteksiPenyakitController extends Controller
 {
+    use MembutuhkanPenyuluh;
+
     // GET /penyuluh/deteksi-penyakit
-    // "Deteksi Penyakit di Wilayah Binaan" (BAB 2A.6): daftar hasil AI
-    // Scanner dari petani di wilayah binaan penyuluh, dengan opsi memberi
-    // rekomendasi tindak lanjut (BAB 2.7 & KF-23).
+    // "Deteksi Penyakit di Wilayah Binaan" (BAB 2A.6): hasil AI Scanner dari
+    // petani di wilayah binaan, dengan opsi memberi rekomendasi tindak lanjut.
     public function index()
     {
-        $officer = Auth::user()->extensionOfficer;
-
-        if (! $officer) {
+        if (! $officer = $this->penyuluhAtauNull()) {
             return view('penyuluh.belum-terdaftar');
         }
 
@@ -26,10 +27,18 @@ class DeteksiPenyakitController extends Controller
             ->latest()
             ->paginate(10);
 
+        // Hitungan per status dalam satu query, bukan satu query per status
+        $perStatus = DiseaseReport::diWilayah($officer->wilayah_binaan)
+            ->whereIn('status', ['baru', 'ditindaklanjuti'])
+            ->toBase()
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
         $stats = [
-            'total'            => $laporan->total(),
-            'baru'             => DiseaseReport::diWilayah($officer->wilayah_binaan)->baru()->count(),
-            'ditindaklanjuti'  => DiseaseReport::diWilayah($officer->wilayah_binaan)->ditindaklanjuti()->count(),
+            'total'           => $laporan->total(),
+            'baru'            => (int) ($perStatus['baru'] ?? 0),
+            'ditindaklanjuti' => (int) ($perStatus['ditindaklanjuti'] ?? 0),
         ];
 
         return view('penyuluh.deteksi-penyakit.index', compact('officer', 'laporan', 'stats'));
@@ -39,8 +48,12 @@ class DeteksiPenyakitController extends Controller
     public function show(DiseaseReport $laporan)
     {
         $officer = $this->pastikanDiWilayahBinaan($laporan);
+        $this->tandaiDitinjau($laporan);
 
-        return view('penyuluh.deteksi-penyakit.show', compact('laporan', 'officer'));
+        return view('penyuluh.deteksi-penyakit.show', [
+            'laporan' => $laporan->loadMissing(['user', 'lahan']),
+            'officer' => $officer,
+        ]);
     }
 
     // POST /penyuluh/deteksi-penyakit/{laporan}/tindak-lanjut
@@ -49,7 +62,7 @@ class DeteksiPenyakitController extends Controller
         $this->pastikanDiWilayahBinaan($laporan);
 
         $data = $request->validate([
-            'rekomendasi_tindak_lanjut' => 'required|string',
+            'rekomendasi_tindak_lanjut' => 'required|string|max:3000',
         ], [
             'rekomendasi_tindak_lanjut.required' => 'Rekomendasi tindak lanjut harus diisi.',
         ]);
@@ -65,20 +78,20 @@ class DeteksiPenyakitController extends Controller
             ->with('success', 'Rekomendasi tindak lanjut berhasil dikirim.');
     }
 
-    // Pastikan laporan yang diakses berada di wilayah binaan penyuluh yang
-    // sedang login, sekaligus tandai statusnya "ditinjau" saat pertama dibuka.
-    private function pastikanDiWilayahBinaan(DiseaseReport $laporan)
+    private function pastikanDiWilayahBinaan(DiseaseReport $laporan): ExtensionOfficer
     {
-        $officer = Auth::user()->extensionOfficer;
-        abort_if(! $officer, 403, 'Profil penyuluh belum terdaftar.');
+        $officer = $this->penyuluh();
 
-        $namaWilayahLaporan = $laporan->wilayah?->nama_wilayah;
-        abort_if($namaWilayahLaporan !== $officer->wilayah_binaan, 403, 'Laporan ini berada di luar wilayah binaan Anda.');
+        abort_if($laporan->wilayah?->nama_wilayah !== $officer->wilayah_binaan, 403, 'Laporan ini berada di luar wilayah binaan Anda.');
 
+        return $officer;
+    }
+
+    // Laporan baru otomatis berstatus "ditinjau" saat pertama dibuka penyuluh
+    private function tandaiDitinjau(DiseaseReport $laporan): void
+    {
         if ($laporan->status === 'baru') {
             $laporan->update(['status' => 'ditinjau', 'ditinjau_oleh' => Auth::id(), 'ditinjau_at' => now()]);
         }
-
-        return $officer;
     }
 }
