@@ -80,4 +80,11 @@ return [
         'simulasi' => (bool) env('MIDTRANS_SIMULASI', false),
     ],
 
+    // OpenWeatherMap - https://home.openweathermap.org/api_keys
+    // Dipakai untuk cuaca lahan petani. Kalau kosong, aplikasi memakai
+    // Open-Meteo (gratis, tanpa key). Pengaturan lain di config/cuaca.php.
+    'openweathermap' => [
+        'key' => env('OPENWEATHER_API_KEY'),
+    ],
+
 ];

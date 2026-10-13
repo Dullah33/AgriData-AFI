@@ -30,6 +30,25 @@
                           :href="route('petani.kunjungan-penyuluh.index')" hint="Dari penyuluh wilayah" />
     </div>
 
+    <x-dashboard.panel :title="$cuaca['lahan'] ? 'Cuaca di '.$cuaca['lahan']->nama_lahan : 'Cuaca di lahan'"
+                       description="Kondisi saat ini, prakiraan, dan saran perawatan."
+                       :href="route('petani.lahan.index')" link-label="Semua lahan">
+        @if ($cuaca['data'])
+            <x-cuaca.kartu :cuaca="$cuaca['data']" :saran="$cuaca['saran']" lengkap />
+        @elseif ($cuaca['lahan'])
+            <x-dashboard.empty icon="cloud-off" title="Cuaca belum bisa diambil"
+                               description="Layanan cuaca sedang tidak bisa dihubungi. Coba muat ulang beberapa saat lagi." />
+        @elseif ($cuaca['adaLahan'])
+            <x-dashboard.empty icon="map-pin-plus" title="Lokasi lahan belum diketahui"
+                               description="Gambar batas lahan di peta supaya cuaca dan prakiraan hujan bisa ditampilkan."
+                               :href="route('petani.lahan.index')" action="Buka lahan saya" />
+        @else
+            <x-dashboard.empty icon="map" title="Belum ada lahan"
+                               description="Tambahkan lahan untuk memantau cuaca dan prakiraan hujan di lokasinya."
+                               :href="route('petani.lahan.create')" action="Tambah lahan" />
+        @endif
+    </x-dashboard.panel>
+
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <x-dashboard.panel class="lg:col-span-3" title="Perlu dikirim" description="Pesanan yang sudah dibayar dan menunggu Anda kirim."
                            :href="route('petani.pesanan.index', ['status' => 'diproses'])">

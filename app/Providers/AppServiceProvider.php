@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -28,5 +30,9 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        // Batas job pembaruan cuaca per menit, supaya tidak melewati kuota
+        // paket gratis OpenWeatherMap (60 panggilan/menit).
+        RateLimiter::for('cuaca-api', fn () => Limit::perMinute((int) config('cuaca.job_per_menit', 25)));
     }
 }

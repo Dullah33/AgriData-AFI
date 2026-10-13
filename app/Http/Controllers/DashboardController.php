@@ -11,6 +11,7 @@ use App\Models\UlasanRating;
 use App\Models\FieldVisit;
 use App\Models\DiseaseReport;
 use App\Models\Pembayaran;
+use App\Services\WeatherService;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -75,7 +76,37 @@ class DashboardController extends Controller
         $laporanTerbaru = DiseaseReport::where('user_id', $user->id)
             ->latest()->take(3)->get();
 
-        return view('dashboard.petani', compact('stats', 'pesananTerbaru', 'laporanTerbaru'));
+        $cuaca = $this->cuacaLahanUtama($profile);
+
+        return view('dashboard.petani', compact('stats', 'pesananTerbaru', 'laporanTerbaru', 'cuaca'));
+    }
+
+    /**
+     * Cuaca untuk satu lahan yang ditampilkan di dashboard: lahan aktif yang
+     * punya koordinat didahulukan. Datanya dari cache WeatherService (3 jam).
+     */
+    private function cuacaLahanUtama(?PetaniProfile $profile): array
+    {
+        if (! $profile) {
+            return ['lahan' => null, 'data' => null, 'saran' => [], 'adaLahan' => false];
+        }
+
+        $profile->loadMissing('wilayah');
+        $lahans = $profile->lahans()->with('weatherData')->latest()->get()
+            ->each->setRelation('petaniProfile', $profile);
+
+        $lahan = $lahans->sortBy(fn ($l) => $l->status === 'aktif' ? 0 : 1)
+            ->first(fn ($l) => $l->koordinatCuaca() !== null);
+
+        $layanan = app(WeatherService::class);
+        $data = $lahan ? $layanan->untukLahan($lahan) : null;
+
+        return [
+            'lahan' => $lahan,
+            'data' => $data,
+            'saran' => $data ? $layanan->saranPerawatan($data) : [],
+            'adaLahan' => $lahans->isNotEmpty(),
+        ];
     }
 
     private function userDashboard()

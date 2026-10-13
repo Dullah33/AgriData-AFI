@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Petani;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lahan;
+use App\Services\WeatherService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +17,7 @@ class LahanController extends Controller
     // GET /petani/lahan
     // Halaman "Profil & Lahan Saya" (BAB 2A.3): daftar seluruh lahan
     // milik petani yang sedang login.
-    public function index()
+    public function index(WeatherService $weather)
     {
         $petaniProfile = Auth::user()->petaniProfile;
 
@@ -26,11 +27,19 @@ class LahanController extends Controller
             return view('petani.lahan.belum-profil');
         }
 
-        $lahans = $petaniProfile->lahans()->latest()->get();
+        $petaniProfile->loadMissing('wilayah');
+        $lahans = $petaniProfile->lahans()->with('weatherData')->latest()->get()
+            ->each->setRelation('petaniProfile', $petaniProfile);
+
+        // Cuaca tiap lahan diambil dari cache (3 jam). Lahan yang berdekatan
+        // berbagi satu entri cache, jadi API paling banyak dipanggil sekali
+        // per titik lokasi meski petani punya banyak lahan.
+        $cuaca = $lahans->mapWithKeys(fn (Lahan $lahan) => [$lahan->id => $weather->untukLahan($lahan)]);
 
         return view('petani.lahan.index', [
             'petaniProfile' => $petaniProfile,
             'lahans'        => $lahans,
+            'cuaca'         => $cuaca,
         ]);
     }
 
