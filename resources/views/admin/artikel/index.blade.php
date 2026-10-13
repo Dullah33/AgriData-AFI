@@ -16,7 +16,7 @@
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-lg font-semibold text-gray-800">Daftar Artikel Pertanian</h2>
         <a href="{{ route('admin.artikel.create') }}"
-           class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">
+           class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg">
             + Tambah Artikel
         </a>
     </div>

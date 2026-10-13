@@ -52,7 +52,7 @@
             </p>
 
             <a href="{{ route('user.deteksi-penyakit.create') }}"
-               class="inline-block mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">
+               class="inline-block mt-4 px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg">
                 🔬 Scan Foto Lain
             </a>
         </div>

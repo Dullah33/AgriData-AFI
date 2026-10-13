@@ -22,29 +22,29 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Kode Tanaman *</label>
                         <input type="text" name="kode" value="{{ old('kode', $plant->kode) }}" required
-                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                         @error('kode') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Tanaman *</label>
                         <input type="text" name="nama" value="{{ old('nama', $plant->nama) }}" required
-                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                         @error('nama') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">URL Gambar</label>
                         <input type="text" name="gambar" value="{{ old('gambar', $plant->gambar) }}" 
-                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Deskripsi</label>
                         <textarea name="deskripsi" rows="3" 
-                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">{{ old('deskripsi', $plant->deskripsi) }}</textarea>
+                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">{{ old('deskripsi', $plant->deskripsi) }}</textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Keunggulan</label>
                         <textarea name="keunggulan" rows="3" 
-                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">{{ old('keunggulan', $plant->keunggulan) }}</textarea>
+                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">{{ old('keunggulan', $plant->keunggulan) }}</textarea>
                     </div>
                 </div>
             </div>
@@ -56,56 +56,56 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Suhu Ideal (Teks) *</label>
                         <input type="text" name="suhu_ideal" value="{{ old('suhu_ideal', $plant->suhu_ideal) }}" required
-                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Min Suhu (°C) *</label>
                             <input type="number" step="0.01" name="min_suhu" value="{{ old('min_suhu', $plant->min_suhu) }}" required
-                                   class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                                   class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Max Suhu (°C) *</label>
                             <input type="number" step="0.01" name="max_suhu" value="{{ old('max_suhu', $plant->max_suhu) }}" required
-                                   class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                                   class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Kelembapan Ideal (Teks) *</label>
                         <input type="text" name="kelembapan_ideal" value="{{ old('kelembapan_ideal', $plant->kelembapan_ideal) }}" required
-                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Min Kelembaban (%) *</label>
                             <input type="number" step="0.01" name="min_kelembaban" value="{{ old('min_kelembaban', $plant->min_kelembaban) }}" required
-                                   class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                                   class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Max Kelembaban (%) *</label>
                             <input type="number" step="0.01" name="max_kelembaban" value="{{ old('max_kelembaban', $plant->max_kelembaban) }}" required
-                                   class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                                   class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Curah Hujan Ideal *</label>
                         <input type="text" name="curah_hujan_ideal" value="{{ old('curah_hujan_ideal', $plant->curah_hujan_ideal) }}" required
-                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Musim Tanam *</label>
                         <input type="text" name="musim" value="{{ old('musim', $plant->musim) }}" required
-                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Jenis Tanah *</label>
                         <input type="text" name="jenis_tanah" value="{{ old('jenis_tanah', $plant->jenis_tanah) }}" required
-                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Durasi Panen</label>
                         <input type="text" name="durasi_panen" value="{{ old('durasi_panen', $plant->durasi_panen) }}"
-                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                               class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                     </div>
                 </div>
             </div>
@@ -117,22 +117,22 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Status Cuaca Hujan</label>
                         <textarea name="status_cuaca_hujan" rows="2" 
-                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">{{ old('status_cuaca_hujan', $plant->status_cuaca_hujan) }}</textarea>
+                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">{{ old('status_cuaca_hujan', $plant->status_cuaca_hujan) }}</textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Status Cuaca Panas</label>
                         <textarea name="status_cuaca_panas" rows="2" 
-                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">{{ old('status_cuaca_panas', $plant->status_cuaca_panas) }}</textarea>
+                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">{{ old('status_cuaca_panas', $plant->status_cuaca_panas) }}</textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Status Curah Hujan Tinggi</label>
                         <textarea name="status_curah_hujan_tinggi" rows="2" 
-                                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">{{ old('status_curah_hujan_tinggi', $plant->status_curah_hujan_tinggi) }}</textarea>
+                                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">{{ old('status_curah_hujan_tinggi', $plant->status_curah_hujan_tinggi) }}</textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Status Curah Hujan Rendah</label>
                         <textarea name="status_curah_hujan_rendah" rows="2" 
-                                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">{{ old('status_curah_hujan_rendah', $plant->status_curah_hujan_rendah) }}</textarea>
+                                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">{{ old('status_curah_hujan_rendah', $plant->status_curah_hujan_rendah) }}</textarea>
                     </div>
                 </div>
             </div>
@@ -144,17 +144,17 @@
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Persiapan Lahan</label>
                         <textarea name="budidaya_persiapan_lahan" rows="3" 
-                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">{{ old('budidaya_persiapan_lahan', $plant->budidaya_persiapan_lahan) }}</textarea>
+                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">{{ old('budidaya_persiapan_lahan', $plant->budidaya_persiapan_lahan) }}</textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Pemupukan</label>
                         <textarea name="budidaya_pemupukan" rows="3" 
-                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">{{ old('budidaya_pemupukan', $plant->budidaya_pemupukan) }}</textarea>
+                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">{{ old('budidaya_pemupukan', $plant->budidaya_pemupukan) }}</textarea>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Irigasi</label>
                         <textarea name="budidaya_irigasi" rows="3" 
-                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">{{ old('budidaya_irigasi', $plant->budidaya_irigasi) }}</textarea>
+                                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">{{ old('budidaya_irigasi', $plant->budidaya_irigasi) }}</textarea>
                     </div>
                 </div>
             </div>
@@ -172,12 +172,12 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Judul Langkah</label>
                                 <input type="text" name="langkah_budidaya[{{ $index }}][title]" value="{{ $step['title'] ?? '' }}"
-                                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Konten</label>
                                 <textarea name="langkah_budidaya[{{ $index }}][content]" rows="2" 
-                                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">{{ $step['content'] ?? '' }}</textarea>
+                                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">{{ $step['content'] ?? '' }}</textarea>
                             </div>
                         </div>
                         @if($index > 0)
@@ -193,12 +193,12 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Judul Langkah</label>
                                 <input type="text" name="langkah_budidaya[0][title]" 
-                                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Konten</label>
                                 <textarea name="langkah_budidaya[0][content]" rows="2" 
-                                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"></textarea>
+                                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none"></textarea>
                             </div>
                         </div>
                     </div>
@@ -223,17 +223,17 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Icon (Emoji)</label>
                                 <input type="text" name="tips_budidaya[{{ $index }}][icon]" value="{{ $tip['icon'] ?? '' }}"
-                                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Judul Tips</label>
                                 <input type="text" name="tips_budidaya[{{ $index }}][title]" value="{{ $tip['title'] ?? '' }}"
-                                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Konten</label>
                                 <textarea name="tips_budidaya[{{ $index }}][content]" rows="2" 
-                                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">{{ $tip['content'] ?? '' }}</textarea>
+                                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">{{ $tip['content'] ?? '' }}</textarea>
                             </div>
                         </div>
                         @if($index > 0)
@@ -249,17 +249,17 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Icon (Emoji)</label>
                                 <input type="text" name="tips_budidaya[0][icon]" placeholder="💡" 
-                                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Judul Tips</label>
                                 <input type="text" name="tips_budidaya[0][title]" 
-                                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Konten</label>
                                 <textarea name="tips_budidaya[0][content]" rows="2" 
-                                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"></textarea>
+                                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none"></textarea>
                             </div>
                         </div>
                     </div>
@@ -274,7 +274,7 @@
             <!-- Submit Buttons -->
             <div class="flex gap-4">
                 <button type="submit" 
-                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all">
+                        class="px-6 py-3 bg-brand-700 hover:bg-brand-800 text-white font-semibold rounded-xl transition-all">
                     Update Tanaman
                 </button>
                 <a href="{{ route('admin.plants.index') }}" 
@@ -300,12 +300,12 @@ function addStep() {
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Judul Langkah</label>
                 <input type="text" name="langkah_budidaya[${stepCount}][title]" 
-                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
             </div>
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Konten</label>
                 <textarea name="langkah_budidaya[${stepCount}][content]" rows="2" 
-                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"></textarea>
+                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none"></textarea>
             </div>
         </div>
         <button type="button" onclick="this.parentElement.remove()" 
@@ -326,17 +326,17 @@ function addTip() {
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Icon (Emoji)</label>
                 <input type="text" name="tips_budidaya[${tipCount}][icon]" placeholder="💡" 
-                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
             </div>
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Judul Tips</label>
                 <input type="text" name="tips_budidaya[${tipCount}][title]" 
-                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none">
+                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none">
             </div>
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Konten</label>
                 <textarea name="tips_budidaya[${tipCount}][content]" rows="2" 
-                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"></textarea>
+                          class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-brand-500 focus:outline-none"></textarea>
             </div>
         </div>
         <button type="button" onclick="this.parentElement.remove()" 

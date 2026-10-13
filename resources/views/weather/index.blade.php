@@ -24,7 +24,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Provinsi</label>
                             <select id="provinsi" 
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white disabled:bg-gray-100 disabled:cursor-not-allowed">
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all bg-white disabled:bg-gray-100 disabled:cursor-not-allowed">
                                 <option value="">Memuat provinsi...</option>
                             </select>
                         </div>
@@ -34,7 +34,7 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Kabupaten/Kota</label>
                             <select id="kabupaten" 
                                 disabled
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-gray-100 disabled:cursor-not-allowed">
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all bg-gray-100 disabled:cursor-not-allowed">
                                 <option value="">-- Pilih Kabupaten --</option>
                             </select>
                         </div>
@@ -44,7 +44,7 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Kecamatan</label>
                             <select id="kecamatan" 
                                 disabled
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-gray-100 disabled:cursor-not-allowed">
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition-all bg-gray-100 disabled:cursor-not-allowed">
                                 <option value="">-- Pilih Kecamatan --</option>
                             </select>
                         </div>
@@ -64,7 +64,7 @@
                         <!-- Tombol Analisis -->
                         <button id="btnAnalisis" 
                             disabled
-                            class="w-full mt-6 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                            class="w-full mt-6 bg-brand-700 hover:bg-brand-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
                             <i data-lucide="search" class="w-5 h-5"></i>
                             Analisis Sekarang
                         </button>
@@ -105,7 +105,7 @@
                             <!-- Header -->
                             <div class="flex items-center gap-3 mb-4">
                                 <div class="p-2 bg-blue-50 rounded-lg">
-                                    <i data-lucide="loader-2" class="w-6 h-6 text-blue-600 animate-spin"></i>
+                                    <i data-lucide="loader-2" class="w-6 h-6 text-brand-700 animate-spin"></i>
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-gray-800">Sedang Menganalisis...</h4>
@@ -120,7 +120,7 @@
                             
                             <!-- Step Indicators -->
                             <ul class="text-sm text-gray-600 space-y-3">
-                                <li id="step1" class="flex items-center gap-3 font-medium text-blue-600">
+                                <li id="step1" class="flex items-center gap-3 font-medium text-brand-700">
                                     <i class="fas fa-circle-notch fa-spin w-4"></i> 
                                     <span>Mengonversi lokasi ke koordinat...</span>
                                 </li>

@@ -4,7 +4,7 @@
 
 <div class="max-w-2xl">
     <a href="{{ route('user.marketplace') }}"
-       class="text-sm text-blue-600 hover:underline mb-4 block">← Kembali ke Marketplace</a>
+       class="text-sm text-brand-700 hover:underline mb-4 block">← Kembali ke Marketplace</a>
 
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         {{-- Foto Produk --}}
@@ -18,7 +18,7 @@
 
         <div class="p-6">
             {{-- Info Produk --}}
-            <span class="text-xs font-semibold text-blue-600 uppercase tracking-wide">{{ $produk->kategori }}</span>
+            <span class="text-xs font-semibold text-brand-700 uppercase tracking-wide">{{ $produk->kategori }}</span>
             <h2 class="text-2xl font-bold text-gray-800 mt-1">{{ $produk->nama_produk }}</h2>
             <p class="text-sm text-gray-500 mt-1">Dijual oleh: <span class="font-medium text-gray-700">{{ $produk->petani->username }}</span></p>
 
@@ -54,7 +54,7 @@
                         </label>
                         <input type="number" name="jumlah" value="{{ old('jumlah', 1) }}"
                                min="1" max="{{ $produk->stok }}"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white">
                         <p class="text-xs text-gray-400 mt-1">Maksimal {{ $produk->stok }} {{ $produk->satuan }}</p>
                     </div>
 
@@ -63,14 +63,14 @@
                             Alamat Pengiriman <span class="text-red-500">*</span>
                         </label>
                         <textarea name="alamat_pengiriman" rows="3"
-                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white"
                                   placeholder="Masukkan alamat lengkap (jalan, RT/RW, desa, kecamatan, kota)...">{{ old('alamat_pengiriman') }}</textarea>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Catatan untuk Petani (opsional)</label>
                         <input type="text" name="catatan" value="{{ old('catatan') }}"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white"
                                placeholder="Misal: tolong pilihkan yang segar...">
                     </div>
 

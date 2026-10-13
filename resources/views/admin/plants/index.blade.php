@@ -11,7 +11,7 @@
                 <p class="text-gray-600 mt-1">Kelola data tanaman untuk sistem prediksi cuaca</p>
             </div>
             <a href="{{ route('admin.plants.create') }}" 
-               class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all flex items-center gap-2">
+               class="px-6 py-3 bg-brand-700 hover:bg-brand-800 text-white font-semibold rounded-xl transition-all flex items-center gap-2">
                 <i data-lucide="plus" class="w-5 h-5"></i>
                 Tambah Tanaman
             </a>

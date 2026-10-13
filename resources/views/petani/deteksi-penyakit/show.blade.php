@@ -10,7 +10,7 @@
     @endif
 
     <a href="{{ route('petani.deteksi-penyakit.index') }}"
-       class="text-sm text-blue-600 hover:underline mb-4 inline-block">← Riwayat Deteksi</a>
+       class="text-sm text-brand-700 hover:underline mb-4 inline-block">← Riwayat Deteksi</a>
 
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         <img src="{{ Storage::url($laporan->foto_tanaman) }}" alt="Foto tanaman yang dianalisis"
@@ -65,7 +65,7 @@
                     </span>
                 </div>
                 <a href="{{ route('petani.deteksi-penyakit.create') }}"
-                   class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">
+                   class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg">
                     🔬 Scan Foto Lain
                 </a>
             </div>

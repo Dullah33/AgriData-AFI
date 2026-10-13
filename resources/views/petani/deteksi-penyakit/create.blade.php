@@ -4,7 +4,7 @@
 
 <div class="max-w-5xl">
     <a href="{{ route('petani.deteksi-penyakit.index') }}"
-       class="inline-block mb-4 text-sm text-blue-600 hover:underline">← Riwayat Deteksi</a>
+       class="inline-block mb-4 text-sm text-brand-700 hover:underline">← Riwayat Deteksi</a>
 
     <div class="grid gap-6 lg:grid-cols-5">
         <div class="lg:col-span-3 bg-white rounded-2xl shadow-sm p-5 sm:p-6">

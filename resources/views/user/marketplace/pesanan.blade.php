@@ -9,7 +9,7 @@
 <div class="bg-white rounded-xl shadow-sm p-6">
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-lg font-semibold text-gray-800">Pesanan Saya (Sedang Berjalan)</h2>
-        <a href="{{ route('user.riwayat-ulasan') }}" class="text-xs text-blue-600 hover:underline">
+        <a href="{{ route('user.riwayat-ulasan') }}" class="text-xs text-brand-700 hover:underline">
             Lihat Riwayat & Ulasan Saya →
         </a>
     </div>

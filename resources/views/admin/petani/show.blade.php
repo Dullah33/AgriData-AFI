@@ -13,7 +13,7 @@
 <div class="bg-white rounded-xl shadow-sm p-6 max-w-2xl">
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-lg font-semibold text-gray-800">Detail Profil Petani</h2>
-        <a href="{{ route('admin.petani.index') }}" class="text-sm text-blue-600 hover:underline">&larr; Kembali</a>
+        <a href="{{ route('admin.petani.index') }}" class="text-sm text-brand-700 hover:underline">&larr; Kembali</a>
     </div>
 
     <dl class="grid grid-cols-3 gap-y-4 text-sm">
@@ -44,7 +44,7 @@
         <dt class="text-gray-500">Foto KTP</dt>
         <dd class="col-span-2">
             @if ($petani->foto_ktp)
-                <a href="{{ \Illuminate\Support\Facades\Storage::url($petani->foto_ktp) }}" target="_blank" class="text-blue-600 hover:underline">Lihat foto</a>
+                <a href="{{ \Illuminate\Support\Facades\Storage::url($petani->foto_ktp) }}" target="_blank" class="text-brand-700 hover:underline">Lihat foto</a>
             @else
                 <span class="text-gray-400">Belum diunggah</span>
             @endif

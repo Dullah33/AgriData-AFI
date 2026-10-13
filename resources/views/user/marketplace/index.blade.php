@@ -12,14 +12,14 @@
     {{-- Filter & Cari --}}
     <form method="GET" action="{{ route('user.marketplace') }}" class="flex gap-3 mb-6">
         <input type="text" name="cari" value="{{ request('cari') }}" placeholder="Cari produk..."
-               class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+               class="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-brand-500">
         <select name="kategori" class="border border-gray-300 rounded-lg px-3 py-2 text-sm">
             <option value="">Semua Kategori</option>
             @foreach ($kategoris as $k)
                 <option value="{{ $k }}" {{ request('kategori') === $k ? 'selected' : '' }}>{{ $k }}</option>
             @endforeach
         </select>
-        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-semibold">Cari</button>
+        <button type="submit" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm rounded-lg font-semibold">Cari</button>
         <a href="{{ route('user.marketplace') }}" class="px-4 py-2 text-sm text-gray-500 hover:underline self-center">Reset</a>
     </form>
 
@@ -36,7 +36,7 @@
                         <div class="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-300 text-sm">Tidak ada foto</div>
                     @endif
                     <div class="p-4">
-                        <span class="text-xs text-blue-600 font-semibold">{{ $p->kategori }}</span>
+                        <span class="text-xs text-brand-700 font-semibold">{{ $p->kategori }}</span>
                         <h3 class="font-semibold text-gray-800 mt-1">{{ $p->nama_produk }}</h3>
                         <p class="text-xs text-gray-500 mt-1">Oleh: {{ $p->petani->username }}</p>
                         <div class="flex items-center justify-between mt-3">
@@ -47,7 +47,7 @@
                             <span class="text-xs text-gray-500">Stok: {{ $p->stok }}</span>
                         </div>
                         <a href="{{ route('user.marketplace.show', $p) }}"
-                           class="mt-3 block w-full text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">
+                           class="mt-3 block w-full text-center px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg">
                             Lihat Detail
                         </a>
                     </div>

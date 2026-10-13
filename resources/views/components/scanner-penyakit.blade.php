@@ -212,22 +212,22 @@
             .scan-grid {
                 position: absolute; inset: 0;
                 background-image:
-                    linear-gradient(rgba(74, 222, 128, .14) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(74, 222, 128, .14) 1px, transparent 1px);
+                    linear-gradient(rgba(143, 209, 166, .14) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(143, 209, 166, .14) 1px, transparent 1px);
                 background-size: 28px 28px;
             }
             .scan-garis {
                 position: absolute; left: 0; right: 0; height: 3px;
-                background: linear-gradient(90deg, transparent, #4ade80 20%, #bbf7d0 50%, #4ade80 80%, transparent);
-                box-shadow: 0 0 16px 4px rgba(74, 222, 128, .55), 0 0 60px 18px rgba(74, 222, 128, .18);
+                background: linear-gradient(90deg, transparent, #8fd1a6 20%, #dcefe2 50%, #8fd1a6 80%, transparent);
+                box-shadow: 0 0 16px 4px rgba(143, 209, 166, .55), 0 0 60px 18px rgba(143, 209, 166, .18);
                 animation: scan-sapu 2.4s ease-in-out infinite alternate;
             }
             .scan-titik {
                 position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px;
-                border-radius: 9999px; border: 2px solid #4ade80;
+                border-radius: 9999px; border: 2px solid #8fd1a6;
                 animation: scan-denyut 2.1s ease-out infinite;
             }
-            .scan-sudut { position: absolute; width: 28px; height: 28px; border-color: #4ade80; }
+            .scan-sudut { position: absolute; width: 28px; height: 28px; border-color: #8fd1a6; }
             @keyframes scan-sapu { from { top: 3%; } to { top: 97%; } }
             @keyframes scan-denyut {
                 0%   { transform: scale(.4); opacity: 0; }

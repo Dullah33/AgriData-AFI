@@ -89,7 +89,7 @@ document.addEventListener('alpine:init', () => {
 
             get keteranganTahap() {
                 if (this.tahap === 'unggah') return 'Jangan tutup halaman ini.';
-                if (this.tahap === 'analisis') return 'Biasanya selesai dalam 5–20 detik.';
+                if (this.tahap === 'analisis') return 'Biasanya selesai dalam 5-20 detik.';
                 if (this.tahap === 'selesai') return 'Membuka hasil diagnosis…';
                 return '';
             },

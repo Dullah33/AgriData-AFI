@@ -50,7 +50,7 @@
                 <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
             @endforeach
         </select>
-        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">Filter</button>
+        <button type="submit" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg">Filter</button>
         <a href="{{ route('admin.peta-lahan.index') }}" class="px-4 py-2 text-sm text-gray-500 hover:underline self-center">Reset</a>
     </form>
 </div>

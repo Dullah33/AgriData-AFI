@@ -6,7 +6,7 @@
     <ul class="space-y-3 text-sm text-gray-600">
         <li class="flex gap-3">
             <i data-lucide="focus" class="w-4 h-4 mt-0.5 shrink-0 text-green-600"></i>
-            <span>Fokus ke bagian yang bergejala, misalnya satu daun yang bercak. Jarak sekitar 20–30 cm.</span>
+            <span>Fokus ke bagian yang bergejala, misalnya satu daun yang bercak. Jarak sekitar 20-30 cm.</span>
         </li>
         <li class="flex gap-3">
             <i data-lucide="sun" class="w-4 h-4 mt-0.5 shrink-0 text-green-600"></i>

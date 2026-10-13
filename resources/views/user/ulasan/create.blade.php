@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="max-w-xl">
-    <a href="{{ route('user.pesanan') }}" class="text-sm text-blue-600 hover:underline block mb-4">← Kembali ke Pesanan Saya</a>
+    <a href="{{ route('user.pesanan') }}" class="text-sm text-brand-700 hover:underline block mb-4">← Kembali ke Pesanan Saya</a>
 
     <div class="bg-white rounded-xl shadow-sm p-6">
         <h2 class="text-lg font-semibold text-gray-800 mb-1">Beri Ulasan & Rating</h2>
@@ -46,7 +46,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Komentar (opsional)</label>
                 <textarea name="komentar" rows="4"
-                          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                           placeholder="Ceritakan pengalaman berbelanja Anda...">{{ old('komentar') }}</textarea>
                 <p class="text-xs text-gray-400 mt-1">Maksimal 500 karakter</p>
             </div>

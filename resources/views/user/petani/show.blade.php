@@ -5,7 +5,7 @@
 @section('content')
 
 <div class="mb-4">
-    <a href="{{ route('user.petani.index') }}" class="text-sm text-blue-600 hover:underline">← Kembali ke Profil Petani</a>
+    <a href="{{ route('user.petani.index') }}" class="text-sm text-brand-700 hover:underline">← Kembali ke Profil Petani</a>
 </div>
 
 <div class="bg-white rounded-xl shadow-sm p-6 mb-6 max-w-2xl">
