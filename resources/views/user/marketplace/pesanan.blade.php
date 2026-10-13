@@ -1,53 +1,89 @@
 @extends('layouts.dashboard')
-@section('title', 'Keranjang & Pesanan Saya')
+@section('title', 'Pesanan Saya')
 @section('content')
 
-@if (session('success'))
-    <div class="mb-4 px-4 py-3 bg-green-100 border border-green-300 text-green-800 rounded-lg text-sm">{{ session('success') }}</div>
-@endif
-
-<div class="bg-white rounded-xl shadow-sm p-6">
-    <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-semibold text-gray-800">Pesanan Saya (Sedang Berjalan)</h2>
-        <a href="{{ route('user.riwayat-ulasan') }}" class="text-xs text-brand-700 hover:underline">
-            Lihat Riwayat & Ulasan Saya →
+<div class="space-y-6">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-stone-900">Pesanan saya</h1>
+            <p class="mt-1 text-sm text-stone-500">Pantau pembayaran dan status pengiriman pesanan Anda.</p>
+        </div>
+        <a href="{{ route('user.riwayat-ulasan') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-900">
+            <i data-lucide="star" class="h-4 w-4"></i> Riwayat & ulasan
         </a>
     </div>
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-            <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
-                <tr>
-                    <th class="px-4 py-3">Produk</th>
-                    <th class="px-4 py-3">Petani</th>
-                    <th class="px-4 py-3">Jumlah</th>
-                    <th class="px-4 py-3">Total</th>
-                    <th class="px-4 py-3">Status</th>
-                    <th class="px-4 py-3">Tanggal</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-                @forelse ($pesanans as $p)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-800">{{ $p->produk->nama_produk }}</td>
-                        <td class="px-4 py-3 text-gray-600">{{ $p->produk->petani->username }}</td>
-                        <td class="px-4 py-3">{{ $p->jumlah }} {{ $p->produk->satuan }}</td>
-                        <td class="px-4 py-3 font-semibold">Rp {{ number_format($p->total_harga, 0, ',', '.') }}</td>
-                        <td class="px-4 py-3">
-                            @php $badge = ['pending'=>'yellow','diproses'=>'blue','batal'=>'red'][$p->status_transaksi] ?? 'gray'; @endphp
-                            <span class="px-2 py-1 text-xs font-semibold bg-{{ $badge }}-100 text-{{ $badge }}-700 rounded-full capitalize">
-                                {{ $p->status_transaksi }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-gray-500">{{ $p->created_at->format('d M Y') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-4 py-8 text-center text-gray-400">Belum ada pesanan yang sedang berjalan.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+
+    <x-flash />
+
+    @if ($pembayarans->isEmpty() && $pesananLama->isEmpty())
+        <div class="rounded-2xl border border-stone-200/80 bg-white p-6 shadow-card">
+            <x-dashboard.empty icon="shopping-basket" title="Belum ada pesanan"
+                               description="Hasil panen segar dari petani lokal menunggu di marketplace."
+                               :href="route('user.marketplace')" action="Mulai belanja" />
+        </div>
+    @endif
+
+    <div class="space-y-4">
+        @foreach ($pembayarans as $pembayaran)
+            <article class="rounded-2xl border border-stone-200/80 bg-white shadow-card">
+                <header class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 px-5 py-4">
+                    <div class="min-w-0">
+                        <p class="flex flex-wrap items-center gap-2 text-sm font-semibold text-stone-900">
+                            {{ $pembayaran->kode }}
+                            <x-marketplace.status-pembayaran :pembayaran="$pembayaran" />
+                        </p>
+                        <p class="mt-0.5 text-xs text-stone-500">
+                            {{ $pembayaran->created_at->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('j M Y, H:i') }}
+                            <span class="text-stone-300" aria-hidden="true">/</span> {{ $pembayaran->labelMetode() }}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <p class="text-right">
+                            <span class="block text-xs text-stone-500">Total</span>
+                            <span class="text-sm font-semibold text-stone-900 tabular-nums">Rp {{ number_format($pembayaran->jumlah, 0, ',', '.') }}</span>
+                        </p>
+                        <a href="{{ route('user.pembayaran.show', $pembayaran) }}" @class([
+                            'inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition',
+                            'bg-brand-700 text-white shadow-sm hover:bg-brand-800' => $pembayaran->bisaDibayar(),
+                            'bg-white text-stone-700 ring-1 ring-inset ring-stone-200 hover:bg-stone-50' => ! $pembayaran->bisaDibayar(),
+                        ])>
+                            {{ $pembayaran->bisaDibayar() ? 'Bayar' : 'Detail' }} <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                        </a>
+                    </div>
+                </header>
+                <ul class="divide-y divide-stone-100 px-5">
+                    @foreach ($pembayaran->transaksis as $t)
+                        <li class="flex items-center justify-between gap-3 py-3">
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-medium text-stone-900">{{ $t->produk->nama_produk ?? 'Produk' }}</p>
+                                <p class="text-xs text-stone-500">{{ $t->jumlah }} {{ $t->produk->satuan ?? '' }} dari {{ $t->produk->petani->username ?? '-' }}</p>
+                            </div>
+                            <x-dashboard.status :status="$t->status_transaksi" />
+                        </li>
+                    @endforeach
+                </ul>
+            </article>
+        @endforeach
     </div>
-    @if ($pesanans->hasPages()) <div class="mt-4">{{ $pesanans->links() }}</div> @endif
+
+    @if ($pembayarans->hasPages())
+        <div>{{ $pembayarans->links() }}</div>
+    @endif
+
+    @if ($pesananLama->isNotEmpty())
+        <x-dashboard.panel title="Pesanan sebelumnya" description="Dibuat sebelum ada fitur pembayaran online, dikonfirmasi langsung oleh petani.">
+            <ul class="-my-1 divide-y divide-stone-100">
+                @foreach ($pesananLama as $t)
+                    <li class="flex items-center justify-between gap-3 py-3">
+                        <div class="min-w-0">
+                            <p class="truncate text-sm font-medium text-stone-900">{{ $t->produk->nama_produk ?? 'Produk' }}</p>
+                            <p class="text-xs text-stone-500">{{ $t->jumlah }} {{ $t->produk->satuan ?? '' }} / Rp {{ number_format($t->total_harga, 0, ',', '.') }}</p>
+                        </div>
+                        <x-dashboard.status :status="$t->status_transaksi" />
+                    </li>
+                @endforeach
+            </ul>
+        </x-dashboard.panel>
+    @endif
 </div>
 @endsection

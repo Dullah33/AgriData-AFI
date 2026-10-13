@@ -28,7 +28,8 @@
             </div>
         </x-dashboard.stat>
         <x-dashboard.stat label="Transaksi bulan ini" :value="$stats['transaksi_bulan_ini']" icon="shopping-basket"
-                          :hint="$stats['transaksi_pending'].' masih menunggu'" />
+                          :href="route('admin.pembayaran.index')" :tone="$stats['pembayaran_menunggu'] > 0 ? 'attention' : 'brand'"
+                          :hint="$stats['pembayaran_menunggu'] > 0 ? $stats['pembayaran_menunggu'].' pembayaran perlu diverifikasi' : $stats['transaksi_pending'].' masih menunggu'" />
         <x-dashboard.stat label="Penyuluh aktif" :value="$stats['penyuluh_aktif']" icon="user-check" :href="route('admin.penyuluh.index')"
                           hint="Petugas lapangan" />
         <x-dashboard.stat label="Artikel terbit" :value="$stats['artikel_published']" icon="newspaper" :href="route('admin.artikel.index')"

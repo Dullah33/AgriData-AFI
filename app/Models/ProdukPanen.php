@@ -13,6 +13,14 @@ class ProdukPanen extends Model
         'harga', 'satuan', 'stok', 'foto_produk', 'status',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'harga' => 'decimal:2',
+            'stok' => 'integer',
+        ];
+    }
+
     public function petani()
     {
         return $this->belongsTo(User::class, 'petani_id');
@@ -27,5 +35,11 @@ class ProdukPanen extends Model
     public function scopeTersedia($query)
     {
         return $query->where('status', 'tersedia')->where('stok', '>', 0);
+    }
+
+    // Bisa dimasukkan ke keranjang / dibeli
+    public function bisaDibeli(): bool
+    {
+        return $this->status === 'tersedia' && $this->stok > 0;
     }
 }

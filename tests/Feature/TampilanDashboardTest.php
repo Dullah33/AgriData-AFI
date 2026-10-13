@@ -56,7 +56,7 @@ class TampilanDashboardTest extends TestCase
             ->assertOk()->assertSee('Semua petani sudah terverifikasi')->assertSee('Belum ada ulasan');
 
         $this->actingAs($this->buatUser('petani'))->get(route('dashboard'))
-            ->assertOk()->assertSee('Belum ada pesanan baru')->assertSee('Belum pernah scan');
+            ->assertOk()->assertSee('Belum ada pesanan untuk dikirim')->assertSee('Belum pernah scan');
 
         $this->actingAs($this->buatUser('penyuluh'))->get(route('dashboard'))
             ->assertOk()->assertSee('Akun Anda belum punya wilayah binaan');
@@ -78,9 +78,10 @@ class TampilanDashboardTest extends TestCase
             'petani_id' => $petani->id, 'nama_produk' => 'Cabai rawit merah', 'deskripsi' => 'Panen pagi',
             'harga' => 42000, 'satuan' => 'kg', 'stok' => 30, 'status' => 'tersedia',
         ]);
+        // Sudah dibayar, menunggu dikirim petani
         $pesanan = Transaksi::create([
             'user_id' => $pembeli->id, 'produk_id' => $produk->id, 'jumlah' => 3,
-            'total_harga' => 126000, 'status_transaksi' => 'pending',
+            'total_harga' => 126000, 'status_transaksi' => 'diproses',
         ]);
         $selesai = Transaksi::create([
             'user_id' => $pembeli->id, 'produk_id' => $produk->id, 'jumlah' => 1,
@@ -106,7 +107,7 @@ class TampilanDashboardTest extends TestCase
             ->assertSee('aria-current="page"', false);
 
         $this->actingAs($petani)->get(route('dashboard'))
-            ->assertOk()->assertSee('Cabai rawit merah')->assertSee('Menunggu')->assertSee('Antraknosa');
+            ->assertOk()->assertSee('Cabai rawit merah')->assertSee('Diproses')->assertSee('Antraknosa');
 
         $this->actingAs($penyuluh)->get(route('dashboard'))
             ->assertOk()->assertSee('Wilayah binaan: Sukoharjo')->assertSee('pak_slamet')->assertSee('Terjadwal');

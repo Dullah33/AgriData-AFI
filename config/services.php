@@ -69,4 +69,15 @@ return [
         'timeout' => (int) env('GEMINI_TIMEOUT', 45),
     ],
 
+    // Midtrans Snap (payment gateway) - https://dashboard.midtrans.com
+    // Kalau server key kosong, metode Midtrans hanya muncul bila
+    // MIDTRANS_SIMULASI=true dan aplikasi tidak berjalan di production,
+    // supaya tidak ada yang bisa "membayar" lewat tombol simulasi di server asli.
+    'midtrans' => [
+        'server_key' => env('MIDTRANS_SERVER_KEY'),
+        'client_key' => env('MIDTRANS_CLIENT_KEY'),
+        'is_production' => (bool) env('MIDTRANS_IS_PRODUCTION', false),
+        'simulasi' => (bool) env('MIDTRANS_SIMULASI', false),
+    ],
+
 ];

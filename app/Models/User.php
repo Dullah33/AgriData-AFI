@@ -54,4 +54,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(DiseaseReport::class, 'user_id');
     }
+
+    // Isi keranjang belanja (role user)
+    public function keranjang()
+    {
+        return $this->hasMany(KeranjangItem::class, 'user_id');
+    }
+
+    // Tagihan pembayaran hasil checkout (role user)
+    public function pembayaran()
+    {
+        return $this->hasMany(Pembayaran::class, 'user_id');
+    }
 }

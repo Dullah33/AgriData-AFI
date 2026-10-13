@@ -6,7 +6,12 @@
     //              dengan 'route'. Pakai wildcard supaya halaman turunan
     //              (detail, edit) tetap menandai menu induknya.
     // - 'icon'   : nama ikon Lucide (https://lucide.dev/icons).
+    // - 'badge'  : angka kecil di sisi kanan (mis. isi keranjang), opsional.
     // "Pengaturan Akun" dipindah ke bagian bawah sidebar dan menu profil.
+    $peran = Auth::user()->role;
+    $jumlahKeranjang = $peran === 'user' ? \App\Models\KeranjangItem::where('user_id', Auth::id())->count() : 0;
+    $jumlahVerifikasi = $peran === 'admin' ? \App\Models\Pembayaran::status(\App\Models\Pembayaran::MENUNGGU_VERIFIKASI)->count() : 0;
+
     $sidebarConfig = [
         'admin' => [
             'label' => 'Admin',
@@ -17,6 +22,9 @@
                 ['title' => 'Pengguna', 'items' => [
                     ['label' => 'Manajemen Petani', 'route' => 'admin.petani.index', 'active' => 'admin.petani.*', 'icon' => 'users'],
                     ['label' => 'Manajemen Penyuluh', 'route' => 'admin.penyuluh.index', 'active' => 'admin.penyuluh.*', 'icon' => 'user-check'],
+                ]],
+                ['title' => 'Transaksi', 'items' => [
+                    ['label' => 'Verifikasi Pembayaran', 'route' => 'admin.pembayaran.index', 'active' => 'admin.pembayaran.*', 'icon' => 'wallet', 'badge' => $jumlahVerifikasi],
                 ]],
                 ['title' => 'Data & konten', 'items' => [
                     ['label' => 'Manajemen Tanaman', 'route' => 'admin.plants.index', 'active' => 'admin.plants.*', 'icon' => 'sprout'],
@@ -60,7 +68,8 @@
                 ]],
                 ['title' => 'Belanja', 'items' => [
                     ['label' => 'Marketplace Hasil Panen', 'route' => 'user.marketplace', 'active' => ['user.marketplace', 'user.marketplace.*'], 'icon' => 'store'],
-                    ['label' => 'Keranjang & Pesanan Saya', 'route' => 'user.pesanan', 'icon' => 'shopping-basket'],
+                    ['label' => 'Keranjang', 'route' => 'user.keranjang.index', 'active' => ['user.keranjang.*', 'user.checkout.*'], 'icon' => 'shopping-cart', 'badge' => $jumlahKeranjang],
+                    ['label' => 'Pesanan Saya', 'route' => 'user.pesanan', 'active' => ['user.pesanan', 'user.pembayaran.*'], 'icon' => 'shopping-basket'],
                     ['label' => 'Riwayat & Ulasan Saya', 'route' => 'user.riwayat-ulasan', 'active' => ['user.riwayat-ulasan', 'user.ulasan.*'], 'icon' => 'star'],
                     ['label' => 'Profil Petani (Lihat)', 'route' => 'user.petani.index', 'active' => 'user.petani.*', 'icon' => 'users'],
                 ]],
@@ -155,6 +164,9 @@
                                     <i data-lucide="{{ $item['icon'] }}"
                                        @class(['h-[18px] w-[18px] shrink-0', 'text-brand-300' => $aktif, 'text-stone-500 group-hover:text-stone-300' => ! $aktif])></i>
                                     <span class="truncate">{{ $item['label'] }}</span>
+                                    @if (! empty($item['badge']))
+                                        <span class="ml-auto rounded-full bg-brand-500/25 px-2 py-0.5 text-xs font-semibold text-brand-100 tabular-nums">{{ $item['badge'] }}</span>
+                                    @endif
                                 </a>
                             @else
                                 <span class="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-stone-600">

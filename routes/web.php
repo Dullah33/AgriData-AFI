@@ -28,9 +28,20 @@ use App\Http\Controllers\Penyuluh\LaporanBulananController;
 use App\Http\Controllers\Penyuluh\DeteksiPenyakitController as PenyuluhDeteksiPenyakitController;
 use App\Http\Controllers\Petani\DeteksiPenyakitController as PetaniDeteksiPenyakitController;
 use App\Http\Controllers\User\DeteksiPenyakitController as UserDeteksiPenyakitController;
+use App\Http\Controllers\User\KeranjangController;
+use App\Http\Controllers\User\CheckoutController;
+use App\Http\Controllers\User\PembayaranController as UserPembayaranController;
+use App\Http\Controllers\Admin\PembayaranController as AdminPembayaranController;
+use App\Http\Controllers\MidtransWebhookController;
 
 // Landing page
 Route::get('/', fn() => view('landing'))->name('landing');
+
+// Notifikasi pembayaran dari Midtrans. Tanpa login & CSRF (lihat
+// bootstrap/app.php); keasliannya diverifikasi lewat signature_key.
+Route::post('/webhook/midtrans', MidtransWebhookController::class)
+    ->middleware('throttle:60,1')
+    ->name('webhook.midtrans');
 
 // Guest
 Route::middleware('guest')->group(function () {
@@ -109,6 +120,13 @@ Route::middleware('auth')->group(function () {
 
         // Plant Management
         Route::resource('plants', \App\Http\Controllers\Admin\PlantController::class);
+
+        // Verifikasi pembayaran marketplace
+        Route::get('pembayaran', [AdminPembayaranController::class, 'index'])->name('pembayaran.index');
+        Route::get('pembayaran/{pembayaran}', [AdminPembayaranController::class, 'show'])->name('pembayaran.show');
+        Route::get('pembayaran/{pembayaran}/bukti', [AdminPembayaranController::class, 'bukti'])->name('pembayaran.bukti');
+        Route::post('pembayaran/{pembayaran}/verifikasi', [AdminPembayaranController::class, 'verifikasi'])->name('pembayaran.verifikasi');
+        Route::post('pembayaran/{pembayaran}/tolak', [AdminPembayaranController::class, 'tolak'])->name('pembayaran.tolak');
     });
 
     // ============================================
@@ -144,8 +162,22 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:user')->group(function () {
         Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('user.marketplace');
         Route::get('/marketplace/{produk}', [MarketplaceController::class, 'show'])->name('user.marketplace.show');
-        Route::post('/marketplace/{produk}/beli', [MarketplaceController::class, 'beli'])->name('user.marketplace.beli');
         Route::get('/pesanan-saya', [MarketplaceController::class, 'pesananSaya'])->name('user.pesanan');
+
+        // Keranjang belanja
+        Route::get('/keranjang', [KeranjangController::class, 'index'])->name('user.keranjang.index');
+        Route::post('/marketplace/{produk}/keranjang', [KeranjangController::class, 'store'])->name('user.keranjang.store');
+        Route::patch('/keranjang/{item}', [KeranjangController::class, 'update'])->name('user.keranjang.update');
+        Route::delete('/keranjang/{item}', [KeranjangController::class, 'destroy'])->name('user.keranjang.destroy');
+
+        // Checkout & pembayaran
+        Route::get('/checkout', [CheckoutController::class, 'create'])->name('user.checkout.create');
+        Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('user.checkout.store');
+        Route::get('/pembayaran/{pembayaran}', [UserPembayaranController::class, 'show'])->name('user.pembayaran.show');
+        Route::post('/pembayaran/{pembayaran}/bukti', [UserPembayaranController::class, 'unggahBukti'])->middleware('throttle:10,1')->name('user.pembayaran.bukti.store');
+        Route::get('/pembayaran/{pembayaran}/bukti', [UserPembayaranController::class, 'bukti'])->name('user.pembayaran.bukti');
+        Route::post('/pembayaran/{pembayaran}/batal', [UserPembayaranController::class, 'batal'])->name('user.pembayaran.batal');
+        Route::post('/pembayaran/{pembayaran}/simulasi', [UserPembayaranController::class, 'simulasi'])->name('user.pembayaran.simulasi');
         Route::get('/riwayat-ulasan', [MarketplaceController::class, 'riwayatUlasan'])->name('user.riwayat-ulasan');
         Route::get("/ulasan/{transaksi}/create", [UserUlasanController::class, "create"])->name("user.ulasan.create");
         Route::post("/ulasan/{transaksi}", [UserUlasanController::class, "store"])->name("user.ulasan.store");

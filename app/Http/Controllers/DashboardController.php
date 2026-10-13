@@ -10,6 +10,7 @@ use App\Models\Artikel;
 use App\Models\UlasanRating;
 use App\Models\FieldVisit;
 use App\Models\DiseaseReport;
+use App\Models\Pembayaran;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -34,6 +35,7 @@ class DashboardController extends Controller
             'petani_terverifikasi' => PetaniProfile::whereNotNull('verified_by')->count(),
             'transaksi_bulan_ini' => Transaksi::whereMonth('created_at', now()->month)->count(),
             'transaksi_pending'   => Transaksi::where('status_transaksi', 'pending')->count(),
+            'pembayaran_menunggu' => Pembayaran::status(Pembayaran::MENUNGGU_VERIFIKASI)->count(),
             'penyuluh_aktif'      => ExtensionOfficer::where('status', 'aktif')->count(),
             'artikel_published'   => Artikel::where('status', 'published')->count(),
             'artikel_draft'       => Artikel::where('status', 'draft')->count(),
@@ -58,14 +60,15 @@ class DashboardController extends Controller
 
         $stats = [
             'produk_aktif'        => ProdukPanen::where('petani_id', $user->id)->where('status', 'tersedia')->count(),
-            'pesanan_pending'     => Transaksi::whereIn('produk_id', $produkIds)->where('status_transaksi', 'pending')->count(),
+            // Sudah dibayar, menunggu dikirim petani
+            'pesanan_perlu_dikirim' => Transaksi::whereIn('produk_id', $produkIds)->where('status_transaksi', Transaksi::DIPROSES)->count(),
             'total_lahan'         => $profile?->lahans()->count() ?? 0,
             'kunjungan_terjadwal' => $profile ? FieldVisit::where('petani_profile_id', $profile->id)->where('status', 'terjadwal')->count() : 0,
         ];
 
         $pesananTerbaru = Transaksi::with(['produk', 'pembeli'])
             ->whereIn('produk_id', $produkIds)
-            ->where('status_transaksi', 'pending')
+            ->where('status_transaksi', Transaksi::DIPROSES)
             ->latest()->take(5)->get();
 
         // Hasil AI Scanner terbaru, ditampilkan di panel "Hasil scan terbaru"

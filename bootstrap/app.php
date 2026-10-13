@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => CheckRole::class,
         ]);
+
+        // Midtrans mengirim notifikasi tanpa token CSRF
+        $middleware->validateCsrfTokens(except: ['webhook/midtrans']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Selalu JSON untuk route api/*, dan juga untuk request AJAX dari

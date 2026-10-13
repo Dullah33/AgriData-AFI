@@ -12,6 +12,17 @@
 
         <p class="min-w-0 flex-1 truncate text-sm font-semibold text-stone-900">@yield('title', 'Dashboard')</p>
 
+        @if ($user->role === 'user')
+            @php $isiKeranjang = \App\Models\KeranjangItem::where('user_id', $user->id)->count(); @endphp
+            <a href="{{ route('user.keranjang.index') }}" aria-label="Keranjang ({{ $isiKeranjang }} produk)"
+               class="relative inline-flex h-10 w-10 items-center justify-center rounded-lg text-stone-600 transition-colors hover:bg-stone-100 hover:text-stone-900">
+                <i data-lucide="shopping-cart" class="h-5 w-5"></i>
+                @if ($isiKeranjang > 0)
+                    <span class="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-700 px-1 text-[10px] font-bold text-white tabular-nums">{{ $isiKeranjang }}</span>
+                @endif
+            </a>
+        @endif
+
         {{-- Menu profil. <details> supaya tetap bisa dibuka walau JS gagal dimuat. --}}
         <details class="group relative" data-menu>
             <summary class="flex cursor-pointer list-none items-center gap-2 rounded-full p-1 pr-2 transition-colors hover:bg-stone-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 [&::-webkit-details-marker]:hidden">

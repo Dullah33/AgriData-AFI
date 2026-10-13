@@ -22,8 +22,8 @@
     <div class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <x-dashboard.stat label="Produk aktif" :value="$stats['produk_aktif']" icon="package" :href="route('petani.produk.index')"
                           hint="Listing yang bisa dibeli" />
-        <x-dashboard.stat label="Pesanan menunggu" :value="$stats['pesanan_pending']" icon="inbox" :href="route('petani.pesanan.index')"
-                          tone="attention" :hint="$stats['pesanan_pending'] > 0 ? 'Perlu dikonfirmasi' : 'Tidak ada pesanan baru'" />
+        <x-dashboard.stat label="Perlu dikirim" :value="$stats['pesanan_perlu_dikirim']" icon="truck" :href="route('petani.pesanan.index', ['status' => 'diproses'])"
+                          tone="attention" :hint="$stats['pesanan_perlu_dikirim'] > 0 ? 'Sudah dibayar pembeli' : 'Tidak ada pesanan baru'" />
         <x-dashboard.stat label="Petak lahan" :value="$stats['total_lahan']" icon="map" :href="route('petani.lahan.index')"
                           hint="Terdaftar di profil" />
         <x-dashboard.stat label="Kunjungan terjadwal" :value="$stats['kunjungan_terjadwal']" icon="calendar-check"
@@ -31,10 +31,10 @@
     </div>
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
-        <x-dashboard.panel class="lg:col-span-3" title="Pesanan masuk" description="Pesanan yang menunggu konfirmasi Anda."
-                           :href="route('petani.pesanan.index')">
+        <x-dashboard.panel class="lg:col-span-3" title="Perlu dikirim" description="Pesanan yang sudah dibayar dan menunggu Anda kirim."
+                           :href="route('petani.pesanan.index', ['status' => 'diproses'])">
             @if ($pesananTerbaru->isEmpty())
-                <x-dashboard.empty icon="inbox" title="Belum ada pesanan baru"
+                <x-dashboard.empty icon="inbox" title="Belum ada pesanan untuk dikirim"
                                    description="Pastikan produk Anda punya foto dan stok supaya mudah ditemukan pembeli."
                                    :href="route('petani.produk.index')" action="Kelola produk" />
             @else
