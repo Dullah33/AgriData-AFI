@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agri Data - Smart Insights. Stronger Harvests.</title>
+    <title>AgriScan - Smart Insights. Stronger Harvests.</title>
     
     <!-- Custom Style Sheet in Assets Folder -->
     <link rel="stylesheet" href="{{ asset('assets/css/landing.css') }}">
@@ -20,7 +20,7 @@
                     <path d="M12 2C12 2 15 6 15 10C15 12.2091 13.2091 14 12 14C10.7909 14 9 12.2091 9 10C9 6 12 2 12 2Z" fill="#a5f3fc"/>
                     <path d="M12 6V12" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
-                Agri Data
+                AgriScan
             </a>
             
             <!-- Hamburger Toggle (Mobile Only) -->
@@ -94,7 +94,7 @@
                 </h1>
                 
                 <p class="hero-subtitle">
-                    Agri Data empowers farmers and stakeholders with real-time insights, AI technology, and accurate data for better agricultural decisions.
+                    AgriScan empowers farmers and stakeholders with real-time insights, AI technology, and accurate data for better agricultural decisions.
                 </p>
                 
                 <div class="hero-buttons">
@@ -335,13 +335,13 @@
             <div class="about-container">
                 <div class="section-header">
                     <span class="section-badge">Tentang Kami</span>
-                    <h2 class="section-title">Tentang Agri Data</h2>
+                    <h2 class="section-title">Tentang AgriScan</h2>
                     <p class="section-desc">Platform data pertanian pintar yang dikembangkan untuk mendukung petani, penyuluh, dan pemangku kepentingan pertanian di Indonesia.</p>
                 </div>
 
                 <div class="about-grid">
                     <div class="about-text">
-                        <p>Agri Data hadir sebagai jembatan antara petani, penyuluh pertanian, dan teknologi. Kami percaya bahwa akses terhadap data yang akurat dan teknologi AI dapat membantu petani mengambil keputusan yang lebih baik dalam mengelola lahan dan tanaman mereka.</p>
+                        <p>AgriScan hadir sebagai jembatan antara petani, penyuluh pertanian, dan teknologi. Kami percaya bahwa akses terhadap data yang akurat dan teknologi AI dapat membantu petani mengambil keputusan yang lebih baik dalam mengelola lahan dan tanaman mereka.</p>
                         <p>Melalui platform ini, petani dapat memantau kondisi tanaman, mendeteksi penyakit tanaman lebih dini, mengakses informasi cuaca, serta terhubung dengan penyuluh pertanian dan pasar hasil panen — semua dalam satu tempat.</p>
                     </div>
                     <div class="about-values">
@@ -364,7 +364,7 @@
                 <div class="section-header">
                     <span class="section-badge">Hubungi Kami</span>
                     <h2 class="section-title">Ada Pertanyaan?</h2>
-                    <p class="section-desc">Tim kami siap membantu jika Anda memiliki pertanyaan seputar Agri Data.</p>
+                    <p class="section-desc">Tim kami siap membantu jika Anda memiliki pertanyaan seputar AgriScan.</p>
                 </div>
 
                 <div class="contact-grid">
@@ -418,7 +418,7 @@
                         </svg>
                     </div>
                     <div class="cta-text-wrapper">
-                        <h2 class="cta-title">Join Agri Data Today</h2>
+                        <h2 class="cta-title">Join AgriScan Today</h2>
                         <p class="cta-desc">Be part of a smarter farming community.</p>
                     </div>
                 </div>
@@ -445,7 +445,7 @@
                     <path d="M12 2C12 2 15 6 15 10C15 12.2091 13.2091 14 12 14C10.7909 14 9 12.2091 9 10C9 6 12 2 12 2Z" fill="#a5f3fc"/>
                     <path d="M12 6V12" stroke="#1e293b" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
-                Agri Data
+                AgriScan
             </div>
             <ul class="footer-nav">
                 <li><a href="#" class="footer-nav-link">Home</a></li>
@@ -453,7 +453,7 @@
                 <li><a href="#about" class="footer-nav-link">About Us</a></li>
                 <li><a href="#contact" class="footer-nav-link">Contact</a></li>
             </ul>
-            <p>&copy; {{ date('Y') }} Dinas Pertanian & Agri Data. Hak Cipta Dilindungi Undang-Undang.</p>
+            <p>&copy; {{ date('Y') }} Dinas Pertanian & AgriScan. Hak Cipta Dilindungi Undang-Undang.</p>
         </div>
     </footer>
 

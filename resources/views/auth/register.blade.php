@@ -8,17 +8,17 @@
     
     <!-- Logo & Branding -->
     <div class="text-center mb-6">
-        <!-- AgriData Logo -->
+        <!-- AgriScan Logo -->
         <div class="flex items-center justify-center mb-4">
             <div class="w-12 h-12 bg-primary-800 rounded-xl flex items-center justify-center mr-3">
                 <i data-lucide="leaf" class="text-white w-7 h-7"></i>
             </div>
-            <h1 class="text-3xl font-bold text-primary-800">AgriData</h1>
+            <h1 class="text-3xl font-bold text-primary-800">AgriScan</h1>
         </div>
         
         <!-- Heading -->
         <h2 class="text-2xl font-bold text-gray-800 mb-2">Create Account</h2>
-        <p class="text-gray-600 text-sm">Join AgriData to start your journey</p>
+        <p class="text-gray-600 text-sm">Join AgriScan to start your journey</p>
     </div>
     
     <!-- Register Form -->

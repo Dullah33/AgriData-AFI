@@ -113,7 +113,7 @@ class LocationService
         $url = "https://nominatim.openstreetmap.org/search?format=json&q={$query}&limit=1";
         
         $response = Http::withHeaders([
-            'User-Agent' => 'AgriData-WeatherSystem/1.0 (Contact: ferry_fifyli8@student.uns.ac.id)'
+            'User-Agent' => 'AgriScan-WeatherSystem/1.0 (Contact: ferry_fifyli8@student.uns.ac.id)'
         ])
         ->timeout(10)
         ->get($url);
@@ -125,7 +125,7 @@ class LocationService
             $urlFallback = "https://nominatim.openstreetmap.org/search?format=json&q={$queryFallback}&limit=1";
             
             $response = Http::withHeaders([
-                'User-Agent' => 'AgriData-WeatherSystem/1.0 (Contact: ferry_fifyli8@student.uns.ac.id)'
+                'User-Agent' => 'AgriScan-WeatherSystem/1.0 (Contact: ferry_fifyli8@student.uns.ac.id)'
             ])
             ->timeout(10)
             ->get($urlFallback);

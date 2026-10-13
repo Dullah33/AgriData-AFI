@@ -83,7 +83,7 @@
               transform -translate-x-full transition-transform duration-300 ease-in-out"
        style="background-color: {{ $config['color'] }};">
     <div class="px-5 py-4 border-b border-white/20 flex items-center gap-2">
-        <span class="text-lg font-bold">Agri Data</span>
+        <span class="text-lg font-bold">AgriScan</span>
     </div>
 
     <div class="px-5 pt-4 pb-2">

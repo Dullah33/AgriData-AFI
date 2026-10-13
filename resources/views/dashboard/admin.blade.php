@@ -5,7 +5,7 @@
 <div class="space-y-6">
     <div>
         <h2 class="text-lg font-semibold text-gray-800">Selamat datang, {{ Auth::user()->username }} 👋</h2>
-        <p class="text-sm text-gray-500">Ringkasan platform Agri Data per hari ini.</p>
+        <p class="text-sm text-gray-500">Ringkasan platform AgriScan per hari ini.</p>
     </div>
 
     {{-- Stat Cards --}}

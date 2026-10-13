@@ -8,12 +8,12 @@
     
     <!-- Logo & Branding -->
     <div class="text-center mb-8">
-        <!-- AgriData Logo -->
+        <!-- AgriScan Logo -->
         <div class="flex items-center justify-center mb-4">
             <div class="w-12 h-12 bg-primary-800 rounded-xl flex items-center justify-center mr-3">
                 <i data-lucide="leaf" class="text-white w-7 h-7"></i>
             </div>
-            <h1 class="text-3xl font-bold text-primary-800">AgriData</h1>
+            <h1 class="text-3xl font-bold text-primary-800">AgriScan</h1>
         </div>
         
         <!-- Heading -->
