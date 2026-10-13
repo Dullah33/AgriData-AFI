@@ -38,6 +38,7 @@ return [
     // AI Scanner Penyakit Tanaman (BAB 5.3.1) — pilih provider deteksi lewat
     // AI_SCANNER_PROVIDER di .env:
     //   local   -> mesin klasifikasi katalog lokal (default, tanpa API key)
+    //   gemini  -> Google Gemini Vision, lihat GEMINI_API_KEY di bawah (disarankan untuk production)
     //   plantid -> Plant.id API v3 (Kindwise), lihat PLANT_ID_API_KEY di bawah
     //   custom  -> API model AI custom (mis. server Python/TensorFlow sendiri)
     'ai_scanner' => [
@@ -51,11 +52,21 @@ return [
     ],
 
     // Google Gemini API — https://aistudio.google.com/apikey
-    // Dipakai untuk melengkapi field "penyebab" & "penanganan" saat
-    // Plant.id tidak menyediakan data tersebut untuk kelas penyakit tertentu.
+    // Dipakai dua cara:
+    //   1. Provider utama AI Scanner (AI_SCANNER_PROVIDER=gemini): foto
+    //      langsung dianalisis Gemini Vision.
+    //   2. Pelengkap field "penyebab" & "penanganan" saat Plant.id tidak
+    //      menyediakan data tersebut untuk kelas penyakit tertentu.
+    //
+    // Default model memakai alias "gemini-flash-latest" yang selalu diarahkan
+    // Google ke model Flash terbaru. Model versi tetap (mis. gemini-2.0-flash)
+    // dimatikan Google secara berkala, dan begitu itu terjadi fitur scan ikut
+    // mati. Kalau ingin hasil yang konsisten, pin ke versi tertentu lewat
+    // GEMINI_MODEL, misalnya gemini-3.5-flash.
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
-        'model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+        'model' => env('GEMINI_MODEL', 'gemini-flash-latest'),
+        'timeout' => (int) env('GEMINI_TIMEOUT', 45),
     ],
 
 ];

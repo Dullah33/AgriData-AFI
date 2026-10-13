@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Exceptions\PlantNotDetectedException;
+use App\Http\Controllers\Concerns\MenanganiScanPenyakit;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ScanPenyakitRequest;
 use App\Models\DiseaseReport;
 use App\Services\DiseaseDetectionService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class DeteksiPenyakitController extends Controller
 {
+    use MenanganiScanPenyakit;
+
     public function __construct(private DiseaseDetectionService $aiScanner)
     {
     }
@@ -26,41 +27,18 @@ class DeteksiPenyakitController extends Controller
     }
 
     // POST /ai-scanner
-    public function store(Request $request)
+    // Menerima foto dari kamera (WebRTC) atau galeri, menganalisisnya lewat
+    // AI Scanner, lalu menyimpan foto + hasilnya sebagai DiseaseReport.
+    public function store(ScanPenyakitRequest $request)
     {
-        $request->validate([
-            'foto_tanaman' => 'required|image|mimes:jpg,jpeg,png|max:5120',
-        ], [
-            'foto_tanaman.required' => 'Foto tanaman harus diupload.',
-            'foto_tanaman.image'    => 'File harus berupa gambar.',
-            'foto_tanaman.mimes'    => 'Format foto harus JPG atau PNG.',
-            'foto_tanaman.max'      => 'Ukuran foto maksimal 5MB.',
+        $foto = $request->file('foto_tanaman');
+        $hasil = $this->analisisFoto($foto);
+
+        $laporan = $this->simpanLaporan($foto, $this->atributHasil($hasil) + [
+            'user_id' => Auth::id(),
         ]);
 
-        $path = $request->file('foto_tanaman')->store('deteksi-penyakit', 'public');
-
-        try {
-            $hasil = $this->aiScanner->analisis(Storage::disk('public')->path($path));
-        } catch (PlantNotDetectedException $e) {
-            Storage::disk('public')->delete($path);
-
-            return back()->withInput()->withErrors(['foto_tanaman' => $e->getMessage()]);
-        }
-
-        $laporan = DiseaseReport::create([
-            'user_id'          => Auth::id(),
-            'foto_tanaman'     => $path,
-            'nama_penyakit'    => $hasil['nama_penyakit'],
-            'confidence_score' => $hasil['confidence_score'],
-            'gejala'           => $hasil['gejala'],
-            'penyebab'         => $hasil['penyebab'],
-            'penanganan'       => $hasil['penanganan'],
-            'tingkat_risiko'   => $hasil['tingkat_risiko'],
-            'status'           => 'baru',
-        ]);
-
-        return redirect()->route('user.deteksi-penyakit.show', $laporan)
-            ->with('success', 'Analisis selesai! Berikut hasil deteksinya.');
+        return $this->arahkanKeHasil($request, route('user.deteksi-penyakit.show', $laporan));
     }
 
     // GET /ai-scanner/{laporan}

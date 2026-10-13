@@ -27,6 +27,9 @@
                 Dilaporkan oleh <strong>{{ $laporan->user->username ?? '-' }}</strong>
                 pada {{ $laporan->created_at->translatedFormat('d M Y, H:i') }}
             </p>
+            @if ($tanaman = $laporan->namaTanamanTerdeteksi())
+                <p class="text-sm text-gray-500 mb-1">Tanaman terdeteksi AI: {{ $tanaman }}</p>
+            @endif
             @if ($laporan->lahan)
                 <p class="text-sm text-gray-500 mb-4">Lahan: {{ $laporan->lahan->nama_lahan }} ({{ $laporan->lahan->tanaman_aktif ?? '-' }})</p>
             @endif
@@ -35,21 +38,21 @@
                 <div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
                     <div class="h-2 bg-teal-500" style="width: {{ $laporan->confidence_score }}%"></div>
                 </div>
-                <span class="text-sm font-semibold text-gray-700">{{ $laporan->confidence_score }}% yakin (AI)</span>
+                <span class="text-sm font-semibold text-gray-700">Tingkat akurasi AI: {{ $laporan->confidence_score }}%</span>
             </div>
 
             <div class="space-y-4 text-sm">
                 <div>
                     <h3 class="font-semibold text-gray-700 mb-1">🩺 Gejala</h3>
-                    <p class="text-gray-600">{{ $laporan->gejala }}</p>
+                    <p class="text-gray-600 whitespace-pre-line">{{ $laporan->gejala }}</p>
                 </div>
                 <div>
                     <h3 class="font-semibold text-gray-700 mb-1">🔎 Penyebab</h3>
-                    <p class="text-gray-600">{{ $laporan->penyebab }}</p>
+                    <p class="text-gray-600 whitespace-pre-line">{{ $laporan->penyebab }}</p>
                 </div>
                 <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
                     <h3 class="font-semibold text-gray-700 mb-1">Penanganan Umum (hasil AI)</h3>
-                    <p class="text-gray-600">{{ $laporan->penanganan }}</p>
+                    <p class="text-gray-600 whitespace-pre-line">{{ $laporan->penanganan }}</p>
                 </div>
             </div>
         </div>

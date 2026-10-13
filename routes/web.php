@@ -124,7 +124,8 @@ Route::middleware('auth')->group(function () {
         // AI Scanner Penyakit Tanaman & Riwayat Deteksi Penyakit
         Route::get('deteksi-penyakit', [PetaniDeteksiPenyakitController::class, 'index'])->name('deteksi-penyakit.index');
         Route::get('deteksi-penyakit/scan', [PetaniDeteksiPenyakitController::class, 'create'])->name('deteksi-penyakit.create');
-        Route::post('deteksi-penyakit/scan', [PetaniDeteksiPenyakitController::class, 'store'])->name('deteksi-penyakit.store');
+        // Throttle: tiap scan memanggil API AI berbayar/berkuota, batasi 10x per menit per pengguna
+        Route::post('deteksi-penyakit/scan', [PetaniDeteksiPenyakitController::class, 'store'])->middleware('throttle:10,1')->name('deteksi-penyakit.store');
         Route::get('deteksi-penyakit/{laporan}', [PetaniDeteksiPenyakitController::class, 'show'])->name('deteksi-penyakit.show');
 
         // Listing produk
@@ -151,7 +152,7 @@ Route::middleware('auth')->group(function () {
 
         // AI Scanner Penyakit Tanaman (Terbatas)
         Route::get('/ai-scanner', [UserDeteksiPenyakitController::class, 'create'])->name('user.deteksi-penyakit.create');
-        Route::post('/ai-scanner', [UserDeteksiPenyakitController::class, 'store'])->name('user.deteksi-penyakit.store');
+        Route::post('/ai-scanner', [UserDeteksiPenyakitController::class, 'store'])->middleware('throttle:10,1')->name('user.deteksi-penyakit.store');
         Route::get('/ai-scanner/{laporan}', [UserDeteksiPenyakitController::class, 'show'])->name('user.deteksi-penyakit.show');
 
         // Profil Petani (Lihat)

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\AiScannerUnavailableException;
 use App\Exceptions\PlantNotDetectedException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -12,11 +13,14 @@ use Illuminate\Support\Facades\Log;
  * CATATAN ARSITEKTUR:
  * Dokumen modul sistem (BAB 5.3.1) menyebut deteksi penyakit memakai model
  * Python/TensorFlow yang diakses lewat REST API terpisah. Kelas ini
- * mendukung 3 provider yang bisa dipilih lewat .env (AI_SCANNER_PROVIDER):
+ * mendukung 4 provider yang bisa dipilih lewat .env (AI_SCANNER_PROVIDER):
  *
  *   - "local"   (default) — mesin klasifikasi katalog lokal (rule-based,
  *     bukan machine learning sungguhan), supaya alur aplikasi bisa
  *     langsung dites tanpa API key apa pun.
+ *   - "gemini"  — Google Gemini Vision (lihat GeminiEnricherService),
+ *     foto dianalisis langsung oleh model multimodal. Disarankan untuk
+ *     production.
  *   - "plantid" — Plant.id API v3 milik Kindwise (lihat PlantIdService),
  *     hasil deteksi sungguhan berbasis machine learning.
  *   - "custom"  — API model AI custom (mis. server Python/TensorFlow
@@ -28,9 +32,12 @@ use Illuminate\Support\Facades\Log;
  */
 class DiseaseDetectionService
 {
-    public function __construct(private ?PlantIdService $plantId = null)
-    {
-        $this->plantId ??= new PlantIdService();
+    public function __construct(
+        private ?PlantIdService $plantId = null,
+        private ?GeminiEnricherService $gemini = null,
+    ) {
+        $this->gemini ??= new GeminiEnricherService();
+        $this->plantId ??= new PlantIdService($this->gemini);
     }
 
     /**
@@ -101,11 +108,40 @@ class DiseaseDetectionService
      * Menjalankan analisis pada satu foto tanaman dan mengembalikan hasil
      * yang siap disimpan ke tabel `disease_reports`.
      *
-     * @return array{nama_penyakit:string, confidence_score:float, gejala:string, penyebab:string, penanganan:string, tingkat_risiko:string}
+     * Key `hasil_ai` (respons mentah AI) hanya ada untuk provider yang
+     * menyediakannya, jadi pemanggil sebaiknya membacanya dengan `?? null`.
+     *
+     * @param  string|null  $namaTanaman  Petunjuk jenis tanaman (mis. tanaman aktif di lahan), hanya dipakai provider gemini.
+     * @return array{nama_penyakit:string, confidence_score:float, gejala:string, penyebab:string, penanganan:string, tingkat_risiko:string, hasil_ai?:array}
+     *
+     * @throws PlantNotDetectedException kalau foto bukan tanaman
+     * @throws AiScannerUnavailableException kalau provider gemini sedang tidak bisa dipakai
      */
-    public function analisis(string $absoluteImagePath): array
+    public function analisis(string $absoluteImagePath, ?string $namaTanaman = null): array
     {
         $provider = config('services.ai_scanner.provider', 'local');
+
+        if ($provider === 'gemini') {
+            try {
+                return $this->gemini->analisisGambar($absoluteImagePath, $namaTanaman);
+            } catch (PlantNotDetectedException $e) {
+                throw $e;
+            } catch (\Throwable $e) {
+                // Sengaja TIDAK fallback ke katalog lokal: hasil lokal itu
+                // tebakan acak, dan di production laporannya ikut diteruskan
+                // ke Penyuluh serta muncul di peta sebaran penyakit. Lebih
+                // baik pengguna diminta mencoba lagi daripada diberi
+                // diagnosis palsu.
+                Log::error('AI Scanner: analisis Gemini gagal.', [
+                    'error' => $e->getMessage(),
+                ]);
+
+                throw new AiScannerUnavailableException(
+                    'Layanan analisis AI sedang tidak bisa dihubungi. Silakan coba lagi dalam beberapa saat.',
+                    previous: $e,
+                );
+            }
+        }
 
         if ($provider === 'plantid') {
             try {
