@@ -16,7 +16,7 @@
                 <option value="{{ $kat }}" {{ request('kategori') === $kat ? 'selected' : '' }}>{{ $kat }}</option>
             @endforeach
         </select>
-        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">Cari</button>
+        <button type="submit" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg">Cari</button>
         @if (request('cari') || request('kategori'))
             <a href="{{ route('artikel.index') }}" class="px-4 py-2 text-sm text-gray-500 hover:underline self-center">Reset</a>
         @endif
@@ -35,7 +35,7 @@
             @endif
             <div class="p-4 flex-1 flex flex-col">
                 @if ($artikel->kategori)
-                    <span class="text-xs font-semibold text-blue-600 uppercase mb-1">{{ $artikel->kategori }}</span>
+                    <span class="text-xs font-semibold text-brand-700 uppercase mb-1">{{ $artikel->kategori }}</span>
                 @endif
                 <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2">{{ $artikel->judul }}</h3>
                 <p class="text-xs text-gray-400 mt-auto pt-2">

@@ -18,10 +18,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => CheckRole::class,
         ]);
+
+        // Midtrans mengirim notifikasi tanpa token CSRF
+        $middleware->validateCsrfTokens(except: ['webhook/midtrans']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Selalu JSON untuk route api/*, dan juga untuk request AJAX dari
+        // halaman web yang meminta JSON (mis. upload foto AI Scanner) supaya
+        // error validasi dikembalikan sebagai 422 JSON, bukan redirect.
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
 
         $exceptions->render(function (ValidationException $e, Request $request) {

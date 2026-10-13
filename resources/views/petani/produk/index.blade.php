@@ -12,7 +12,7 @@
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-lg font-semibold text-gray-800">Produk Hasil Panen Saya</h2>
         <a href="{{ route('petani.produk.create') }}"
-           class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">
+           class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg">
             + Tambah Produk
         </a>
     </div>

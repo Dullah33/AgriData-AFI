@@ -32,27 +32,27 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">NIP</label>
             <input type="text" name="nip" value="{{ old('nip', $penyuluh->nip) }}"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                    placeholder="Nomor Induk Pegawai (opsional)">
         </div>
 
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Wilayah Binaan <span class="text-red-500">*</span></label>
             <input type="text" name="wilayah_binaan" value="{{ old('wilayah_binaan', $penyuluh->wilayah_binaan) }}"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                    placeholder="Nama desa/kecamatan yang dibina">
         </div>
 
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
             <input type="text" name="phone" value="{{ old('phone', $penyuluh->phone) }}"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                    placeholder="08xxxxxxxxxx (opsional)">
         </div>
 
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Status <span class="text-red-500">*</span></label>
-            <select name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
                 <option value="aktif" {{ old('status', $penyuluh->status) === 'aktif' ? 'selected' : '' }}>Aktif</option>
                 <option value="nonaktif" {{ old('status', $penyuluh->status) === 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
             </select>
@@ -60,7 +60,7 @@
 
         <div class="flex gap-3 pt-2">
             <button type="submit"
-                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">
+                    class="px-6 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg">
                 Simpan Perubahan
             </button>
             <a href="{{ route('admin.penyuluh.index') }}"

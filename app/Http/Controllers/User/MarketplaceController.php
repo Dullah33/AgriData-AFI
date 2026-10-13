@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\KeranjangItem;
+use App\Models\Pembayaran;
 use App\Models\ProdukPanen;
 use App\Models\Transaksi;
+use App\Services\Marketplace\PembayaranService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -33,57 +36,35 @@ class MarketplaceController extends Controller
     public function show(ProdukPanen $produk)
     {
         abort_if($produk->status !== 'tersedia', 404);
-        return view('user.marketplace.show', compact('produk'));
+
+        $produk->load('petani');
+        $diKeranjang = KeranjangItem::where('user_id', Auth::id())->where('produk_id', $produk->id)->value('jumlah') ?? 0;
+
+        return view('user.marketplace.show', compact('produk', 'diKeranjang'));
     }
 
-    // POST /marketplace/{id}/beli
-    public function beli(Request $request, ProdukPanen $produk)
+    // GET /pesanan-saya
+    // "Pesanan Saya" (BAB 2A.4): daftar tagihan hasil checkout beserta status
+    // pembayaran dan status tiap produknya. Pesanan yang sudah selesai juga
+    // muncul di "Riwayat & Ulasan Saya" untuk diberi ulasan.
+    public function pesananSaya(PembayaranService $layanan)
     {
-        abort_if($produk->status !== 'tersedia' || $produk->stok < 1, 422, 'Produk tidak tersedia.');
+        $layanan->kedaluwarsakanJatuhTempo(Auth::id());
 
-        $data = $request->validate([
-            'jumlah'            => 'required|integer|min:1|max:' . $produk->stok,
-            'alamat_pengiriman' => 'required|string|max:500',
-            'catatan'           => 'nullable|string|max:300',
-        ], [
-            'jumlah.required'            => 'Jumlah harus diisi.',
-            'jumlah.max'                 => 'Jumlah melebihi stok tersedia (' . $produk->stok . ').',
-            'alamat_pengiriman.required' => 'Alamat pengiriman harus diisi.',
-        ]);
-
-        $total = $produk->harga * $data['jumlah'];
-
-        Transaksi::create([
-            'user_id'           => Auth::id(),
-            'produk_id'         => $produk->id,
-            'jumlah'            => $data['jumlah'],
-            'total_harga'       => $total,
-            'status_transaksi'  => 'pending',
-            'alamat_pengiriman' => $data['alamat_pengiriman'],
-            'catatan'           => $data['catatan'] ?? null,
-        ]);
-
-        // Kurangi stok setelah order dibuat
-        $produk->decrement('stok', $data['jumlah']);
-
-        return redirect()->route('user.pesanan')
-            ->with('success', 'Pesanan berhasil dibuat! Menunggu konfirmasi petani.');
-    }
-
-    // GET /pesanan-saya (pesanan yang masih berjalan: pending/diproses/batal)
-    // "Keranjang & Pesanan Saya" (BAB 2A.4). Pesanan yang sudah selesai
-    // dipindah ke halaman "Riwayat & Ulasan Saya" terpisah (lihat
-    // riwayatUlasan()) supaya kedua menu sidebar tidak mengarah ke
-    // halaman yang sama persis.
-    public function pesananSaya()
-    {
-        $pesanans = Transaksi::with(['produk.petani', 'ulasan'])
+        $pembayarans = Pembayaran::with('transaksis.produk.petani')
             ->where('user_id', Auth::id())
-            ->where('status_transaksi', '!=', 'selesai')
             ->latest()
-            ->paginate(10);
+            ->paginate(8);
 
-        return view('user.marketplace.pesanan', compact('pesanans'));
+        // Transaksi lama yang dibuat sebelum ada fitur pembayaran
+        $pesananLama = Transaksi::with('produk.petani')
+            ->where('user_id', Auth::id())
+            ->whereNull('pembayaran_id')
+            ->whereIn('status_transaksi', [Transaksi::MENUNGGU, Transaksi::DIPROSES])
+            ->latest()
+            ->get();
+
+        return view('user.marketplace.pesanan', compact('pembayarans', 'pesananLama'));
     }
 
     // GET /riwayat-ulasan
@@ -93,7 +74,7 @@ class MarketplaceController extends Controller
     {
         $pesanans = Transaksi::with(['produk.petani', 'ulasan'])
             ->where('user_id', Auth::id())
-            ->where('status_transaksi', 'selesai')
+            ->where('status_transaksi', Transaksi::SELESAI)
             ->latest()
             ->paginate(10);
 

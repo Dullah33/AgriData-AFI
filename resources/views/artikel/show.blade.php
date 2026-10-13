@@ -5,7 +5,7 @@
 @section('content')
 
 <div class="mb-4">
-    <a href="{{ route('artikel.index') }}" class="text-sm text-blue-600 hover:underline">← Kembali ke Artikel Pertanian</a>
+    <a href="{{ route('artikel.index') }}" class="text-sm text-brand-700 hover:underline">← Kembali ke Artikel Pertanian</a>
 </div>
 
 <article class="bg-white rounded-xl shadow-sm overflow-hidden max-w-3xl">
@@ -16,7 +16,7 @@
 
     <div class="p-6">
         @if ($artikel->kategori)
-            <span class="text-xs font-semibold text-blue-600 uppercase">{{ $artikel->kategori }}</span>
+            <span class="text-xs font-semibold text-brand-700 uppercase">{{ $artikel->kategori }}</span>
         @endif
         <h1 class="text-2xl font-bold text-gray-800 mt-1 mb-2">{{ $artikel->judul }}</h1>
         <p class="text-xs text-gray-400 mb-6">

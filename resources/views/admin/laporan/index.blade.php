@@ -24,7 +24,7 @@
             status aktif &amp; verifikasi.
         </p>
         <a href="{{ route('admin.laporan.petani.export') }}"
-           class="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">
+           class="inline-block px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg">
             ⬇ Ekspor CSV
         </a>
     </div>
@@ -40,7 +40,7 @@
             tanggal transaksi.
         </p>
         <a href="{{ route('admin.laporan.transaksi.export') }}"
-           class="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">
+           class="inline-block px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg">
             ⬇ Ekspor CSV
         </a>
     </div>

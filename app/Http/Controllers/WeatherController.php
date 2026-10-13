@@ -2,269 +2,117 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\CuacaTidakTersediaException;
+use App\Exceptions\LokasiTidakDitemukanException;
 use App\Models\Plant;
-use App\Services\LocationService;
-use App\Services\WeatherService;
-use App\Services\AnalysisService;
+use App\Services\RekomendasiTanamService;
+use App\Services\WilayahIndonesiaService;
+use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class WeatherController extends Controller
 {
-    protected $locationService;
-    protected $weatherService;
-    protected $analysisService;
+    public function __construct(private RekomendasiTanamService $rekomendasi) {}
 
-    public function __construct(
-        LocationService $locationService,
-        WeatherService $weatherService,
-        AnalysisService $analysisService
-    ) {
-        $this->locationService = $locationService;
-        $this->weatherService = $weatherService;
-        $this->analysisService = $analysisService;
-    }
-
-    // Tampilkan halaman analisis cuaca
+    // GET /cuaca
     public function index()
     {
         return view('weather.index');
     }
 
-    //API: Get daftar Provinsi (dari EMSIFA API)
-    public function getProvinces()
+    // GET /api/provinces, /api/regencies/{kode}, /api/districts/{kode}
+    // Proxy ke API wilayah EMSIFA (di-cache, lihat WilayahIndonesiaService)
+    public function getProvinces(WilayahIndonesiaService $wilayah): JsonResponse
     {
-        try {
-            $response = Http::timeout(10)->get('https://emsifa.github.io/api-wilayah-indonesia/api/provinces.json');
-            
-            if (!$response->successful()) {
-                return response()->json(['error' => 'Gagal memuat data provinsi'], 500);
-            }
-            
-            return response()->json($response->json());
-        } catch (\Exception $e) {
-            Log::error("Get provinces error: " . $e->getMessage());
-            return response()->json(['error' => 'Server error'], 500);
-        }
+        return $this->amankan(fn () => response()->json($wilayah->provinsi()), 'Gagal memuat data provinsi');
     }
 
-    //API: Get daftar Kabupaten berdasarkan kode Provinsi
-    public function getRegencies($provCode)
+    public function getRegencies(WilayahIndonesiaService $wilayah, string $provCode): JsonResponse
     {
-        try {
-            $url = "https://emsifa.github.io/api-wilayah-indonesia/api/regencies/{$provCode}.json";
-            $response = Http::timeout(10)->get($url);
-            
-            if (!$response->successful()) {
-                return response()->json(['error' => 'Gagal memuat data kabupaten'], 500);
-            }
-            
-            return response()->json($response->json());
-        } catch (\Exception $e) {
-            Log::error("Get regencies error: " . $e->getMessage());
-            return response()->json(['error' => 'Server error'], 500);
-        }
+        return $this->amankan(fn () => response()->json($wilayah->kabupaten($provCode)), 'Gagal memuat data kabupaten');
     }
 
-    //API: Get daftar Kecamatan berdasarkan kode Kabupaten
-    public function getDistricts($regCode)
+    public function getDistricts(WilayahIndonesiaService $wilayah, string $regCode): JsonResponse
     {
-        try {
-            $url = "https://emsifa.github.io/api-wilayah-indonesia/api/districts/{$regCode}.json";
-            $response = Http::timeout(10)->get($url);
-            
-            if (!$response->successful()) {
-                return response()->json(['error' => 'Gagal memuat data kecamatan'], 500);
-            }
-            
-            return response()->json($response->json());
-        } catch (\Exception $e) {
-            Log::error("Get districts error: " . $e->getMessage());
-            return response()->json(['error' => 'Server error'], 500);
-        }
+        return $this->amankan(fn () => response()->json($wilayah->kecamatan($regCode)), 'Gagal memuat data kecamatan');
     }
 
-    public function getRecommendations($provinsi, $kabupaten, $kecamatan)
+    // GET /api/cuaca/recommendations/{provinsi}/{kabupaten}/{kecamatan}
+    // Lima tanaman paling cocok dengan cuaca saat ini di kecamatan tersebut
+    public function getRecommendations(string $provinsi, string $kabupaten, string $kecamatan): JsonResponse
     {
-        $provinsi = urldecode($provinsi);
-        $kabupaten = urldecode($kabupaten);
-        $kecamatan = urldecode($kecamatan);
+        return $this->amankan(function () use ($provinsi, $kabupaten, $kecamatan) {
+            $kondisi = $this->rekomendasi->kondisi(urldecode($provinsi), urldecode($kabupaten), urldecode($kecamatan));
 
-        try {
-            // 1. Dapatkan koordinat dari nama wilayah
-            $coords = $this->locationService->geocode($provinsi, $kabupaten, $kecamatan);
-            
-            // 2. Dapatkan data cuaca real-time
-            $weather = $this->weatherService->getWeather($coords['latitude'], $coords['longitude']);
-            
-            // 3. Ambil semua tanaman dari database
-            $plants = Plant::all();
-            
-            // 4. Hitung matching score untuk setiap tanaman
-            $recommendations = $plants->map(function($plant) use ($weather) {
-                $analysisResult = $this->analysisService->calculateMatchingScore($plant, $weather);
-                $scoreValue = $analysisResult['score'];
-                $status = $this->analysisService->determineStatus($scoreValue, $analysisResult['details']);
-                
-                return [
-                    'id' => $plant->id,
-                    'kode' => $plant->kode,
-                    'nama' => $plant->nama,
-                    'gambar' => $plant->gambar ? asset($plant->gambar) : null,
-                    'score' => $scoreValue,
-                    'status' => $status,
-                    'current_conditions' => [
-                        'suhu' => $weather['suhu'],
-                        'kelembaban' => $weather['kelembaban'],
-                        'curah_hujan' => $weather['curah_hujan']
-                    ],
-                    'match_details' => [
-                        'suhu_match' => $analysisResult['details']['suhu']['match'],
-                        'kelembaban_match' => $analysisResult['details']['kelembaban']['match'],
-                        'musim_match' => stripos($plant->musim ?? '', 'hujan') !== false
-                    ]
-                ];
-            })
-            ->sortByDesc('score')
-            ->take(5)
-            ->values();
-            
             return response()->json([
-                'success' => true,
-                'location' => [
-                    'provinsi' => $provinsi,
-                    'kabupaten' => $kabupaten,
-                    'kecamatan' => $kecamatan,
-                    'latitude' => $coords['latitude'],
-                    'longitude' => $coords['longitude']
-                ],
-                'weather' => $weather,
-                'recommendations' => $recommendations
+                'success'         => true,
+                'location'        => $kondisi['lokasi'],
+                'weather'         => $kondisi['cuaca'],
+                'recommendations' => $this->rekomendasi->teratas($kondisi['cuaca']),
             ]);
-            
-        } catch (\Exception $e) {
-            Log::error("Recommendations error: " . $e->getMessage());
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
-        }
+        });
     }
 
-    //API: Analisis detail untuk tanaman spesifik
-    public function analyze(Request $request)
+    // POST /api/cuaca/analyze
+    // Analisis detail satu tanaman terhadap cuaca di lokasi yang dipilih
+    public function analyze(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'provinsi' => 'required|string|max:255',
+        $data = $request->validate([
+            'provinsi'  => 'required|string|max:255',
             'kabupaten' => 'required|string|max:255',
             'kecamatan' => 'required|string|max:255',
-            'plant_id' => 'required|exists:plants,id'
+            'plant_id'  => 'required|exists:plants,id',
         ]);
-        
-        try {
-            // 1. Dapatkan koordinat
-            $coords = $this->locationService->geocode(
-                $validated['provinsi'],
-                $validated['kabupaten'],
-                $validated['kecamatan']
-            );
-            
-            // VALIDASI
-            if (!isset($coords['latitude']) || !isset($coords['longitude'])) {
-                \Log::error('Geocoding failed - no coordinates', [
-                    'response' => $coords,
-                    'location' => $validated
-                ]);
-                
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Gagal mendapatkan koordinat lokasi. Pastikan nama wilayah benar.'
-                ], 400);
-            }
-            
-            // 2. Dapatkan data cuaca
-            $weatherData = $this->weatherService->getWeather($coords['latitude'], $coords['longitude']);
-            
-            // VALIDASI
-            if (!isset($weatherData['suhu']) || !isset($weatherData['kelembaban'])) {
-                \Log::error('Weather API failed', [
-                    'response' => $weatherData,
-                    'coords' => $coords
-                ]);
-                
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Gagal mendapatkan data cuaca. Silakan coba lagi.'
-                ], 500);
-            }
-            
-            // 3. Ambil data tanaman
-            $plant = Plant::findOrFail($validated['plant_id']);
-            
-            // 4. Lakukan analisis
-            $analysisResult = $this->analysisService->calculateMatchingScore($plant, $weatherData);
-            $scoreValue = $analysisResult['score'];
-            $status = $this->analysisService->determineStatus($scoreValue, $analysisResult['details']);
-            $recommendation = $this->analysisService->generateRecommendation($plant, $weatherData);
-            
+
+        return $this->amankan(function () use ($data) {
+            $kondisi = $this->rekomendasi->kondisi($data['provinsi'], $data['kabupaten'], $data['kecamatan']);
+            $plant = Plant::findOrFail($data['plant_id']);
+
             return response()->json([
-                'success' => true,
-                'plant' => $plant,
-                'location' => [
-                    'provinsi' => $validated['provinsi'],
-                    'kabupaten' => $validated['kabupaten'],
-                    'kecamatan' => $validated['kecamatan'],
-                    'latitude' => $coords['latitude'],
-                    'longitude' => $coords['longitude']
-                ],
-                'weather' => $weatherData,
-                'analysis' => [
-                    'score' => $scoreValue,
-                    'status' => $status,
-                    'recommendation' => $recommendation,
-                    'match_details' => $analysisResult['details']
-                ]
+                'success'  => true,
+                'plant'    => $plant,
+                'location' => $kondisi['lokasi'],
+                'weather'  => $kondisi['cuaca'],
+                'analysis' => $this->rekomendasi->analisis($plant, $kondisi['cuaca']),
             ]);
-            
-        } catch (\Exception $e) {
-            \Log::error('Analyze error: ' . $e->getMessage(), [
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'input' => $validated
-            ]);
-            
-            return response()->json([
-                'success' => false,
-                'error' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
+        });
     }
 
-    //API: Get detail informasi tanaman
-    public function getPlantDetail($id)
+    // GET /api/tanaman/{plant}/detail
+    public function getPlantDetail(Plant $plant): JsonResponse
     {
-        try {
-            $plant = Plant::findOrFail($id);
-            
-            return response()->json([
-                'success' => true,
-                'data' => $plant
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'error' => 'Tanaman tidak ditemukan'], 404);
-        }
+        return response()->json(['success' => true, 'data' => $plant]);
     }
 
-    //API: Get semua tanaman untuk dropdown
-    public function getPlants()
+    // GET /api/tanaman (untuk dropdown)
+    public function getPlants(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data'    => Plant::select('id', 'kode', 'nama', 'gambar')->orderBy('nama')->get(),
+        ]);
+    }
+
+    /**
+     * Error yang dipahami pengguna (lokasi/cuaca) dikirim apa adanya. Error
+     * lain hanya dicatat di log; sebelumnya pesan exception mentah (bisa
+     * berisi detail SQL atau URL internal) ikut dikirim ke browser.
+     */
+    private function amankan(Closure $aksi, string $pesanUmum = 'Terjadi kesalahan pada server. Silakan coba lagi.'): JsonResponse
     {
         try {
-            $plants = Plant::select('id', 'kode', 'nama', 'gambar')->get();
-            
-            return response()->json([
-                'success' => true,
-                'data' => $plants
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'error' => 'Gagal memuat data tanaman'], 500);
+            return $aksi();
+        } catch (LokasiTidakDitemukanException $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 422);
+        } catch (CuacaTidakTersediaException $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 503);
+        } catch (Throwable $e) {
+            Log::error('Halaman cuaca: '.$e->getMessage(), ['exception' => $e]);
+
+            return response()->json(['success' => false, 'error' => $pesanUmum], 500);
         }
     }
 }

@@ -5,7 +5,7 @@
 <div class="bg-white rounded-xl shadow-sm p-6 max-w-2xl">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('petani.produk.index') }}"
-           class="text-sm text-blue-600 hover:underline">← Kembali</a>
+           class="text-sm text-brand-700 hover:underline">← Kembali</a>
         <h2 class="text-lg font-semibold text-gray-800">Tambah Produk Baru</h2>
     </div>
 
@@ -25,7 +25,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Produk <span class="text-red-500">*</span></label>
             <input type="text" name="nama_produk" value="{{ old('nama_produk') }}"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                    placeholder="Contoh: Cabai Merah Keriting">
         </div>
 
@@ -34,7 +34,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Kategori <span class="text-red-500">*</span></label>
                 <select name="kategori"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
                     <option value="">-- Pilih Kategori --</option>
                     @foreach ($kategoriList as $k)
                         <option value="{{ $k }}" {{ old('kategori') === $k ? 'selected' : '' }}>{{ $k }}</option>
@@ -44,7 +44,7 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Satuan <span class="text-red-500">*</span></label>
                 <select name="satuan"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
                     @foreach (['kg','ton','ikat','buah','karung','liter'] as $s)
                         <option value="{{ $s }}" {{ old('satuan','kg') === $s ? 'selected' : '' }}>{{ $s }}</option>
                     @endforeach
@@ -57,13 +57,13 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Harga per Satuan (Rp) <span class="text-red-500">*</span></label>
                 <input type="number" name="harga" value="{{ old('harga') }}" min="0"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                        placeholder="Contoh: 15000">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Stok Tersedia <span class="text-red-500">*</span></label>
                 <input type="number" name="stok" value="{{ old('stok') }}" min="0"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                        placeholder="Contoh: 100">
             </div>
         </div>
@@ -72,7 +72,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Deskripsi Produk <span class="text-red-500">*</span></label>
             <textarea name="deskripsi" rows="4"
-                      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                       placeholder="Ceritakan kondisi, kualitas, dan keunggulan produk Anda...">{{ old('deskripsi') }}</textarea>
         </div>
 
@@ -92,13 +92,13 @@
                 <input id="foto_produk" type="file" name="foto_produk" accept="image/*" class="hidden"
                        onchange="document.getElementById('nama-file').textContent = this.files[0]?.name ?? ''">
             </label>
-            <p id="nama-file" class="mt-1 text-xs text-blue-600"></p>
+            <p id="nama-file" class="mt-1 text-xs text-brand-700"></p>
         </div>
 
         {{-- Tombol Aksi --}}
         <div class="flex gap-3 pt-2">
             <button type="submit"
-                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg border border-blue-700">
+                    class="px-6 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg border border-brand-800">
                 💾 Simpan Produk
             </button>
             <a href="{{ route('petani.produk.index') }}"

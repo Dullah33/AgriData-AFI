@@ -9,7 +9,7 @@
     <form method="GET" action="{{ route('user.petani.index') }}" class="flex gap-3">
         <input type="text" name="cari" value="{{ request('cari') }}" placeholder="Cari nama petani..."
                class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm">
-        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">Cari</button>
+        <button type="submit" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg">Cari</button>
     </form>
 </div>
 

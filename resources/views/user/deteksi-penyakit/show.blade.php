@@ -10,7 +10,7 @@
     @endif
 
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        <img src="{{ Storage::url($laporan->foto_tanaman) }}"
+        <img src="{{ Storage::url($laporan->foto_tanaman) }}" alt="Foto tanaman yang dianalisis"
              class="w-full h-64 object-cover bg-gray-100">
 
         <div class="p-6">
@@ -20,26 +20,29 @@
                     Risiko {{ ucfirst($laporan->tingkat_risiko) }}
                 </span>
             </div>
+            @if ($tanaman = $laporan->namaTanamanTerdeteksi())
+                <p class="-mt-2 mb-4 text-sm text-gray-500">Tanaman terdeteksi: <span class="font-medium text-gray-700">{{ $tanaman }}</span></p>
+            @endif
 
             <div class="flex items-center gap-2 mb-6">
                 <div class="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
                     <div class="h-2 bg-green-500" style="width: {{ $laporan->confidence_score }}%"></div>
                 </div>
-                <span class="text-sm font-semibold text-gray-700">{{ $laporan->confidence_score }}% yakin</span>
+                <span class="text-sm font-semibold text-gray-700">Tingkat akurasi: {{ $laporan->confidence_score }}%</span>
             </div>
 
             <div class="space-y-4 text-sm">
                 <div>
                     <h3 class="font-semibold text-gray-700 mb-1">🩺 Gejala</h3>
-                    <p class="text-gray-600">{{ $laporan->gejala }}</p>
+                    <p class="text-gray-600 whitespace-pre-line">{{ $laporan->gejala }}</p>
                 </div>
                 <div>
                     <h3 class="font-semibold text-gray-700 mb-1">🔎 Penyebab</h3>
-                    <p class="text-gray-600">{{ $laporan->penyebab }}</p>
+                    <p class="text-gray-600 whitespace-pre-line">{{ $laporan->penyebab }}</p>
                 </div>
                 <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
                     <h3 class="font-semibold text-green-800 mb-1">✅ Cara Penanganan (Umum)</h3>
-                    <p class="text-green-700">{{ $laporan->penanganan }}</p>
+                    <p class="text-green-700 whitespace-pre-line">{{ $laporan->penanganan }}</p>
                 </div>
             </div>
 
@@ -49,7 +52,7 @@
             </p>
 
             <a href="{{ route('user.deteksi-penyakit.create') }}"
-               class="inline-block mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg">
+               class="inline-block mt-4 px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg">
                 🔬 Scan Foto Lain
             </a>
         </div>

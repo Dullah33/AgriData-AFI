@@ -10,6 +10,8 @@ use App\Models\Artikel;
 use App\Models\UlasanRating;
 use App\Models\FieldVisit;
 use App\Models\DiseaseReport;
+use App\Models\Pembayaran;
+use App\Services\WeatherService;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -32,8 +34,11 @@ class DashboardController extends Controller
         $stats = [
             'total_petani'        => PetaniProfile::count(),
             'petani_terverifikasi' => PetaniProfile::whereNotNull('verified_by')->count(),
-            'transaksi_bulan_ini' => Transaksi::whereMonth('created_at', now()->month)->count(),
+            // Rentang tanggal (bukan whereMonth saja) supaya bulan yang sama di
+            // tahun lalu tidak ikut terhitung, dan index created_at bisa dipakai.
+            'transaksi_bulan_ini' => Transaksi::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])->count(),
             'transaksi_pending'   => Transaksi::where('status_transaksi', 'pending')->count(),
+            'pembayaran_menunggu' => Pembayaran::status(Pembayaran::MENUNGGU_VERIFIKASI)->count(),
             'penyuluh_aktif'      => ExtensionOfficer::where('status', 'aktif')->count(),
             'artikel_published'   => Artikel::where('status', 'published')->count(),
             'artikel_draft'       => Artikel::where('status', 'draft')->count(),
@@ -42,7 +47,8 @@ class DashboardController extends Controller
         $petaniBelumVerifikasi = PetaniProfile::with('user')
             ->whereNull('verified_by')->latest()->take(5)->get();
 
-        $ulasanTerbaru = UlasanRating::where('status', 'aktif')
+        $ulasanTerbaru = UlasanRating::with('transaksi.produk')
+            ->where('status', 'aktif')
             ->latest()->take(5)->get();
 
         return view('dashboard.admin', compact('stats', 'petaniBelumVerifikasi', 'ulasanTerbaru'));
@@ -57,17 +63,52 @@ class DashboardController extends Controller
 
         $stats = [
             'produk_aktif'        => ProdukPanen::where('petani_id', $user->id)->where('status', 'tersedia')->count(),
-            'pesanan_pending'     => Transaksi::whereIn('produk_id', $produkIds)->where('status_transaksi', 'pending')->count(),
+            // Sudah dibayar, menunggu dikirim petani
+            'pesanan_perlu_dikirim' => Transaksi::whereIn('produk_id', $produkIds)->where('status_transaksi', Transaksi::DIPROSES)->count(),
             'total_lahan'         => $profile?->lahans()->count() ?? 0,
             'kunjungan_terjadwal' => $profile ? FieldVisit::where('petani_profile_id', $profile->id)->where('status', 'terjadwal')->count() : 0,
         ];
 
         $pesananTerbaru = Transaksi::with(['produk', 'pembeli'])
             ->whereIn('produk_id', $produkIds)
-            ->where('status_transaksi', 'pending')
+            ->where('status_transaksi', Transaksi::DIPROSES)
             ->latest()->take(5)->get();
 
-        return view('dashboard.petani', compact('stats', 'pesananTerbaru'));
+        // Hasil AI Scanner terbaru, ditampilkan di panel "Hasil scan terbaru"
+        $laporanTerbaru = DiseaseReport::where('user_id', $user->id)
+            ->latest()->take(3)->get();
+
+        $cuaca = $this->cuacaLahanUtama($profile);
+
+        return view('dashboard.petani', compact('stats', 'pesananTerbaru', 'laporanTerbaru', 'cuaca'));
+    }
+
+    /**
+     * Cuaca untuk satu lahan yang ditampilkan di dashboard: lahan aktif yang
+     * punya koordinat didahulukan. Datanya dari cache WeatherService (3 jam).
+     */
+    private function cuacaLahanUtama(?PetaniProfile $profile): array
+    {
+        if (! $profile) {
+            return ['lahan' => null, 'data' => null, 'saran' => [], 'adaLahan' => false];
+        }
+
+        $profile->loadMissing('wilayah');
+        $lahans = $profile->lahans()->with('weatherData')->latest()->get()
+            ->each->setRelation('petaniProfile', $profile);
+
+        $lahan = $lahans->sortBy(fn ($l) => $l->status === 'aktif' ? 0 : 1)
+            ->first(fn ($l) => $l->koordinatCuaca() !== null);
+
+        $layanan = app(WeatherService::class);
+        $data = $lahan ? $layanan->untukLahan($lahan) : null;
+
+        return [
+            'lahan' => $lahan,
+            'data' => $data,
+            'saran' => $data ? $layanan->saranPerawatan($data) : [],
+            'adaLahan' => $lahans->isNotEmpty(),
+        ];
     }
 
     private function userDashboard()
@@ -94,7 +135,7 @@ class DashboardController extends Controller
         $officer = ExtensionOfficer::where('user_id', Auth::id())->first();
 
         $stats = [
-            'petani_binaan'       => $officer ? count($officer->petaniBinaan()) : 0,
+            'petani_binaan'       => $officer ? $officer->petaniBinaanQuery()->count() : 0,
             'kunjungan_bulan_ini' => $officer ? $officer->fieldVisits()->bulanIni()->where('status', 'selesai')->count() : 0,
             'kunjungan_terjadwal' => $officer ? $officer->fieldVisits()->where('status', 'terjadwal')->count() : 0,
             'pelatihan_bulan_ini' => $officer ? $officer->trainingPrograms()->bulanIni()->count() : 0,

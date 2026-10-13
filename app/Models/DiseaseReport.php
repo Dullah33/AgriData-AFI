@@ -11,7 +11,7 @@ class DiseaseReport extends Model
     protected $fillable = [
         'user_id', 'lahan_id', 'plant_id', 'wilayah_id',
         'nama_penyakit', 'confidence_score', 'foto_tanaman',
-        'gejala', 'penyebab', 'penanganan', 'tingkat_risiko',
+        'gejala', 'penyebab', 'penanganan', 'tingkat_risiko', 'hasil_ai',
         'latitude', 'longitude', 'status',
         'rekomendasi_tindak_lanjut', 'ditinjau_oleh', 'ditinjau_at',
     ];
@@ -20,6 +20,7 @@ class DiseaseReport extends Model
     {
         return [
             'confidence_score' => 'decimal:2',
+            'hasil_ai'         => 'array',
             'latitude'         => 'decimal:7',
             'longitude'        => 'decimal:7',
             'ditinjau_at'      => 'datetime',
@@ -76,6 +77,14 @@ class DiseaseReport extends Model
     {
         return $query->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year);
+    }
+
+    // Nama tanaman yang dikenali AI (hanya tersedia untuk hasil scan Gemini)
+    public function namaTanamanTerdeteksi(): ?string
+    {
+        $nama = $this->hasil_ai['respons']['nama_tanaman'] ?? null;
+
+        return is_string($nama) && ! in_array(trim($nama), ['', '-'], true) ? trim($nama) : null;
     }
 
     public function badgeRisiko(): string

@@ -7,7 +7,7 @@
 <div class="bg-white rounded-xl shadow-sm p-6 max-w-2xl">
     <div class="flex items-center gap-3 mb-6">
         <a href="{{ route('petani.lahan.index') }}"
-           class="text-sm text-blue-600 hover:underline">← Kembali</a>
+           class="text-sm text-brand-700 hover:underline">← Kembali</a>
         <h2 class="text-lg font-semibold text-gray-800">Edit Lahan: {{ $lahan->nama_lahan }}</h2>
     </div>
 
@@ -26,7 +26,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nama/Kode Lahan <span class="text-red-500">*</span></label>
             <input type="text" name="nama_lahan" value="{{ old('nama_lahan', $lahan->nama_lahan) }}"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
 
         {{-- Luas & Jenis Tanah --}}
@@ -34,12 +34,12 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Luas Lahan (Ha) <span class="text-red-500">*</span></label>
                 <input type="number" step="0.01" min="0.01" name="luas_ha" value="{{ old('luas_ha', $lahan->luas_ha) }}"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Tanah</label>
                 <select name="jenis_tanah"
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
                     <option value="">-- Pilih Jenis Tanah --</option>
                     @foreach ($jenisTanahList as $j)
                         <option value="{{ $j }}" {{ old('jenis_tanah', $lahan->jenis_tanah) === $j ? 'selected' : '' }}>{{ $j }}</option>
@@ -52,7 +52,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Tanaman yang Sedang Ditanam</label>
             <input type="text" name="tanaman_aktif" value="{{ old('tanaman_aktif', $lahan->tanaman_aktif) }}"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
                    placeholder="Kosongkan jika lahan sedang bera">
         </div>
 
@@ -62,13 +62,13 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Tanam</label>
                 <input type="date" name="tanggal_tanam"
                        value="{{ old('tanggal_tanam', $lahan->tanggal_tanam?->format('Y-m-d')) }}"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Perkiraan Tanggal Panen</label>
                 <input type="date" name="perkiraan_panen"
                        value="{{ old('perkiraan_panen', $lahan->perkiraan_panen?->format('Y-m-d')) }}"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
             </div>
         </div>
 
@@ -86,7 +86,7 @@
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Status Lahan <span class="text-red-500">*</span></label>
             <select name="status"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
                 @foreach (['aktif' => 'Aktif Ditanami', 'bera' => 'Bera (Tidak Ditanami)', 'panen' => 'Siap/Sudah Panen'] as $val => $label)
                     <option value="{{ $val }}" {{ old('status', $lahan->status) === $val ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach
@@ -96,7 +96,7 @@
         {{-- Tombol Aksi --}}
         <div class="flex gap-3 pt-2">
             <button type="submit"
-                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg border border-blue-700">
+                    class="px-6 py-2 bg-brand-700 hover:bg-brand-800 text-white text-sm font-semibold rounded-lg border border-brand-800">
                 💾 Simpan Perubahan
             </button>
             <a href="{{ route('petani.lahan.index') }}"

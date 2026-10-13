@@ -28,16 +28,27 @@ use App\Http\Controllers\Penyuluh\LaporanBulananController;
 use App\Http\Controllers\Penyuluh\DeteksiPenyakitController as PenyuluhDeteksiPenyakitController;
 use App\Http\Controllers\Petani\DeteksiPenyakitController as PetaniDeteksiPenyakitController;
 use App\Http\Controllers\User\DeteksiPenyakitController as UserDeteksiPenyakitController;
+use App\Http\Controllers\User\KeranjangController;
+use App\Http\Controllers\User\CheckoutController;
+use App\Http\Controllers\User\PembayaranController as UserPembayaranController;
+use App\Http\Controllers\Admin\PembayaranController as AdminPembayaranController;
+use App\Http\Controllers\MidtransWebhookController;
 
 // Landing page
 Route::get('/', fn() => view('landing'))->name('landing');
 
+// Notifikasi pembayaran dari Midtrans. Tanpa login & CSRF (lihat
+// bootstrap/app.php); keasliannya diverifikasi lewat signature_key.
+Route::post('/webhook/midtrans', MidtransWebhookController::class)
+    ->middleware('throttle:60,1')
+    ->name('webhook.midtrans');
+
 // Guest
 Route::middleware('guest')->group(function () {
     Route::get('/login', fn() => view('auth.login'))->name('login');
-    Route::post('/login', [LoginController::class, 'authenticate']);
+    Route::post('/login', [LoginController::class, 'authenticate'])->middleware('throttle:login');
     Route::get('/register', fn() => view('auth.register'))->name('register');
-    Route::post('/register', [RegisterController::class, 'store']);
+    Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:6,1');
 });
 
 // Protected (semua role)
@@ -60,8 +71,8 @@ Route::middleware('auth')->group(function () {
     
     // API: Cascading Location (EMSIFA)
     Route::get('/api/provinces', [WeatherController::class, 'getProvinces'])->name('api.provinces');
-    Route::get('/api/regencies/{provCode}', [WeatherController::class, 'getRegencies'])->name('api.regencies');
-    Route::get('/api/districts/{regCode}', [WeatherController::class, 'getDistricts'])->name('api.districts');
+    Route::get('/api/regencies/{provCode}', [WeatherController::class, 'getRegencies'])->whereNumber('provCode')->name('api.regencies');
+    Route::get('/api/districts/{regCode}', [WeatherController::class, 'getDistricts'])->whereNumber('regCode')->name('api.districts');
     
     // API: Analisis Cuaca
     Route::get('/api/cuaca/recommendations/{provinsi}/{kabupaten}/{kecamatan}', 
@@ -70,7 +81,7 @@ Route::middleware('auth')->group(function () {
     
     // API: Data Tanaman
     Route::get('/api/tanaman', [WeatherController::class, 'getPlants'])->name('api.tanaman');
-    Route::get('/api/tanaman/{id}/detail', [WeatherController::class, 'getPlantDetail'])->name('api.tanaman.detail');
+    Route::get('/api/tanaman/{plant}/detail', [WeatherController::class, 'getPlantDetail'])->name('api.tanaman.detail');
 
     // Halaman list tanaman
     Route::get('/budidaya', [BudidayaController::class, 'index'])->name('budidaya.index');
@@ -108,7 +119,15 @@ Route::middleware('auth')->group(function () {
         Route::get('peta-lahan', [PetaLahanController::class, 'index'])->name('peta-lahan.index');
 
         // Plant Management
-        Route::resource('plants', \App\Http\Controllers\Admin\PlantController::class);
+        // Tanpa halaman detail (view admin.plants.show memang tidak ada; dulu 500)
+        Route::resource('plants', \App\Http\Controllers\Admin\PlantController::class)->except(['show']);
+
+        // Verifikasi pembayaran marketplace
+        Route::get('pembayaran', [AdminPembayaranController::class, 'index'])->name('pembayaran.index');
+        Route::get('pembayaran/{pembayaran}', [AdminPembayaranController::class, 'show'])->name('pembayaran.show');
+        Route::get('pembayaran/{pembayaran}/bukti', [AdminPembayaranController::class, 'bukti'])->name('pembayaran.bukti');
+        Route::post('pembayaran/{pembayaran}/verifikasi', [AdminPembayaranController::class, 'verifikasi'])->name('pembayaran.verifikasi');
+        Route::post('pembayaran/{pembayaran}/tolak', [AdminPembayaranController::class, 'tolak'])->name('pembayaran.tolak');
     });
 
     // ============================================
@@ -124,7 +143,8 @@ Route::middleware('auth')->group(function () {
         // AI Scanner Penyakit Tanaman & Riwayat Deteksi Penyakit
         Route::get('deteksi-penyakit', [PetaniDeteksiPenyakitController::class, 'index'])->name('deteksi-penyakit.index');
         Route::get('deteksi-penyakit/scan', [PetaniDeteksiPenyakitController::class, 'create'])->name('deteksi-penyakit.create');
-        Route::post('deteksi-penyakit/scan', [PetaniDeteksiPenyakitController::class, 'store'])->name('deteksi-penyakit.store');
+        // Throttle: tiap scan memanggil API AI berbayar/berkuota, batasi 10x per menit per pengguna
+        Route::post('deteksi-penyakit/scan', [PetaniDeteksiPenyakitController::class, 'store'])->middleware('throttle:10,1')->name('deteksi-penyakit.store');
         Route::get('deteksi-penyakit/{laporan}', [PetaniDeteksiPenyakitController::class, 'show'])->name('deteksi-penyakit.show');
 
         // Listing produk
@@ -143,15 +163,29 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:user')->group(function () {
         Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('user.marketplace');
         Route::get('/marketplace/{produk}', [MarketplaceController::class, 'show'])->name('user.marketplace.show');
-        Route::post('/marketplace/{produk}/beli', [MarketplaceController::class, 'beli'])->name('user.marketplace.beli');
         Route::get('/pesanan-saya', [MarketplaceController::class, 'pesananSaya'])->name('user.pesanan');
+
+        // Keranjang belanja
+        Route::get('/keranjang', [KeranjangController::class, 'index'])->name('user.keranjang.index');
+        Route::post('/marketplace/{produk}/keranjang', [KeranjangController::class, 'store'])->name('user.keranjang.store');
+        Route::patch('/keranjang/{item}', [KeranjangController::class, 'update'])->name('user.keranjang.update');
+        Route::delete('/keranjang/{item}', [KeranjangController::class, 'destroy'])->name('user.keranjang.destroy');
+
+        // Checkout & pembayaran
+        Route::get('/checkout', [CheckoutController::class, 'create'])->name('user.checkout.create');
+        Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('user.checkout.store');
+        Route::get('/pembayaran/{pembayaran}', [UserPembayaranController::class, 'show'])->name('user.pembayaran.show');
+        Route::post('/pembayaran/{pembayaran}/bukti', [UserPembayaranController::class, 'unggahBukti'])->middleware('throttle:10,1')->name('user.pembayaran.bukti.store');
+        Route::get('/pembayaran/{pembayaran}/bukti', [UserPembayaranController::class, 'bukti'])->name('user.pembayaran.bukti');
+        Route::post('/pembayaran/{pembayaran}/batal', [UserPembayaranController::class, 'batal'])->name('user.pembayaran.batal');
+        Route::post('/pembayaran/{pembayaran}/simulasi', [UserPembayaranController::class, 'simulasi'])->name('user.pembayaran.simulasi');
         Route::get('/riwayat-ulasan', [MarketplaceController::class, 'riwayatUlasan'])->name('user.riwayat-ulasan');
         Route::get("/ulasan/{transaksi}/create", [UserUlasanController::class, "create"])->name("user.ulasan.create");
         Route::post("/ulasan/{transaksi}", [UserUlasanController::class, "store"])->name("user.ulasan.store");
 
         // AI Scanner Penyakit Tanaman (Terbatas)
         Route::get('/ai-scanner', [UserDeteksiPenyakitController::class, 'create'])->name('user.deteksi-penyakit.create');
-        Route::post('/ai-scanner', [UserDeteksiPenyakitController::class, 'store'])->name('user.deteksi-penyakit.store');
+        Route::post('/ai-scanner', [UserDeteksiPenyakitController::class, 'store'])->middleware('throttle:10,1')->name('user.deteksi-penyakit.store');
         Route::get('/ai-scanner/{laporan}', [UserDeteksiPenyakitController::class, 'show'])->name('user.deteksi-penyakit.show');
 
         // Profil Petani (Lihat)

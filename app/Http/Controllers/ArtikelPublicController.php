@@ -7,14 +7,6 @@ use Illuminate\Http\Request;
 
 class ArtikelPublicController extends Controller
 {
-    private array $kategoriList = [
-        'Teknik Budidaya',
-        'Hama & Penyakit',
-        'Cuaca',
-        'Teknologi Pertanian',
-        'Kebijakan',
-    ];
-
     // GET /artikel
     // "Artikel Pertanian" (BAB 2A.3 & 2A.4): daftar artikel edukatif,
     // read-only, dipakai bersama oleh role Petani & User (dan siapa pun
@@ -28,14 +20,15 @@ class ArtikelPublicController extends Controller
         }
 
         if ($request->filled('cari')) {
-            $query->where('judul', 'like', '%' . $request->cari . '%');
+            // Nilai dikirim lewat parameter binding, jadi aman dari SQL injection
+            $query->where('judul', 'like', '%'.$request->string('cari').'%');
         }
 
         $artikels = $query->paginate(9)->withQueryString();
 
         return view('artikel.index', [
             'artikels'     => $artikels,
-            'kategoriList' => $this->kategoriList,
+            'kategoriList' => Artikel::KATEGORI,
         ]);
     }
 

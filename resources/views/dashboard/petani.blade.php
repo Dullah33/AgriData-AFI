@@ -2,51 +2,126 @@
 @section('title', 'Dashboard Petani')
 @section('content')
 
-<div class="space-y-6">
-    <div>
-        <h2 class="text-lg font-semibold text-gray-800">Selamat datang, {{ Auth::user()->username }} 👋</h2>
-        <p class="text-sm text-gray-500">Ringkasan aktivitas lahan dan penjualan Anda.</p>
+@php
+    $aksiCepat = [
+        ['label' => 'Analisis cuaca', 'desc' => 'Prakiraan & rekomendasi tanam', 'icon' => 'cloud-sun', 'route' => 'cuaca.index'],
+        ['label' => 'Panduan budidaya', 'desc' => 'Cara tanam per komoditas', 'icon' => 'book-open', 'route' => 'budidaya.index'],
+        ['label' => 'Lahan saya', 'desc' => 'Kelola petak & tanaman aktif', 'icon' => 'map', 'route' => 'petani.lahan.index'],
+        ['label' => 'Artikel pertanian', 'desc' => 'Tips dari penyuluh', 'icon' => 'newspaper', 'route' => 'artikel.index'],
+    ];
+@endphp
+
+<div class="space-y-8">
+    <x-dashboard.page-header subtitle="Pantau lahan, kesehatan tanaman, dan penjualan hasil panen Anda.">
+        <x-slot:actions>
+            <x-dashboard.action :href="route('petani.produk.create')" icon="plus" variant="secondary">Tambah produk</x-dashboard.action>
+            <x-dashboard.action :href="route('petani.deteksi-penyakit.create')" icon="scan-search">Scan penyakit</x-dashboard.action>
+        </x-slot:actions>
+    </x-dashboard.page-header>
+
+    <div class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <x-dashboard.stat label="Produk aktif" :value="$stats['produk_aktif']" icon="package" :href="route('petani.produk.index')"
+                          hint="Listing yang bisa dibeli" />
+        <x-dashboard.stat label="Perlu dikirim" :value="$stats['pesanan_perlu_dikirim']" icon="truck" :href="route('petani.pesanan.index', ['status' => 'diproses'])"
+                          tone="attention" :hint="$stats['pesanan_perlu_dikirim'] > 0 ? 'Sudah dibayar pembeli' : 'Tidak ada pesanan baru'" />
+        <x-dashboard.stat label="Petak lahan" :value="$stats['total_lahan']" icon="map" :href="route('petani.lahan.index')"
+                          hint="Terdaftar di profil" />
+        <x-dashboard.stat label="Kunjungan terjadwal" :value="$stats['kunjungan_terjadwal']" icon="calendar-check"
+                          :href="route('petani.kunjungan-penyuluh.index')" hint="Dari penyuluh wilayah" />
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Produk Aktif</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['produk_aktif'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">listing tersedia</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-amber-500">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Pesanan Pending</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['pesanan_pending'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">menunggu konfirmasi</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Total Lahan</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['total_lahan'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">petak lahan</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-teal-500">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Kunjungan Terjadwal</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['kunjungan_terjadwal'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">dari penyuluh</p>
-        </div>
+    <x-dashboard.panel :title="$cuaca['lahan'] ? 'Cuaca di '.$cuaca['lahan']->nama_lahan : 'Cuaca di lahan'"
+                       description="Kondisi saat ini, prakiraan, dan saran perawatan."
+                       :href="route('petani.lahan.index')" link-label="Semua lahan">
+        @if ($cuaca['data'])
+            <x-cuaca.kartu :cuaca="$cuaca['data']" :saran="$cuaca['saran']" lengkap />
+        @elseif ($cuaca['lahan'])
+            <x-dashboard.empty icon="cloud-off" title="Cuaca belum bisa diambil"
+                               description="Layanan cuaca sedang tidak bisa dihubungi. Coba muat ulang beberapa saat lagi." />
+        @elseif ($cuaca['adaLahan'])
+            <x-dashboard.empty icon="map-pin-plus" title="Lokasi lahan belum diketahui"
+                               description="Gambar batas lahan di peta supaya cuaca dan prakiraan hujan bisa ditampilkan."
+                               :href="route('petani.lahan.index')" action="Buka lahan saya" />
+        @else
+            <x-dashboard.empty icon="map" title="Belum ada lahan"
+                               description="Tambahkan lahan untuk memantau cuaca dan prakiraan hujan di lokasinya."
+                               :href="route('petani.lahan.create')" action="Tambah lahan" />
+        @endif
+    </x-dashboard.panel>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <x-dashboard.panel class="lg:col-span-3" title="Perlu dikirim" description="Pesanan yang sudah dibayar dan menunggu Anda kirim."
+                           :href="route('petani.pesanan.index', ['status' => 'diproses'])">
+            @if ($pesananTerbaru->isEmpty())
+                <x-dashboard.empty icon="inbox" title="Belum ada pesanan untuk dikirim"
+                                   description="Pastikan produk Anda punya foto dan stok supaya mudah ditemukan pembeli."
+                                   :href="route('petani.produk.index')" action="Kelola produk" />
+            @else
+                <ul class="-my-1 divide-y divide-stone-100">
+                    @foreach ($pesananTerbaru as $p)
+                        <li class="flex items-center gap-3 py-3">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-stone-100 text-stone-500">
+                                <i data-lucide="package" class="h-5 w-5"></i>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-semibold text-stone-900">{{ $p->produk->nama_produk }}</p>
+                                <p class="truncate text-sm text-stone-500">
+                                    {{ $p->pembeli->username }}
+                                    <span class="text-stone-300" aria-hidden="true">/</span>
+                                    {{ $p->jumlah }} {{ $p->produk->satuan }}
+                                </p>
+                            </div>
+                            <x-dashboard.status :status="$p->status_transaksi" />
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </x-dashboard.panel>
+
+        <x-dashboard.panel class="lg:col-span-2" title="Hasil scan terbaru" :href="route('petani.deteksi-penyakit.index')" link-label="Riwayat">
+            @if ($laporanTerbaru->isEmpty())
+                <x-dashboard.empty icon="scan-search" title="Belum pernah scan"
+                                   description="Foto daun yang sakit untuk tahu penyakit dan cara menanganinya."
+                                   :href="route('petani.deteksi-penyakit.create')" action="Scan sekarang" />
+            @else
+                <ul class="-my-1 divide-y divide-stone-100">
+                    @foreach ($laporanTerbaru as $laporan)
+                        <li>
+                            <a href="{{ route('petani.deteksi-penyakit.show', $laporan) }}"
+                               class="-mx-2 flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-stone-50">
+                                <img src="{{ Storage::url($laporan->foto_tanaman) }}" alt="" loading="lazy"
+                                     class="h-12 w-12 shrink-0 rounded-lg bg-stone-100 object-cover">
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-semibold text-stone-900">{{ $laporan->nama_penyakit }}</p>
+                                    <p class="text-sm text-stone-500">{{ $laporan->created_at->locale('id')->diffForHumans() }}</p>
+                                </div>
+                                <span class="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $laporan->badgeRisiko() }}">
+                                    {{ ucfirst($laporan->tingkat_risiko) }}
+                                </span>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </x-dashboard.panel>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm p-5">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="font-semibold text-gray-800 text-sm">Pesanan Masuk Terbaru</h3>
-            <a href="{{ route('petani.pesanan.index') }}" class="text-xs text-blue-600 hover:underline">Lihat semua →</a>
+    <section aria-labelledby="aksi-cepat">
+        <h2 id="aksi-cepat" class="text-base font-semibold text-stone-900">Aksi cepat</h2>
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            @foreach ($aksiCepat as $aksi)
+                <a href="{{ route($aksi['route']) }}"
+                   class="group flex items-center gap-3.5 rounded-2xl border border-stone-200/80 bg-white p-4 transition hover:border-brand-200 hover:bg-brand-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-100 transition group-hover:bg-brand-700 group-hover:text-white group-hover:ring-brand-700">
+                        <i data-lucide="{{ $aksi['icon'] }}" class="h-5 w-5"></i>
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block truncate text-sm font-semibold text-stone-900">{{ $aksi['label'] }}</span>
+                        <span class="block truncate text-sm text-stone-500">{{ $aksi['desc'] }}</span>
+                    </span>
+                </a>
+            @endforeach
         </div>
-        @forelse ($pesananTerbaru as $p)
-            <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0 text-sm">
-                <div>
-                    <p class="font-medium text-gray-800">{{ $p->produk->nama_produk }}</p>
-                    <p class="text-xs text-gray-400">{{ $p->pembeli->username }} — {{ $p->jumlah }} {{ $p->produk->satuan }}</p>
-                </div>
-                <span class="px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-700 rounded-full">{{ $p->status_transaksi }}</span>
-            </div>
-        @empty
-            <p class="text-sm text-gray-400 py-2">Belum ada pesanan masuk.</p>
-        @endforelse
-    </div>
+    </section>
 </div>
 @endsection

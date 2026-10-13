@@ -2,15 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Lahan extends Model
 {
     protected $table = 'lahan';
 
+    public const JENIS_TANAH = [
+        'Aluvial', 'Andosol', 'Latosol', 'Regosol', 'Grumusol', 'Podsolik', 'Lainnya',
+    ];
+
     protected $fillable = [
-        'petani_profile_id', 'nama_lahan', 'koordinat_poligon', 'luas_ha',
+        'petani_profile_id', 'nama_lahan', 'koordinat_poligon', 'latitude', 'longitude', 'luas_ha',
         'jenis_tanah', 'tanaman_aktif', 'tanggal_tanam', 'perkiraan_panen',
         'status',
     ];
@@ -19,10 +24,24 @@ class Lahan extends Model
     {
         return [
             'koordinat_poligon' => 'array',
+            'latitude'          => 'float',
+            'longitude'         => 'float',
             'luas_ha'           => 'decimal:2',
             'tanggal_tanam'     => 'date',
             'perkiraan_panen'   => 'date',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        // Titik koordinat untuk cuaca ikut diperbarui setiap kali petani
+        // menggambar ulang batas lahan di peta.
+        static::saving(function (Lahan $lahan) {
+            if ($lahan->isDirty('koordinat_poligon') && ($titik = $lahan->centroid())) {
+                $lahan->latitude = round($titik[0], 7);
+                $lahan->longitude = round($titik[1], 7);
+            }
+        });
     }
 
     public function petaniProfile()
@@ -49,6 +68,29 @@ class Lahan extends Model
         $lng = collect($this->koordinat_poligon)->avg(fn ($p) => $p[1]);
 
         return [$lat, $lng];
+    }
+
+    // Cuaca terakhir yang disimpan job pembaruan harian (cuaca:perbarui)
+    public function weatherData(): HasOne
+    {
+        return $this->hasOne(WeatherData::class, 'lahan_id');
+    }
+
+    // Koordinat [lat, lng] untuk mengambil cuaca. Kalau batas lahan belum
+    // digambar, pakai koordinat wilayah (kecamatan) tempat petani terdaftar.
+    public function koordinatCuaca(): ?array
+    {
+        if ($this->latitude !== null && $this->longitude !== null) {
+            return [(float) $this->latitude, (float) $this->longitude];
+        }
+
+        $wilayah = $this->petaniProfile?->wilayah;
+
+        if ($wilayah?->latitude !== null && $wilayah?->longitude !== null) {
+            return [(float) $wilayah->latitude, (float) $wilayah->longitude];
+        }
+
+        return null;
     }
 
     // Scope: lahan yang sedang aktif ditanami

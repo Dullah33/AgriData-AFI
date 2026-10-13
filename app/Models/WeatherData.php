@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 class WeatherData extends Model
 {
@@ -13,6 +15,7 @@ class WeatherData extends Model
      * Fillable attributes
      */
     protected $fillable = [
+        'lahan_id',
         'provinsi',
         'kabupaten',
         'kecamatan',
@@ -24,6 +27,8 @@ class WeatherData extends Model
         'curah_hujan',
         'kecepatan_angin',
         'kondisi_cuaca',
+        'sumber',
+        'diambil_at',
         'historical_data',
         'forecast_data',
         'weather_data',
@@ -44,7 +49,59 @@ class WeatherData extends Model
             'historical_data' => 'array',
             'forecast_data' => 'array',
             'weather_data' => 'array',
+            'diambil_at' => 'datetime',
         ];
+    }
+
+    // Jumlah hari ringkasan cuaca harian yang disimpan di historical_data
+    public const HARI_RIWAYAT = 30;
+
+    public function lahan(): BelongsTo
+    {
+        return $this->belongsTo(Lahan::class, 'lahan_id');
+    }
+
+    /**
+     * Simpan hasil WeatherService untuk satu lahan (satu baris per lahan).
+     * Ringkasan per hari ikut dicatat di historical_data, maksimal 30 hari
+     * terakhir, supaya tren cuaca di lahan bisa dilihat tanpa memanggil API.
+     */
+    public static function simpanUntukLahan(Lahan $lahan, array $cuaca): self
+    {
+        $diambil = Carbon::parse($cuaca['diambil_at']);
+        $tanggal = $diambil->copy()->setTimezone(config('cuaca.zona_waktu'))->toDateString();
+        $lama = static::firstWhere('lahan_id', $lahan->id);
+
+        $riwayat = collect($lama?->historical_data ?? [])
+            ->reject(fn ($hari) => ($hari['tanggal'] ?? null) === $tanggal)
+            ->push([
+                'tanggal' => $tanggal,
+                'suhu' => $cuaca['suhu'],
+                'kelembaban' => $cuaca['kelembaban'],
+                'curah_hujan' => $cuaca['curah_hujan'],
+                'kondisi_cuaca' => $cuaca['kondisi_cuaca'],
+            ])
+            ->sortBy('tanggal')
+            ->take(-self::HARI_RIWAYAT)
+            ->values()
+            ->all();
+
+        return static::updateOrCreate(['lahan_id' => $lahan->id], [
+            'nama_lokasi' => $lahan->nama_lahan,
+            'kabupaten' => $lahan->petaniProfile?->wilayah?->nama_wilayah,
+            'latitude' => $cuaca['latitude'],
+            'longitude' => $cuaca['longitude'],
+            'suhu' => $cuaca['suhu'],
+            'kelembaban' => $cuaca['kelembaban'],
+            'curah_hujan' => $cuaca['curah_hujan'],
+            'kecepatan_angin' => $cuaca['kecepatan_angin'],
+            'kondisi_cuaca' => $cuaca['kondisi_cuaca'],
+            'sumber' => $cuaca['sumber'],
+            'diambil_at' => $diambil,
+            'forecast_data' => $cuaca['prakiraan'],
+            'weather_data' => $cuaca,
+            'historical_data' => $riwayat,
+        ]);
     }
 
     /**

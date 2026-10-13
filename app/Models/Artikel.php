@@ -9,6 +9,15 @@ class Artikel extends Model
 {
     protected $table = 'artikel';
 
+    // Kategori artikel (dokumen modul BAB 2.3.4), dipakai form admin dan filter publik
+    public const KATEGORI = [
+        'Teknik Budidaya',
+        'Hama & Penyakit',
+        'Cuaca',
+        'Teknologi Pertanian',
+        'Kebijakan',
+    ];
+
     // Kolom-kolom di bawah ini disamakan dengan migration ASLI
     // (2026_06_14_200509_create_artikel_table.php +
     // 2026_07_02_000004_add_columns_to_artikel_table.php), BUKAN nama

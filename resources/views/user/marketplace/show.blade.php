@@ -2,84 +2,93 @@
 @section('title', $produk->nama_produk)
 @section('content')
 
-<div class="max-w-2xl">
-    <a href="{{ route('user.marketplace') }}"
-       class="text-sm text-blue-600 hover:underline mb-4 block">← Kembali ke Marketplace</a>
+@php
+    $sisaBoleh = max(0, $produk->stok - $diKeranjang);
+@endphp
 
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-        {{-- Foto Produk --}}
-        @if ($produk->foto_produk)
-            <img src="{{ Storage::url($produk->foto_produk) }}" class="w-full h-64 object-cover">
-        @else
-            <div class="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
-                Tidak ada foto
-            </div>
-        @endif
+<div class="space-y-6">
+    <a href="{{ route('user.marketplace') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-stone-500 hover:text-stone-900">
+        <i data-lucide="arrow-left" class="h-4 w-4"></i> Kembali ke marketplace
+    </a>
 
-        <div class="p-6">
-            {{-- Info Produk --}}
-            <span class="text-xs font-semibold text-blue-600 uppercase tracking-wide">{{ $produk->kategori }}</span>
-            <h2 class="text-2xl font-bold text-gray-800 mt-1">{{ $produk->nama_produk }}</h2>
-            <p class="text-sm text-gray-500 mt-1">Dijual oleh: <span class="font-medium text-gray-700">{{ $produk->petani->username }}</span></p>
+    <x-flash />
 
-            <div class="flex items-center gap-6 mt-4 pb-4 border-b border-gray-100">
-                <div>
-                    <span class="text-3xl font-bold text-green-700">Rp {{ number_format($produk->harga, 0, ',', '.') }}</span>
-                    <span class="text-sm text-gray-400">/{{ $produk->satuan }}</span>
+    <div class="grid gap-8 lg:grid-cols-2">
+        <div class="overflow-hidden rounded-2xl border border-stone-200/80 bg-white">
+            @if ($produk->foto_produk)
+                <img src="{{ Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}" class="aspect-[4/3] w-full object-cover">
+            @else
+                <div class="flex aspect-[4/3] w-full items-center justify-center bg-stone-100 text-stone-400">
+                    <i data-lucide="wheat" class="h-10 w-10"></i>
                 </div>
-                <div class="text-sm text-gray-500">
-                    Stok: <strong class="text-gray-800">{{ $produk->stok }} {{ $produk->satuan }}</strong>
-                </div>
+            @endif
+        </div>
+
+        <div class="flex flex-col">
+            @if ($produk->kategori)
+                <p class="text-sm font-medium text-brand-700">{{ $produk->kategori }}</p>
+            @endif
+            <h1 class="mt-1 text-2xl font-bold tracking-tight text-stone-900 sm:text-3xl">{{ $produk->nama_produk }}</h1>
+
+            <div class="mt-3 flex items-center gap-2.5 text-sm text-stone-600">
+                <x-dashboard.avatar :name="$produk->petani->username" size="h-7 w-7" />
+                <span>Dijual oleh <span class="font-semibold text-stone-900">{{ $produk->petani->username }}</span></span>
             </div>
 
-            <p class="mt-4 text-gray-600 text-sm leading-relaxed">{{ $produk->deskripsi }}</p>
+            <div class="mt-6 flex flex-wrap items-end gap-x-6 gap-y-2 border-b border-stone-200/80 pb-6">
+                <p>
+                    <span class="text-3xl font-bold tracking-tight text-stone-900 tabular-nums">Rp {{ number_format($produk->harga, 0, ',', '.') }}</span>
+                    <span class="text-sm text-stone-500">/ {{ $produk->satuan }}</span>
+                </p>
+                <span @class([
+                    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset',
+                    'bg-brand-50 text-brand-800 ring-brand-200/80' => $produk->stok > 0,
+                    'bg-red-50 text-red-700 ring-red-200/80' => $produk->stok < 1,
+                ])>
+                    <i data-lucide="package" class="h-3.5 w-3.5"></i>
+                    {{ $produk->stok > 0 ? 'Stok '.$produk->stok.' '.$produk->satuan : 'Stok habis' }}
+                </span>
+            </div>
 
-            {{-- Form Beli --}}
-            <div class="mt-6 bg-blue-50 border border-blue-100 rounded-xl p-5">
-                <h3 class="text-base font-semibold text-gray-800 mb-4">🛒 Form Pemesanan</h3>
+            <p class="mt-6 whitespace-pre-line text-[15px] leading-relaxed text-stone-600">{{ $produk->deskripsi }}</p>
 
-                @if ($errors->any())
-                    <div class="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-                        <ul class="list-disc pl-4 space-y-1">
-                            @foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach
-                        </ul>
-                    </div>
+            <div class="mt-8 rounded-2xl border border-stone-200/80 bg-white p-5 shadow-card">
+                @if ($produk->stok < 1)
+                    <p class="text-sm text-stone-600">Produk ini sedang habis. Coba lagi nanti atau lihat produk lain di marketplace.</p>
+                @elseif ($sisaBoleh < 1)
+                    <p class="text-sm text-stone-600">Seluruh stok yang tersedia sudah ada di keranjang Anda.</p>
+                    <a href="{{ route('user.keranjang.index') }}" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-800">
+                        <i data-lucide="shopping-cart" class="h-4 w-4"></i> Buka keranjang
+                    </a>
+                @else
+                    <form method="POST" action="{{ route('user.keranjang.store', $produk) }}">
+                        @csrf
+                        <label class="block text-sm font-medium text-stone-700">Jumlah ({{ $produk->satuan }})</label>
+                        <div class="mt-2 flex flex-wrap items-center gap-4">
+                            <x-marketplace.stepper :value="old('jumlah', 1)" :max="$sisaBoleh" label="Jumlah" />
+                            <p class="text-sm text-stone-500">
+                                Maks. {{ $sisaBoleh }} {{ $produk->satuan }}
+                                @if ($diKeranjang > 0)
+                                    <span class="block text-xs">({{ $diKeranjang }} sudah di keranjang)</span>
+                                @endif
+                            </p>
+                        </div>
+                        @error('jumlah')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+
+                        <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                            <button type="submit" name="aksi" value="keranjang"
+                                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-stone-800 ring-1 ring-inset ring-stone-300 transition hover:bg-stone-50 active:translate-y-px">
+                                <i data-lucide="shopping-cart" class="h-4 w-4"></i> Tambah ke keranjang
+                            </button>
+                            <button type="submit" name="aksi" value="beli"
+                                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 active:translate-y-px">
+                                Beli sekarang
+                            </button>
+                        </div>
+                    </form>
                 @endif
-
-                <form method="POST" action="{{ route('user.marketplace.beli', $produk) }}" class="space-y-4">
-                    @csrf
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Jumlah ({{ $produk->satuan }}) <span class="text-red-500">*</span>
-                        </label>
-                        <input type="number" name="jumlah" value="{{ old('jumlah', 1) }}"
-                               min="1" max="{{ $produk->stok }}"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                        <p class="text-xs text-gray-400 mt-1">Maksimal {{ $produk->stok }} {{ $produk->satuan }}</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Alamat Pengiriman <span class="text-red-500">*</span>
-                        </label>
-                        <textarea name="alamat_pengiriman" rows="3"
-                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                                  placeholder="Masukkan alamat lengkap (jalan, RT/RW, desa, kecamatan, kota)...">{{ old('alamat_pengiriman') }}</textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Catatan untuk Petani (opsional)</label>
-                        <input type="text" name="catatan" value="{{ old('catatan') }}"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                               placeholder="Misal: tolong pilihkan yang segar...">
-                    </div>
-
-                    {{-- Tombol Beli yang Jelas --}}
-                    <button type="submit"
-                            class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-bold text-base rounded-lg border border-green-700 shadow-sm">
-                        🛒 Pesan Sekarang
-                    </button>
-                </form>
             </div>
         </div>
     </div>

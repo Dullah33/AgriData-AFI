@@ -9,7 +9,7 @@
 
 <div class="bg-white rounded-xl shadow-sm p-6 max-w-2xl">
     <div class="flex items-center gap-3 mb-6">
-        <a href="{{ route('petani.lahan.index') }}" class="text-sm text-blue-600 hover:underline">← Kembali</a>
+        <a href="{{ route('petani.lahan.index') }}" class="text-sm text-brand-700 hover:underline">← Kembali</a>
         <h2 class="text-lg font-semibold text-gray-800">Tambah Lahan Baru</h2>
     </div>
 
