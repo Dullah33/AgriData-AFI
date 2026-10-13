@@ -1,29 +1,19 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="id" class="h-full bg-stone-50">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#0f2219">
 
     <title>@yield('title', 'Dashboard') - {{ config('app.name', 'AgriScan') }}</title>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    @include('partials.head-assets')
 
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Font Awesome (untuk icon) -->
+    {{-- Font Awesome masih dipakai halaman Analisis Cuaca --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
         [x-cloak] {
             display: none !important;
         }
@@ -31,75 +21,27 @@
 
     @stack('styles')
 </head>
-<body class="bg-gray-50">
-    <div class="flex min-h-screen">
-        {{-- Sidebar (sempat kehilangan baris @include ini saat rombak layout untuk fitur budidaya) --}}
-        @include('partials.sidebar')
+<body class="h-full font-sans text-stone-900 antialiased">
+    <a href="#konten"
+       class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:shadow-lift">
+        Lewati ke konten
+    </a>
 
-        <div id="main-content" class="flex-1 flex flex-col transition-[margin] duration-300 ease-in-out">
-            <!-- Navbar -->
-            <nav class="bg-white shadow-md border-b border-gray-200">
-                <div class="px-4 sm:px-6 lg:px-8">
-                    <div class="flex justify-between h-16">
-                        <!-- Tombol hamburger: toggle sidebar, aktif di semua ukuran layar (desktop & mobile) -->
-                        <div class="flex items-center gap-3">
-                            <button id="sidebar-toggle" onclick="toggleSidebar()"
-                                    class="text-gray-600 hover:text-gray-900 p-1 -ml-1">
-                                <i data-lucide="menu" class="w-6 h-6"></i>
-                            </button>
-                            <h1 class="font-semibold text-lg text-gray-800">@yield('title', 'Dashboard')</h1>
-                        </div>
+    @include('partials.sidebar')
 
-                        <!-- User Menu -->
-                        <div class="flex items-center gap-4">
-                            <span class="text-sm text-gray-600">{{ auth()->user()->username }}</span>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="text-gray-600 hover:text-red-600 transition">
-                                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+    <div class="flex min-h-full flex-col lg:pl-72">
+        @include('partials.navbar')
 
-            <!-- Main Content -->
-            <main class="py-6 px-4 sm:px-6 lg:px-8 flex-1">
+        <main id="konten" class="flex-1">
+            <div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
                 @yield('content')
-            </main>
-        </div>
+            </div>
+        </main>
     </div>
 
-    <!-- Initialize Lucide Icons -->
+    <script src="{{ asset('assets/js/app-shell.js') }}"></script>
     <script>
         lucide.createIcons();
-
-        // Toggle sidebar — bekerja di semua ukuran layar.
-        // Desktop (>=1024px): konten ikut bergeser (margin-left), tanpa overlay.
-        // Mobile (<1024px): sidebar menimpa konten sebagai overlay + latar gelap.
-        function toggleSidebar() {
-            var sidebar = document.getElementById('sidebar');
-            var overlay = document.getElementById('sidebar-overlay');
-            var main = document.getElementById('main-content');
-            var isDesktop = window.innerWidth >= 1024;
-
-            sidebar.classList.toggle('-translate-x-full');
-
-            if (isDesktop) {
-                main.classList.toggle('lg:ml-64');
-            } else {
-                overlay.classList.toggle('hidden');
-            }
-        }
-
-        // Default: sidebar otomatis terbuka di layar besar, tertutup di layar kecil.
-        document.addEventListener('DOMContentLoaded', function () {
-            if (window.innerWidth >= 1024) {
-                document.getElementById('sidebar').classList.remove('-translate-x-full');
-                document.getElementById('main-content').classList.add('lg:ml-64');
-            }
-        });
     </script>
 
     @stack('scripts')

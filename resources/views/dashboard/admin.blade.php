@@ -2,76 +2,94 @@
 @section('title', 'Dashboard Admin')
 @section('content')
 
-<div class="space-y-6">
-    <div>
-        <h2 class="text-lg font-semibold text-gray-800">Selamat datang, {{ Auth::user()->username }} 👋</h2>
-        <p class="text-sm text-gray-500">Ringkasan platform AgriScan per hari ini.</p>
+@php
+    $persenVerifikasi = $stats['total_petani'] > 0
+        ? round($stats['petani_terverifikasi'] / $stats['total_petani'] * 100)
+        : 0;
+@endphp
+
+<div class="space-y-8">
+    <x-dashboard.page-header subtitle="Ringkasan aktivitas platform AgriScan hari ini.">
+        <x-slot:actions>
+            <x-dashboard.action :href="route('admin.peta-lahan.index')" icon="map" variant="secondary">Lihat peta</x-dashboard.action>
+            <x-dashboard.action :href="route('admin.artikel.create')" icon="pen-line">Tulis artikel</x-dashboard.action>
+        </x-slot:actions>
+    </x-dashboard.page-header>
+
+    <div class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <x-dashboard.stat label="Total petani" :value="$stats['total_petani']" icon="users" :href="route('admin.petani.index')"
+                          :hint="$stats['petani_terverifikasi'].' sudah terverifikasi'">
+            <div class="mt-4 flex items-center gap-3">
+                <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-stone-100" role="progressbar"
+                     aria-valuenow="{{ $persenVerifikasi }}" aria-valuemin="0" aria-valuemax="100" aria-label="Petani terverifikasi">
+                    <div class="h-full rounded-full bg-brand-500" style="width: {{ $persenVerifikasi }}%"></div>
+                </div>
+                <span class="text-xs font-semibold text-stone-500 tabular-nums">{{ $persenVerifikasi }}%</span>
+            </div>
+        </x-dashboard.stat>
+        <x-dashboard.stat label="Transaksi bulan ini" :value="$stats['transaksi_bulan_ini']" icon="shopping-basket"
+                          :hint="$stats['transaksi_pending'].' masih menunggu'" />
+        <x-dashboard.stat label="Penyuluh aktif" :value="$stats['penyuluh_aktif']" icon="user-check" :href="route('admin.penyuluh.index')"
+                          hint="Petugas lapangan" />
+        <x-dashboard.stat label="Artikel terbit" :value="$stats['artikel_published']" icon="newspaper" :href="route('admin.artikel.index')"
+                          :hint="$stats['artikel_draft'].' masih draf'" />
     </div>
 
-    {{-- Stat Cards --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Total Petani</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['total_petani'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">{{ $stats['petani_terverifikasi'] }} terverifikasi</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Transaksi Bulan Ini</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['transaksi_bulan_ini'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">{{ $stats['transaksi_pending'] }} pending</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-teal-500">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Penyuluh Aktif</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['penyuluh_aktif'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">petugas lapangan</p>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-amber-500">
-            <p class="text-xs text-gray-500 uppercase font-semibold">Artikel Published</p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">{{ $stats['artikel_published'] }}</p>
-            <p class="text-xs text-gray-400 mt-1">{{ $stats['artikel_draft'] }} draft</p>
-        </div>
-    </div>
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <x-dashboard.panel class="lg:col-span-3" title="Menunggu verifikasi" :count="$petaniBelumVerifikasi->count() ?: null"
+                           description="Petani baru yang datanya perlu dicek sebelum bisa berjualan."
+                           :href="route('admin.petani.index')">
+            @if ($petaniBelumVerifikasi->isEmpty())
+                <x-dashboard.empty icon="shield-check" title="Semua petani sudah terverifikasi"
+                                   description="Petani yang baru mendaftar akan muncul di sini." />
+            @else
+                <ul class="-my-1 divide-y divide-stone-100">
+                    @foreach ($petaniBelumVerifikasi as $p)
+                        <li class="flex items-center gap-3 py-3">
+                            <x-dashboard.avatar :name="$p->user->username" />
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-semibold text-stone-900">{{ $p->user->username }}</p>
+                                <p class="truncate text-sm text-stone-500">
+                                    {{ $p->komoditas_utama ?: 'Komoditas belum diisi' }}
+                                    <span class="text-stone-300" aria-hidden="true">/</span>
+                                    daftar {{ $p->created_at->locale('id')->diffForHumans() }}
+                                </p>
+                            </div>
+                            <a href="{{ route('admin.petani.show', $p) }}"
+                               class="shrink-0 rounded-lg bg-white px-3 py-1.5 text-sm font-semibold text-stone-700 ring-1 ring-inset ring-stone-200 transition hover:bg-brand-50 hover:text-brand-800 hover:ring-brand-200">
+                                Tinjau
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </x-dashboard.panel>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {{-- Petani Belum Verifikasi --}}
-        <div class="bg-white rounded-xl shadow-sm p-5">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-gray-800 text-sm">Petani Menunggu Verifikasi</h3>
-                <a href="{{ route('admin.petani.index') }}" class="text-xs text-blue-600 hover:underline">Lihat semua →</a>
-            </div>
-            @forelse ($petaniBelumVerifikasi as $p)
-                <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0 text-sm">
-                    <div>
-                        <p class="font-medium text-gray-800">{{ $p->user->username }}</p>
-                        <p class="text-xs text-gray-400">{{ $p->komoditas_utama ?? 'Belum diisi' }}</p>
-                    </div>
-                    <a href="{{ route('admin.petani.show', $p) }}"
-                       class="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-lg hover:bg-blue-200">
-                        Verifikasi
-                    </a>
-                </div>
-            @empty
-                <p class="text-sm text-gray-400 py-2">Semua petani sudah terverifikasi ✓</p>
-            @endforelse
-        </div>
-
-        {{-- Ulasan Terbaru --}}
-        <div class="bg-white rounded-xl shadow-sm p-5">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-gray-800 text-sm">Ulasan Terbaru</h3>
-                <a href="{{ route('admin.ulasan.index') }}" class="text-xs text-blue-600 hover:underline">Moderasi →</a>
-            </div>
-            @forelse ($ulasanTerbaru as $u)
-                <div class="py-2 border-b border-gray-100 last:border-0 text-sm">
-                    <div class="flex items-center gap-1 mb-1">
-                        <span class="text-amber-400 font-bold">{{ str_repeat('★', $u->rating) }}{{ str_repeat('☆', 5 - $u->rating) }}</span>
-                    </div>
-                    <p class="text-gray-600 text-xs truncate">{{ $u->komentar ?? 'Tanpa komentar' }}</p>
-                </div>
-            @empty
-                <p class="text-sm text-gray-400 py-2">Belum ada ulasan.</p>
-            @endforelse
-        </div>
+        <x-dashboard.panel class="lg:col-span-2" title="Ulasan terbaru" :href="route('admin.ulasan.index')" link-label="Moderasi">
+            @if ($ulasanTerbaru->isEmpty())
+                <x-dashboard.empty icon="message-square" title="Belum ada ulasan"
+                                   description="Ulasan pembeli untuk hasil panen akan tampil di sini." />
+            @else
+                <ul class="-my-1 divide-y divide-stone-100">
+                    @foreach ($ulasanTerbaru as $u)
+                        <li class="py-3">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-0.5" aria-label="Rating {{ $u->rating }} dari 5">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <i data-lucide="star" @class(['h-4 w-4', 'fill-amber-400 text-amber-400' => $i <= $u->rating, 'text-stone-200' => $i > $u->rating])></i>
+                                    @endfor
+                                </div>
+                                <span class="text-xs text-stone-400">{{ $u->created_at->locale('id')->diffForHumans() }}</span>
+                            </div>
+                            <p class="mt-1.5 line-clamp-2 text-sm text-stone-600">{{ $u->komentar ?: 'Tanpa komentar' }}</p>
+                            @if ($u->transaksi?->produk)
+                                <p class="mt-1 truncate text-xs font-medium text-stone-400">{{ $u->transaksi->produk->nama_produk }}</p>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </x-dashboard.panel>
     </div>
 </div>
 @endsection

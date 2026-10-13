@@ -42,7 +42,8 @@ class DashboardController extends Controller
         $petaniBelumVerifikasi = PetaniProfile::with('user')
             ->whereNull('verified_by')->latest()->take(5)->get();
 
-        $ulasanTerbaru = UlasanRating::where('status', 'aktif')
+        $ulasanTerbaru = UlasanRating::with('transaksi.produk')
+            ->where('status', 'aktif')
             ->latest()->take(5)->get();
 
         return view('dashboard.admin', compact('stats', 'petaniBelumVerifikasi', 'ulasanTerbaru'));
@@ -67,7 +68,11 @@ class DashboardController extends Controller
             ->where('status_transaksi', 'pending')
             ->latest()->take(5)->get();
 
-        return view('dashboard.petani', compact('stats', 'pesananTerbaru'));
+        // Hasil AI Scanner terbaru, ditampilkan di panel "Hasil scan terbaru"
+        $laporanTerbaru = DiseaseReport::where('user_id', $user->id)
+            ->latest()->take(3)->get();
+
+        return view('dashboard.petani', compact('stats', 'pesananTerbaru', 'laporanTerbaru'));
     }
 
     private function userDashboard()
